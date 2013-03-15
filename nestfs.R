@@ -86,7 +86,8 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
       break
   }
 
-  return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks))
+  return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
+                    stringsAsFactors=FALSE))
 }
 
 paired.pvals <- function(all.llk) {
