@@ -49,7 +49,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
       x.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
       x.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
 
-      ## models augmented with one metabolite at a time
+      ## models augmented with one additional variable at a time
       all.stats <- (foreach(idx=1:length(other.vars), .combine=rbind)
                     %dopar%
                     par.univ.logreg(x.train, x.test, model, other.vars[idx]))
@@ -69,7 +69,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
       all.llk <- cbind(all.llk, res.by.fold[[fold]][, 4])
 
     ## choose the best variable according to a paired test
-    tt.pvals <- paired.pvals(all.llk)[[pval.test]]
+    tt.pvals <- paired.pvals(all.llk, pval.test)
     idx.min <- which.min(tt.pvals)
     chosen.pval <- tt.pvals[idx.min]
     chosen.met <- names(idx.min)
@@ -90,18 +90,17 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
                     row.names=NULL, stringsAsFactors=FALSE))
 }
 
-paired.pvals <- function(all.llk) {
-  wilcoxon.pvals <- t.pvals <- NULL
+paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
+  test <- match.arg(test)
+  test.function <- list(t=t.test, wilcoxon=wilcox.test)
+  pvals <- NULL
   for (i in 2:nrow(all.llk)) {
-    tmp <- wilcox.test(all.llk[i, ], all.llk[1, ],
-                       paired=TRUE, alternative="greater")
-    wilcoxon.pvals <- c(wilcoxon.pvals, tmp$p.value)
-    tmp <- t.test(all.llk[i, ], all.llk[1, ],
-                  paired=TRUE, alternative="greater")
-    t.pvals <- c(t.pvals, tmp$p.value)
+    ttt <- test.function[[test]](all.llk[i, ], all.llk[1, ],
+                                 paired=TRUE, alternative="greater")
+    pvals <- c(pvals, ttt$p.value)
   }
-  names(wilcoxon.pvals) <- names(t.pvals) <- rownames(all.llk)[-1]
-  return(list(wilcoxon=wilcoxon.pvals, t=t.pvals))
+  names(pvals) <- rownames(all.llk)[-1]
+  return(pvals)
 }
 
 plain.logreg <- function(x, y, folds) {
