@@ -16,7 +16,8 @@ univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
 }
 
 forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
-                              num.folds=50, max.iters=30, max.pval=0.15) {
+                              num.folds=50, max.iters=30, max.pval=0.15,
+                              rep.every=25) {
   par.univ.logreg <- function(x.train, x.test, model, met) {
     model.met <- paste(model, met, sep=" + ")
     tt <- univ.logreg(model.met, x.train, x.test)
@@ -32,8 +33,6 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
 
   for (iter in 1:max.iters) {
 
-    cat("*** Iteration", iter, "\n")
-
     model <- paste("y ~", paste(model.vars, collapse= " + "))
     other.vars <- setdiff(all.vars, model.vars)
 
@@ -41,7 +40,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
     res.by.fold <- NULL
     for (fold in 1:length(all.folds)) {
 
-      if (fold %% 25 == 0)
+      if (fold %% rep.every == 0)
         cat("Fold", fold, "\n")
 
       test.idx <- all.folds[[fold]]
