@@ -89,6 +89,33 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
                     row.names=NULL, stringsAsFactors=FALSE))
 }
 
+nested.forward.selection <- function(x.all, y.all, model.vars,
+                                     test=c("t", "wilcoxon"), num.folds=50,
+                                     num.inner.folds=50, max.iters=30,
+                                     max.pval=0.3) {
+  all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=50)[[1]]
+  all.res <- list()
+  for (fold in 1:length(all.folds)) {
+
+    cat("* Outer Fold", fold, "\n")
+
+    test.idx <- all.folds[[fold]]
+    train.idx <- setdiff(seq(nrow(x.all)), test.idx)
+    x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
+    fs <- forward.selection(x.train, y.train, model.vars, test=test,
+                            max.iters=max.iters, num.folds=num.inner.folds,
+                            max.pval=max.pval, rep.every=100)
+    this.fold <- list(test.idx)
+    ttt <- plain.logreg(x.all, y.all, this.fold)
+    stopifnot(all.equal(unlist(ttt$ground), y.all[test.idx]))
+    res <- list(fs=fs, fit=unlist(ttt$pred), caseness.test=unlist(ttt$ground))
+    res$test.idx <- test.idx
+    res$call <- match.call()
+    all.res[[fold]] <- res
+  }
+  return(all.res)
+}
+
 paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
   test <- match.arg(test)
   test.function <- list(t=t.test, wilcoxon=wilcox.test)
@@ -104,10 +131,11 @@ paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
 
 plain.logreg <- function(x, y, folds) {
   stopifnot(all.equal(nrow(x), length(y)))
-  all.regr <- list()
+  all.regr <- all.pred <- all.ground <- list()
   all.acc <- all.llk <- NULL
   for (fold in 1:length(folds)) {
-    cat(fold, "\n")
+    if (fold %% 10 == 0)
+      cat("Fold", fold, "\n")
     idx.test <- folds[[fold]]
     idx.train <- setdiff(1:nrow(x), idx.test)
     x.test <- x[idx.test, ]; x.train <- x[idx.train, ]
@@ -117,9 +145,12 @@ plain.logreg <- function(x, y, folds) {
     regr <- glm(as.formula(model), data=x.train, family="binomial")
     y.pred <- predict(regr, newdata=x.test, type="response")
     all.regr[[fold]] <- regr
+    all.pred[[fold]] <- y.pred
+    all.ground[[fold]] <- y.test
     all.acc <- c(all.acc, sum(round(y.pred) == y.test) / length(y.test))
     loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
     all.llk <- c(all.llk, loglik)
   }
-  return(list(acc=all.acc, llk=all.llk, regr=all.regr))
+  return(list(acc=all.acc, llk=all.llk, regr=all.regr,
+              pred=all.pred, ground=all.ground))
 }
