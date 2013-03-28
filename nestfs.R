@@ -99,7 +99,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars,
   all.res <- list()
   for (fold in 1:length(all.folds)) {
 
-    cat("* Outer Fold", fold, "\n")
+    cat("* Outer Fold", fold, "-", format(Sys.time(), "%H:%M"), "\n")
 
     test.idx <- all.folds[[fold]]
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
