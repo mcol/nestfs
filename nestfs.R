@@ -17,7 +17,7 @@ univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
 
 forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
                               num.folds=50, max.iters=30, max.pval=0.15,
-                              rep.every=25) {
+                              n.add=1, rep.every=25) {
   par.univ.logreg <- function(x.train, x.test, model, met) {
     model.met <- paste(model, met, sep=" + ")
     tt <- univ.logreg(model.met, x.train, x.test)
@@ -28,8 +28,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
 
   all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=50)[[1]]
   all.vars <- colnames(x.all)
-  model.pvals <- rep(NA, length(model.vars))
-  model.llks <- rep(NA, length(model.vars))
+  model.pvals <- model.llks <- model.iter <- rep(NA, length(model.vars))
 
   for (iter in 1:max.iters) {
 
@@ -69,23 +68,26 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
 
     ## choose the best variable according to a paired test
     tt.pvals <- paired.pvals(all.llk, pval.test)
-    idx.min <- which.min(tt.pvals)
-    chosen.pval <- tt.pvals[idx.min]
-    chosen.met <- names(idx.min)
-    chosen.llk <- sum(all.llk[chosen.met, ])
-    cat(chosen.met, chosen.pval, chosen.llk, "\n")
+    thresh.pval <- sort(tt.pvals)[n.add]
+    idx.pval <- which(tt.pvals <= thresh.pval)
+    chosen.pval <- sort(tt.pvals[idx.pval])
+    chosen.met <- names(chosen.pval)
+    chosen.llk <- rowSums(all.llk[chosen.met, , drop=FALSE])
+    print(data.frame(chosen.pval, chosen.llk))
 
     ## append the chosen variable to the existing ones
     model.vars <- c(model.vars, chosen.met)
     model.pvals <- c(model.pvals, chosen.pval)
     model.llks <- c(model.llks, chosen.llk)
+    model.iter <- c(model.iter, rep(iter, length(chosen.met)))
 
     ## check for early termination
-    if (chosen.pval > max.pval)
+    if (max(chosen.pval) > max.pval)
       break
   }
 
   return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
+                    iter=model.iter,
                     row.names=NULL, stringsAsFactors=FALSE))
 }
 
