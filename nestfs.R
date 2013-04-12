@@ -91,11 +91,9 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
                     row.names=NULL, stringsAsFactors=FALSE))
 }
 
-nested.forward.selection <- function(x.all, y.all, model.vars,
-                                     test=c("t", "wilcoxon"), num.folds=50,
-                                     num.inner.folds=50, max.iters=30,
-                                     max.pval=0.3) {
-  all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=50)[[1]]
+nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
+                                     test=c("t", "wilcoxon"), num.inner.folds,
+                                     max.iters=50, max.pval=0.5) {
   all.res <- list()
   for (fold in 1:length(all.folds)) {
 
