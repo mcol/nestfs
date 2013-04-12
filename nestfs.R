@@ -75,15 +75,15 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
     chosen.llk <- rowSums(all.llk[chosen.met, , drop=FALSE])
     print(data.frame(chosen.pval, chosen.llk))
 
+    ## check for early termination
+    if (max(chosen.pval) > max.pval)
+      break
+
     ## append the chosen variable to the existing ones
     model.vars <- c(model.vars, chosen.met)
     model.pvals <- c(model.pvals, chosen.pval)
     model.llks <- c(model.llks, chosen.llk)
     model.iter <- c(model.iter, rep(iter, length(chosen.met)))
-
-    ## check for early termination
-    if (max(chosen.pval) > max.pval)
-      break
   }
 
   return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
