@@ -108,9 +108,9 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                             max.iters=max.iters, num.folds=num.inner.folds,
                             max.pval=max.pval, rep.every=100)
     this.fold <- list(test.idx)
-    ttt <- plain.logreg(x.all, y.all, this.fold)
-    stopifnot(all.equal(unlist(ttt$ground), y.all[test.idx]))
-    res <- list(fs=fs, fit=unlist(ttt$pred), caseness.test=unlist(ttt$ground))
+    ttt <- plain.logreg(x.all, y.all, this.fold)[[1]]
+    stopifnot(all.equal(ttt$caseness.test, y.all[test.idx]))
+    res <- list(fs=fs, fit=ttt$fit, caseness.test=ttt$caseness.test)
     res$test.idx <- test.idx
     res$call <- match.call()
     all.res[[fold]] <- res
@@ -133,8 +133,7 @@ paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
 
 plain.logreg <- function(x, y, folds) {
   stopifnot(all.equal(nrow(x), length(y)))
-  all.regr <- all.pred <- all.ground <- list()
-  all.acc <- all.llk <- NULL
+  res <- list()
   for (fold in 1:length(folds)) {
     if (fold %% 10 == 0)
       cat("Fold", fold, "\n")
@@ -142,17 +141,13 @@ plain.logreg <- function(x, y, folds) {
     idx.train <- setdiff(1:nrow(x), idx.test)
     x.test <- x[idx.test, ]; x.train <- x[idx.train, ]
     y.test <- y[idx.test];   y.train <- y[idx.train]
-    preds <- paste("~", paste(colnames(x.train), collapse=" + "))
-    model <- paste(quote(y.train), preds)
+    model <- paste("y.train ~", paste(colnames(x.train), collapse=" + "))
     regr <- glm(as.formula(model), data=x.train, family="binomial")
     y.pred <- predict(regr, newdata=x.test, type="response")
-    all.regr[[fold]] <- regr
-    all.pred[[fold]] <- y.pred
-    all.ground[[fold]] <- y.test
-    all.acc <- c(all.acc, sum(round(y.pred) == y.test) / length(y.test))
+    acc <- sum(round(y.pred) == y.test) / length(y.test)
     loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
-    all.llk <- c(all.llk, loglik)
+    res[[fold]] <- list(regr=regr, fit=y.pred, caseness.test=y.test,
+                        acc=acc, llk=loglik, test.idx=idx.test)
   }
-  return(list(acc=all.acc, llk=all.llk, regr=all.regr,
-              pred=all.pred, ground=all.ground))
+  return(res)
 }
