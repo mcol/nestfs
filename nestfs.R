@@ -17,7 +17,7 @@ univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
 
 forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
                               num.folds=50, max.iters=30, max.pval=0.15,
-                              n.add=1, rep.every=25) {
+                              min.llk.diff=0, n.add=1, rep.every=25) {
   par.univ.logreg <- function(x.train, x.test, model, met) {
     model.met <- paste(model, met, sep=" + ")
     tt <- univ.logreg(model.met, x.train, x.test)
@@ -78,6 +78,8 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
     ## check for early termination
     if (max(chosen.pval) > max.pval)
       break
+    if (iter > 1 & chosen.llk - max(model.llks, na.rm=TRUE) < min.llk.diff)
+      break
 
     ## append the chosen variable to the existing ones
     model.vars <- c(model.vars, chosen.met)
@@ -93,7 +95,8 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                                      test=c("t", "wilcoxon"), num.inner.folds,
-                                     max.iters=50, max.pval=0.5) {
+                                     max.iters=50, max.pval=0.5,
+                                     min.llk.diff=0) {
   all.res <- list()
   num.folds <- length(all.folds)
   for (fold in 1:num.folds) {
@@ -106,7 +109,8 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
     fs <- forward.selection(x.train, y.train, model.vars, test=test,
                             max.iters=max.iters, num.folds=num.inner.folds,
-                            max.pval=max.pval, rep.every=100)
+                            max.pval=max.pval, min.llk.diff=min.llk.diff,
+                            rep.every=100)
     this.fold <- list(test.idx)
     ttt <- plain.logreg(x.all, y.all, this.fold)[[1]]
     stopifnot(all.equal(ttt$caseness.test, y.all[test.idx]))
