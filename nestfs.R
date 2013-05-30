@@ -17,7 +17,7 @@ univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
 
 forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
                               num.folds=50, max.iters=30, max.pval=0.15,
-                              min.llk.diff=0, n.add=1, rep.every=25) {
+                              min.llk.diff=0, n.add=1, rep.every=25, seed=50) {
   par.univ.logreg <- function(x.train, x.test, model, met) {
     model.met <- paste(model, met, sep=" + ")
     tt <- univ.logreg(model.met, x.train, x.test)
@@ -26,7 +26,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
   stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
 
-  all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=50)[[1]]
+  all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=seed)[[1]]
   all.vars <- colnames(x.all)
   model.pvals <- model.llks <- model.iter <- rep(NA, length(model.vars))
 
@@ -96,7 +96,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                                      test=c("t", "wilcoxon"), num.inner.folds,
                                      max.iters=50, max.pval=0.5,
-                                     min.llk.diff=0) {
+                                     min.llk.diff=0, seed=50) {
   all.res <- list()
   num.folds <- length(all.folds)
   for (fold in 1:num.folds) {
@@ -110,7 +110,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     fs <- forward.selection(x.train, y.train, model.vars, test=test,
                             max.iters=max.iters, num.folds=num.inner.folds,
                             max.pval=max.pval, min.llk.diff=min.llk.diff,
-                            rep.every=100)
+                            rep.every=100, seed=seed)
     this.fold <- list(test.idx)
     ttt <- plain.logreg(x.all, y.all, this.fold)[[1]]
     stopifnot(all.equal(ttt$caseness.test, y.all[test.idx]))
