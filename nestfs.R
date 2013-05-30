@@ -78,7 +78,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
     ## check for early termination
     if (max(chosen.pval) > max.pval)
       break
-    if (iter > 1 & chosen.llk - max(model.llks, na.rm=TRUE) < min.llk.diff)
+    if (iter > 1 && chosen.llk - max(model.llks, na.rm=TRUE) < min.llk.diff)
       break
 
     ## append the chosen variable to the existing ones
