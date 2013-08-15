@@ -73,12 +73,13 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
     chosen.pval <- sort(tt.pvals[idx.pval])
     chosen.met <- names(chosen.pval)
     chosen.llk <- rowSums(all.llk[chosen.met, , drop=FALSE])
-    print(data.frame(chosen.pval, chosen.llk))
+    diff.llk <- ifelse(iter > 1, chosen.llk - max(model.llks, na.rm=TRUE), Inf)
+    print(data.frame(chosen.pval, chosen.llk, diff.llk))
 
     ## check for early termination
     if (max(chosen.pval) > max.pval)
       break
-    if (iter > 1 && chosen.llk - max(model.llks, na.rm=TRUE) < min.llk.diff)
+    if (diff.llk < min.llk.diff)
       break
 
     ## append the chosen variable to the existing ones
@@ -89,7 +90,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
   }
 
   return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
-                    iter=model.iter,
+                    diffs=c(NA, diff(model.llks)), iter=model.iter,
                     row.names=NULL, stringsAsFactors=FALSE))
 }
 
