@@ -157,3 +157,17 @@ plain.logreg <- function(x, y, folds) {
   }
   return(res)
 }
+
+summary.nestfs <- function(res) {
+
+  nfolds <- length(res)
+  sel <- NULL
+  for (fold in 1:nfolds)
+    sel <- c(sel, res[[fold]]$fs$vars)
+  sel <- grep("DEMOG", sel, invert=TRUE, value=TRUE)
+  tsel <- tryCatch(table(comp2bio(sel)), error=function(e) table(sel))
+  ttt <- data.frame(tsel, emp.pval=1-as.numeric(tsel)/nfolds)
+  ttt <- ttt[order(ttt$emp.pval), ]
+  rownames(ttt) <- NULL
+  return(ttt)
+}
