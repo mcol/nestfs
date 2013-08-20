@@ -15,7 +15,7 @@ univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
   return(res)
 }
 
-forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
+forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               num.folds=50, max.iters=30, max.pval=0.15,
                               min.llk.diff=0, n.add=1, rep.every=25, seed=50) {
   par.univ.logreg <- function(x.train, x.test, model, met) {
@@ -28,7 +28,10 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
 
   all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=seed)[[1]]
   all.vars <- colnames(x.all)
-  model.pvals <- model.llks <- model.iter <- rep(NA, length(model.vars))
+  num.init.vars <- length(init.vars)
+  model.vars <- init.vars
+  model.llks <- c(rep(NA, num.init.vars - 1), 0)
+  model.pvals <- model.iter <- rep(NA, num.init.vars)
 
   for (iter in 1:max.iters) {
 
@@ -57,6 +60,10 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
       all.stats <- rbind(tail(tt, n=1), all.stats)
       rownames(all.stats) <- c("Base", other.vars)
 
+      ## get loglikelihood for the initial set
+      if (iter == 1)
+        model.llks[num.init.vars] <- model.llks[num.init.vars] + tt[1, 4]
+
       ## store results for this fold
       res.by.fold[[fold]] <- all.stats
     }
@@ -73,7 +80,7 @@ forward.selection <- function(x.all, y.all, model.vars, test=c("t", "wilcoxon"),
     chosen.pval <- sort(tt.pvals[idx.pval])
     chosen.met <- names(chosen.pval)
     chosen.llk <- rowSums(all.llk[chosen.met, , drop=FALSE])
-    diff.llk <- ifelse(iter > 1, chosen.llk - max(model.llks, na.rm=TRUE), Inf)
+    diff.llk <- chosen.llk - max(model.llks, na.rm=TRUE)
     print(data.frame(chosen.pval, chosen.llk, diff.llk))
 
     ## check for early termination
