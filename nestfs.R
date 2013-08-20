@@ -17,7 +17,8 @@ univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
 
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               num.folds=50, max.iters=30, max.pval=0.15,
-                              min.llk.diff=0, n.add=1, rep.every=25, seed=50) {
+                              min.llk.diff=0, n.add=1, rep.every=25, seed=50,
+                              init.model=NULL) {
   par.univ.logreg <- function(x.train, x.test, model, met) {
     model.met <- paste(model, met, sep=" + ")
     tt <- univ.logreg(model.met, x.train, x.test)
@@ -25,6 +26,8 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   }
   stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
+  if (is.null(init.model))
+    init.model <- paste("y ~", paste(init.vars, collapse= " + "))
 
   all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=seed)[[1]]
   all.vars <- colnames(x.all)
@@ -32,10 +35,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   model.vars <- init.vars
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
   model.pvals <- model.iter <- rep(NA, num.init.vars)
+  model <- init.model
 
   for (iter in 1:max.iters) {
 
-    model <- paste("y ~", paste(model.vars, collapse= " + "))
     other.vars <- setdiff(all.vars, model.vars)
 
     ## loop over the folds
@@ -94,6 +97,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     model.pvals <- c(model.pvals, chosen.pval)
     model.llks <- c(model.llks, chosen.llk)
     model.iter <- c(model.iter, rep(iter, length(chosen.met)))
+    model <- paste(model, chosen.met, sep=" + ")
   }
 
   return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
