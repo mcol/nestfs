@@ -28,6 +28,14 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   pval.test <- match.arg(test)
   if (is.null(init.model))
     init.model <- paste("y ~", paste(init.vars, collapse= " + "))
+  else {
+    ## work out the variables from the initialization model
+    cat("Using init.model, ignoring init.vars\n")
+    stopifnot(length(grep("~", init.model)) > 0)
+    init.vars <- unlist(strsplit(init.model, "~" ))[2]
+    init.vars <- gsub(" ", "", init.vars)
+    init.vars <- unlist(strsplit(init.vars, "\\+" ))
+  }
 
   all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=seed)[[1]]
   all.vars <- colnames(x.all)
