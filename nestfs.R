@@ -1,28 +1,40 @@
-univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
-  regr <- glm(as.formula(model), data=x.train, family="binomial")
-  rsum <- summary(regr)
-
-  y.pred <- predict(regr, newdata=x.test, type="response")
-  y.test <- x.test$y
-
-  acc <- sum(round(y.pred) == y.test) / length(y.pred)
-  loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
-  if (mean.llk)
-    loglik <- loglik / length(y.pred)
-
-  res <- cbind(coef(regr), coefficients(rsum)[, 4], acc, loglik)
-  colnames(res) <- c("LogEstimate", "p-value", "TestAcc", "TestLogLik")
-  return(res)
-}
-
+## run the forward selection starting from a set of variables or a model
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
-                              num.folds=50, max.iters=30, max.pval=0.15,
+                              num.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, n.add=1, rep.every=25, seed=50,
                               init.model=NULL) {
+  univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
+    regr <- glm(as.formula(model), data=x.train, family="binomial")
+    rsum <- summary(regr)
+
+    y.pred <- predict(regr, newdata=x.test, type="response")
+    y.test <- x.test$y
+
+    acc <- sum(round(y.pred) == y.test) / length(y.pred)
+    loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
+    if (mean.llk)
+      loglik <- loglik / length(y.pred)
+
+    res <- cbind(coef(regr), coefficients(rsum)[, 4], acc, loglik)
+    colnames(res) <- c("LogEstimate", "p-value", "TestAcc", "TestLogLik")
+    return(res)
+  }
   par.univ.logreg <- function(x.train, x.test, model, met) {
     model.met <- paste(model, met, sep=" + ")
     tt <- univ.logreg(model.met, x.train, x.test)
     return(tail(tt, n=1))
+  }
+  paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
+    test <- match.arg(test)
+    test.function <- list(t=t.test, wilcoxon=wilcox.test)
+    pvals <- NULL
+    for (i in 2:nrow(all.llk)) {
+      ttt <- test.function[[test]](all.llk[i, ], all.llk[1, ],
+                                   paired=TRUE, alternative="greater")
+      pvals <- c(pvals, ttt$p.value)
+    }
+    names(pvals) <- rownames(all.llk)[-1]
+    return(pvals)
   }
   stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
@@ -37,7 +49,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     init.vars <- unlist(strsplit(init.vars, "\\+" ))
   }
 
-  all.folds <- produce.folds(1, num.folds, nrow(x.all), seed=seed)[[1]]
+  all.folds <- create.folds(num.folds, nrow(x.all), seed=seed)
   all.vars <- colnames(x.all)
   num.init.vars <- length(init.vars)
   model.vars <- init.vars
@@ -141,19 +153,6 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     all.res[[fold]] <- res
   }
   return(all.res)
-}
-
-paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
-  test <- match.arg(test)
-  test.function <- list(t=t.test, wilcoxon=wilcox.test)
-  pvals <- NULL
-  for (i in 2:nrow(all.llk)) {
-    ttt <- test.function[[test]](all.llk[i, ], all.llk[1, ],
-                                 paired=TRUE, alternative="greater")
-    pvals <- c(pvals, ttt$p.value)
-  }
-  names(pvals) <- rownames(all.llk)[-1]
-  return(pvals)
 }
 
 plain.logreg <- function(x, y, folds) {
