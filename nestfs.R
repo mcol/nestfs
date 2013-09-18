@@ -177,15 +177,24 @@ plain.logreg <- function(x, y, folds) {
 }
 
 summary.nestfs <- function(res) {
-
+  iqr <- function(x) quantile(x, c(0.25, 0.75))
+  format.iqr <- function(x) sprintf("(%.2g, %.2g)", x[1], x[2])
   nfolds <- length(res)
   sel <- NULL
-  for (fold in 1:nfolds)
-    sel <- c(sel, res[[fold]]$fs$vars)
-  sel <- grep("DEMOG", sel, invert=TRUE, value=TRUE)
-  tsel <- tryCatch(table(comp2bio(sel)), error=function(e) table(sel))
-  ttt <- data.frame(tsel, emp.pval=1-as.numeric(tsel)/nfolds)
-  ttt <- ttt[order(ttt$emp.pval), ]
+  for (fold in 1:nfolds) {
+    fs <- res[[fold]]$fs[, c("vars", "diffs", "iter")]
+    sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exlude init model
+  }
+  props <- tapply(sel$vars, sel$vars, length)
+  ranks <- round(tapply(sel$iter, sel$vars, median))
+  ranks.iqr <- tapply(sel$iter, sel$vars, function(z) format.iqr(round(iqr(z))))
+  diffs <- tapply(sel$diff, sel$vars, median)
+  diffs.iqr <- tapply(sel$diff, sel$vars, function(z) format.iqr(iqr(z)))
+  vars <- tryCatch(comp2bio(names(props)), error=function(e) names(props))
+  ttt <- data.frame(vars, freq=props, emp.pval=1 - props / nfolds,
+                    rank=ranks, rankIQR=ranks.iqr,
+                    diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr)
+  ttt <- ttt[order(ttt$emp.pval, ttt$rank), ]
   rownames(ttt) <- NULL
   return(ttt)
 }
