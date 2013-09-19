@@ -2,7 +2,7 @@
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               num.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, n.add=1, rep.every=25, seed=50,
-                              init.model=NULL) {
+                              init.model=NULL, save.iter1=FALSE) {
   univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
     regr <- glm(as.formula(model), data=x.train, family="binomial")
     rsum <- summary(regr)
@@ -56,6 +56,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
   model.pvals <- model.iter <- rep(NA, num.init.vars)
   model <- init.model
+  iter1 <- list()
 
   for (iter in 1:max.iters) {
 
@@ -86,6 +87,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       ## get loglikelihood for the initial set
       if (iter == 1)
         model.llks[num.init.vars] <- model.llks[num.init.vars] + tt[1, 4]
+
+      ## store first iteration
+      if (iter == 1 && save.iter1)
+        iter1[[fold]] <- as.data.frame(all.stats)
 
       ## store results for this fold
       res.by.fold[[fold]] <- all.stats
@@ -120,6 +125,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     model <- paste(model, chosen.met, sep=" + ")
   }
 
+  if (save.iter1) save(file="iter1.Rdata", iter1)
   return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
                     diffs=c(NA, diff(model.llks)), iter=model.iter,
                     row.names=NULL, stringsAsFactors=FALSE))
@@ -197,4 +203,20 @@ summary.nestfs <- function(res) {
   ttt <- ttt[order(ttt$emp.pval, ttt$rank), ]
   rownames(ttt) <- NULL
   return(ttt)
+}
+
+summary.iter1 <- function(iter1) {
+  iter1.pvals <- NULL
+  iter1.diffs <- NULL
+  for (i in 1:length(iter1)) {
+    tmp <- iter1[[i]]
+    iter1.pvals <- cbind(iter1.pvals, tmp$"p-value")
+    iter1.diffs <- cbind(iter1.diffs, tmp$TestLogLik - tmp$TestLogLik[1])
+  }
+  res <- data.frame(row.names=rownames(iter1[[1]]),
+                    diffLogLik=apply(iter1.diffs, 1, sum),
+                    p.value=apply(iter1.pvals, 1, median))
+  res <- res[-1, ] # remove baseline
+  res <- res[order(res$diffLogLik, decreasing=TRUE), ]
+  return(res)
 }
