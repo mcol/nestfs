@@ -196,8 +196,9 @@ summary.nestfs <- function(res) {
   ranks.iqr <- tapply(sel$iter, sel$vars, function(z) format.iqr(round(iqr(z))))
   diffs <- tapply(sel$diff, sel$vars, median)
   diffs.iqr <- tapply(sel$diff, sel$vars, function(z) format.iqr(iqr(z)))
-  vars <- tryCatch(comp2bio(names(props)), error=function(e) names(props))
-  ttt <- data.frame(vars, freq=props, emp.pval=1 - props / nfolds,
+  vars <- names(props)
+  fullname <- tryCatch(comp2bio(vars), error=function(e) names(props))
+  ttt <- data.frame(vars, fullname, freq=props, emp.pval=1 - props / nfolds,
                     rank=ranks, rankIQR=ranks.iqr,
                     diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr)
   ttt <- ttt[order(ttt$emp.pval, ttt$rank), ]
