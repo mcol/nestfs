@@ -1,5 +1,6 @@
 ## run the forward selection starting from a set of variables or a model
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
+                              sel.crit=c("paired.test", "total.loglik"),
                               num.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, n.add=1, rep.every=25, seed=50,
                               init.model=NULL, save.iter1=FALSE) {
@@ -38,6 +39,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   }
   stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
+  sel.crit <- match.arg(sel.crit)
   if (is.null(init.model))
     init.model <- paste("y ~", paste(init.vars, collapse= " + "))
   else {
@@ -101,13 +103,28 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     for (fold in 1:length(res.by.fold))
       all.llk <- cbind(all.llk, res.by.fold[[fold]][, 4])
 
-    ## choose the best variable according to a paired test
+    total.llk <- rowSums(all.llk[-1, ])
     tt.pvals <- paired.pvals(all.llk, pval.test)
-    thresh.pval <- sort(tt.pvals)[n.add]
-    idx.pval <- which(tt.pvals <= thresh.pval)
-    chosen.pval <- sort(tt.pvals[idx.pval])
-    chosen.met <- names(chosen.pval)
-    chosen.llk <- rowSums(all.llk[chosen.met, , drop=FALSE])
+
+    ## choose the best variable according to a paired test
+    if (sel.crit == "paired.test") {
+      thresh.pval <- sort(tt.pvals)[n.add]
+      idx.pval <- which(tt.pvals <= thresh.pval)
+      chosen.pval <- sort(tt.pvals[idx.pval])
+      chosen.met <- names(chosen.pval)
+      chosen.llk <- total.llk[chosen.met]
+    }
+
+    ## choose the best variable according to the total loglikelihood
+    else {
+      thresh.llk <- sort(total.llk, decreasing=TRUE)[n.add]
+      idx.llk <- which(total.llk >= thresh.llk)
+      chosen.llk <- sort(total.llk[idx.llk])
+      chosen.met <- names(chosen.llk)
+      chosen.pval <- tt.pvals[chosen.met]
+    }
+
+    ## report iteration summary
     diff.llk <- chosen.llk - max(model.llks, na.rm=TRUE)
     print(data.frame(chosen.pval, chosen.llk, diff.llk))
 
@@ -133,6 +150,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                                      test=c("t", "wilcoxon"), num.inner.folds,
+                                     sel.crit=c("paired.test", "total.loglik"),
                                      max.iters=50, max.pval=0.5,
                                      min.llk.diff=0, seed=50) {
   all.res <- list()
@@ -146,6 +164,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
     fs <- forward.selection(x.train, y.train, model.vars, test=test,
+                            sel.crit=sel.crit,
                             max.iters=max.iters, num.folds=num.inner.folds,
                             max.pval=max.pval, min.llk.diff=min.llk.diff,
                             rep.every=100, seed=seed)
