@@ -2,8 +2,8 @@
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik"),
                               num.folds=50, max.iters=30, max.pval=0.5,
-                              min.llk.diff=0, n.add=1, rep.every=25, seed=50,
-                              init.model=NULL, save.iter1=FALSE) {
+                              min.llk.diff=0, n.add=1, rep.every=50, seed=50,
+                              init.model=NULL, save.iter1=NULL) {
   univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
     regr <- glm(as.formula(model), data=x.train, family="binomial")
     rsum <- summary(regr)
@@ -87,12 +87,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       rownames(all.stats) <- c("Base", other.vars)
 
       ## get loglikelihood for the initial set
-      if (iter == 1)
+      if (iter == 1) {
         model.llks[num.init.vars] <- model.llks[num.init.vars] + tt[1, 4]
-
-      ## store first iteration
-      if (iter == 1 && save.iter1)
         iter1[[fold]] <- as.data.frame(all.stats)
+      }
 
       ## store results for this fold
       res.by.fold[[fold]] <- all.stats
@@ -142,7 +140,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     model <- paste(model, chosen.met, sep=" + ")
   }
 
-  if (save.iter1) save(file="iter1.Rdata", iter1)
+  if (!is.null(save.iter1)) save(file=save.iter1, iter1)
   return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
                     diffs=c(NA, diff(model.llks)), iter=model.iter,
                     row.names=NULL, stringsAsFactors=FALSE))
