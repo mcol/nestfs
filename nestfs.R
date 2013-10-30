@@ -238,3 +238,22 @@ summary.iter1 <- function(iter1) {
   res <- res[order(res$diffLogLik, decreasing=TRUE), ]
   return(res)
 }
+
+## contribution to the AUCs by adding one marker at a time
+aucs.fs.incremental <- function(x, y, selection, clin, folds, num.keep) {
+  num.folds <- length(folds)
+  stopifnot(all.equal(length(selection), num.folds))
+  all.res <- list()
+  for (fold in 1:num.folds) {
+
+    ## cut the selection to the specified number
+    pred <- union(clin, head(selection[[fold]], num.keep))
+
+    ## fit a logistic regression model on the training/test split
+    test.idx <- folds[[fold]]
+    res <- plain.logreg(x[, pred], y, list(test.idx))[[1]]
+    res$test.idx <- test.idx
+    all.res[[fold]] <- res
+  }
+  return(all.res)
+}
