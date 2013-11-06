@@ -149,8 +149,9 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                                      test=c("t", "wilcoxon"), num.inner.folds,
                                      sel.crit=c("paired.test", "total.loglik"),
-                                     max.iters=50, max.pval=0.5,
-                                     min.llk.diff=0, seed=50) {
+                                     max.pval=0.5, min.llk.diff=0, max.iters=50,
+                                     num.filter=0, filter.ignore=model.vars,
+                                     seed=50) {
   all.res <- list()
   num.folds <- length(all.folds)
   for (fold in 1:num.folds) {
@@ -161,6 +162,16 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     test.idx <- all.folds[[fold]]
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
+
+    filter.keep <- NULL
+    if (num.filter > 0) {
+      filt.idx <- filter.predictors(x.train, y.train, num.filter,
+                                    ignore=filter.ignore)
+      keep.idx <- union(match(filter.ignore, colnames(x.train)), filt.idx)
+      x.train <- x.train[, keep.idx]
+      filter.keep <- colnames(x.train)
+    }
+
     fs <- forward.selection(x.train, y.train, model.vars, test=test,
                             sel.crit=sel.crit,
                             max.iters=max.iters, num.folds=num.inner.folds,
@@ -169,9 +180,11 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
+    model$regr$data <- NULL; model$regr$y <- NULL
     res <- list(fs=fs, fit=model$fit, caseness.test=model$caseness.test,
                 model=model$regr)
     res$test.idx <- test.idx
+    res$filter <- filter.keep
     res$call <- match.call()
     all.res[[fold]] <- res
   }
