@@ -1,6 +1,7 @@
 ## run the forward selection starting from a set of variables or a model
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik"),
+                              num.filter=0, filter.ignore=init.vars,
                               num.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, n.add=1, rep.every=50, seed=50,
                               init.model=NULL, save.iter1=NULL) {
@@ -52,7 +53,6 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   }
 
   all.folds <- create.folds(num.folds, nrow(x.all), seed=seed)
-  all.vars <- colnames(x.all)
   num.init.vars <- length(init.vars)
   model.vars <- init.vars
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
@@ -60,6 +60,30 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   model <- init.model
   iter1 <- list()
 
+  ## filtering according to association with outcome
+  if (num.filter > 0) {
+
+    ## run the filter on the training part of all inner folds
+    all.filt.idx <- NULL
+    for (fold in 1:length(all.folds)) {
+
+      train.idx <- setdiff(seq(nrow(x.all)), all.folds[[fold]])
+      x.train <- x.all[train.idx, ]
+      y.train <- y.all[train.idx]
+      filt.idx <- filter.predictors(x.train, y.train, num.filter,
+                                    ignore=filter.ignore)
+      all.filt.idx <- c(all.filt.idx, filt.idx)
+    }
+
+    ## keep the union of the variables retained in the inner folds
+    filt.idx <- sort(table(all.filt.idx), decreasing=TRUE)
+    filt.idx <- as.integer(names(filt.idx))[1:num.filter]
+    keep.idx <- union(match(filter.ignore, colnames(x.train)), filt.idx)
+    x.all <- x.all[, keep.idx]
+  }
+  all.vars <- colnames(x.all)
+
+  ## variable selection
   for (iter in 1:max.iters) {
 
     other.vars <- setdiff(all.vars, model.vars)
@@ -163,17 +187,9 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
 
-    filter.keep <- NULL
-    if (num.filter > 0) {
-      filt.idx <- filter.predictors(x.train, y.train, num.filter,
-                                    ignore=filter.ignore)
-      keep.idx <- union(match(filter.ignore, colnames(x.train)), filt.idx)
-      x.train <- x.train[, keep.idx]
-      filter.keep <- colnames(x.train)
-    }
-
     fs <- forward.selection(x.train, y.train, model.vars, test=test,
                             sel.crit=sel.crit,
+                            num.filter=num.filter, filter.ignore=filter.ignore,
                             max.iters=max.iters, num.folds=num.inner.folds,
                             max.pval=max.pval, min.llk.diff=min.llk.diff,
                             rep.every=100, seed=seed)
@@ -184,7 +200,6 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     res <- list(fs=fs, fit=model$fit, caseness.test=model$caseness.test,
                 model=model$regr)
     res$test.idx <- test.idx
-    res$filter <- filter.keep
     res$call <- match.call()
     all.res[[fold]] <- res
   }
