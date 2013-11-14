@@ -3,7 +3,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik"),
                               num.filter=0, filter.ignore=init.vars,
                               num.folds=50, max.iters=30, max.pval=0.5,
-                              min.llk.diff=0, n.add=1, rep.every=50, seed=50,
+                              min.llk.diff=0, n.add=1, seed=50,
                               init.model=NULL, save.iter1=NULL) {
   univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
     regr <- glm(as.formula(model), data=x.train, family="binomial")
@@ -21,10 +21,24 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     colnames(res) <- c("LogEstimate", "p-value", "TestAcc", "TestLogLik")
     return(res)
   }
-  par.univ.logreg <- function(x.train, x.test, model, met) {
-    model.met <- paste(model, met, sep=" + ")
-    tt <- univ.logreg(model.met, x.train, x.test)
-    return(tail(tt, n=1))
+  inner.fold <- function(x.all, y.all, model, other.vars, test.idx) {
+    train.idx <- setdiff(seq(nrow(x.all)), test.idx)
+    x.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
+    x.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
+
+    ## current model
+    tt.curr <- univ.logreg(model, x.train, x.test)
+    all.stats <- tail(tt.curr, n=1)
+
+    ## models augmented with one additional variable at a time
+    for (met in other.vars) {
+      model.met <- paste(model, met, sep=" + ")
+      tt <- univ.logreg(model.met, x.train, x.test)
+      all.stats <- rbind(all.stats, tail(tt, n=1))
+    }
+    rownames(all.stats) <- c("Base", other.vars)
+
+    return(all.stats)
   }
   paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
     test <- match.arg(test)
@@ -65,7 +79,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
     ## run the filter on the training part of all inner folds
     all.filt.idx <- NULL
-    for (fold in 1:length(all.folds)) {
+    for (fold in 1:num.folds) {
 
       train.idx <- setdiff(seq(nrow(x.all)), all.folds[[fold]])
       x.train <- x.all[train.idx, ]
@@ -89,41 +103,21 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     other.vars <- setdiff(all.vars, model.vars)
 
     ## loop over the folds
-    res.by.fold <- NULL
-    for (fold in 1:length(all.folds)) {
+    res.inner <- (foreach(fold=1:num.folds)
+                  %dopar%
+                  inner.fold(x.all, y.all, model, other.vars,
+                             all.folds[[fold]]))
 
-      if (fold %% rep.every == 0)
-        cat("Fold", fold, "\n")
-
-      test.idx <- all.folds[[fold]]
-      train.idx <- setdiff(seq(nrow(x.all)), test.idx)
-      x.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
-      x.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
-
-      ## models augmented with one additional variable at a time
-      all.stats <- (foreach(idx=1:length(other.vars), .combine=rbind)
-                    %dopar%
-                    par.univ.logreg(x.train, x.test, model, other.vars[idx]))
-
-      ## current model
-      tt <- univ.logreg(model, x.train, x.test)
-      all.stats <- rbind(tail(tt, n=1), all.stats)
-      rownames(all.stats) <- c("Base", other.vars)
-
-      ## get loglikelihood for the initial set
-      if (iter == 1) {
-        model.llks[num.init.vars] <- model.llks[num.init.vars] + tt[1, 4]
-        iter1[[fold]] <- as.data.frame(all.stats)
-      }
-
-      ## store results for this fold
-      res.by.fold[[fold]] <- all.stats
+    ## compute the loglikelihood for the initialization model
+    if (iter == 1) {
+      model.llks[num.init.vars] <- sum(sapply(res.inner, function(z) z[1, 4]))
+      iter1 <- res.inner
     }
 
     ## summarise the loglikelihoods
     all.llk <- NULL
-    for (fold in 1:length(res.by.fold))
-      all.llk <- cbind(all.llk, res.by.fold[[fold]][, 4])
+    for (fold in 1:length(res.inner))
+      all.llk <- cbind(all.llk, res.inner[[fold]][, 4])
 
     total.llk <- rowSums(all.llk[-1, ])
     tt.pvals <- paired.pvals(all.llk, pval.test)
@@ -192,7 +186,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                             num.filter=num.filter, filter.ignore=filter.ignore,
                             max.iters=max.iters, num.folds=num.inner.folds,
                             max.pval=max.pval, min.llk.diff=min.llk.diff,
-                            rep.every=100, seed=seed)
+                            seed=seed)
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
