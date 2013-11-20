@@ -190,9 +190,8 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
-    model$regr$data <- NULL; model$regr$y <- NULL
     res <- list(fs=fs, fit=model$fit, caseness.test=model$caseness.test,
-                model=model$regr)
+                model=summary(model$regr))
     res$test.idx <- test.idx
     res$call <- match.call()
     all.res[[fold]] <- res
