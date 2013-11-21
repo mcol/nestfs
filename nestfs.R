@@ -4,7 +4,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               num.filter=0, filter.ignore=init.vars,
                               num.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, n.add=1, seed=50,
-                              init.model=NULL, save.iter1=NULL) {
+                              init.model=NULL) {
   univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
     regr <- glm(as.formula(model), data=x.train, family="binomial")
     rsum <- summary(regr)
@@ -18,7 +18,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       loglik <- loglik / length(y.pred)
 
     res <- cbind(coef(regr), coefficients(rsum)[, 4], acc, loglik)
-    colnames(res) <- c("LogEstimate", "p-value", "TestAcc", "TestLogLik")
+    colnames(res) <- c("LogEstimate", "p.value", "TestAcc", "TestLogLik")
     return(res)
   }
   inner.fold <- function(x.all, y.all, model, other.vars, test.idx) {
@@ -72,7 +72,6 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
   model.pvals <- model.iter <- rep(NA, num.init.vars)
   model <- init.model
-  iter1 <- list()
 
   ## filtering according to association with outcome
   if (num.filter > 0) {
@@ -108,17 +107,12 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                   inner.fold(x.all, y.all, model, other.vars,
                              all.folds[[fold]]))
 
-    ## compute the loglikelihood for the initialization model
-    if (iter == 1) {
-      model.llks[num.init.vars] <- sum(sapply(res.inner, function(z) z[1, 4]))
-      iter1 <- res.inner
-    }
-
     ## summarise the loglikelihoods
     all.llk <- NULL
     for (fold in 1:length(res.inner))
       all.llk <- cbind(all.llk, res.inner[[fold]][, 4])
 
+    base.llk <- sum(all.llk[1, ])
     total.llk <- rowSums(all.llk[-1, ])
     tt.pvals <- paired.pvals(all.llk, pval.test)
 
@@ -140,6 +134,12 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       chosen.pval <- tt.pvals[chosen.met]
     }
 
+    ## compute the loglikelihood for the initialization model
+    if (iter == 1) {
+      model.llks[num.init.vars] <- base.llk
+      iter1 <- data.frame(diff.llk=total.llk - base.llk, p.value=tt.pvals)
+    }
+
     ## report iteration summary
     diff.llk <- chosen.llk - max(model.llks, na.rm=TRUE)
     print(data.frame(chosen.pval, chosen.llk, diff.llk))
@@ -158,10 +158,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     model <- paste(model, chosen.met, sep=" + ")
   }
 
-  if (!is.null(save.iter1)) save(file=save.iter1, iter1)
-  return(data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
-                    diffs=c(NA, diff(model.llks)), iter=model.iter,
-                    row.names=NULL, stringsAsFactors=FALSE))
+  return(list(fs=data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
+                diffs=c(NA, diff(model.llks)), iter=model.iter,
+                row.names=NULL, stringsAsFactors=FALSE),
+              iter1=iter1))
 }
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
@@ -188,11 +188,10 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                             max.pval=max.pval, min.llk.diff=min.llk.diff,
                             seed=seed)
     this.fold <- list(test.idx)
-    model <- plain.logreg(x.all[, fs$vars], y.all, this.fold)[[1]]
+    model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
-    res <- list(fs=fs, fit=model$fit, caseness.test=model$caseness.test,
-                model=summary(model$regr))
-    res$test.idx <- test.idx
+    res <- list(fs=fs$fs, fit=model$fit, caseness.test=model$caseness.test,
+                model=summary(model$regr), iter1=fs$iter1, test.idx=test.idx)
     res$call <- match.call()
     all.res[[fold]] <- res
   }
@@ -244,19 +243,26 @@ summary.nestfs <- function(res) {
   return(ttt)
 }
 
-summary.iter1 <- function(iter1) {
+## summarise the first iteration information across the nested folds
+summary.iter1 <- function(res) {
+  iqr <- function(x) quantile(x, c(0.25, 0.75))
+  format.iqr <- function(x, n) sprintf("(%.*f, %.*f)", n, x[1], n, x[2])
   iter1.pvals <- NULL
   iter1.diffs <- NULL
-  for (i in 1:length(iter1)) {
-    tmp <- iter1[[i]]
-    iter1.pvals <- cbind(iter1.pvals, tmp$"p-value")
-    iter1.diffs <- cbind(iter1.diffs, tmp$TestLogLik - tmp$TestLogLik[1])
+  num.folds <- length(res)
+  for (fold in 1:num.folds) {
+    fold.iter1 <- res[[fold]]$iter1
+    iter1.diffs <- cbind(iter1.diffs, fold.iter1$diff.llk)
+    iter1.pvals <- cbind(iter1.pvals, fold.iter1$p.value)
   }
-  res <- data.frame(row.names=rownames(iter1[[1]]),
-                    diffLogLik=apply(iter1.diffs, 1, sum),
-                    p.value=apply(iter1.pvals, 1, median))
-  res <- res[-1, ] # remove baseline
-  res <- res[order(res$diffLogLik, decreasing=TRUE), ]
+  med.diffs <- round(apply(iter1.diffs, 1, median), 2)
+  med.pvals <- round(apply(iter1.pvals, 1, median), 3)
+  iqr.diffs <- apply(iter1.diffs, 1, function(z) format.iqr(iqr(z), 2))
+  iqr.pvals <- apply(iter1.pvals, 1, function(z) format.iqr(iqr(z), 3))
+  res <- data.frame(row.names=rownames(fold.iter1),
+                    med.diff.llk=med.diffs, iqr.diff.llk=iqr.diffs,
+                    med.pvalue=med.pvals, iqr.pvalue=iqr.pvals)
+  res <- res[order(res$med.diff.llk, decreasing=TRUE), ]
   return(res)
 }
 
