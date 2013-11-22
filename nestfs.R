@@ -195,6 +195,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     res$call <- match.call()
     all.res[[fold]] <- res
   }
+  class(all.res) <- "nestfs"
   return(all.res)
 }
 
