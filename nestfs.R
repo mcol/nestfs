@@ -190,6 +190,8 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
+    sel <- fs$fs$vars[!is.na(fs$fs$iter)]
+    fs$fs$coef[match(sel, fs$fs$vars)] <- model$regr$coef[sel]
     res <- list(fs=fs$fs, fit=model$fit, caseness.test=model$caseness.test,
                 model=summary(model$regr), iter1=fs$iter1, test.idx=test.idx)
     res$call <- match.call()
@@ -226,10 +228,12 @@ summary.nestfs <- function(res) {
   nfolds <- length(res)
   sel <- NULL
   for (fold in 1:nfolds) {
-    fs <- res[[fold]]$fs[, c("vars", "diffs", "iter")]
+    fs <- res[[fold]]$fs[, c("vars", "coef", "diffs", "iter")]
     sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exlude init model
   }
   props <- tapply(sel$vars, sel$vars, length)
+  coefs <- round(tapply(sel$coef, sel$vars, median), 3)
+  coefs.iqr <- tapply(sel$coef, sel$vars, function(z) format.iqr(iqr(z)))
   ranks <- round(tapply(sel$iter, sel$vars, median))
   ranks.iqr <- tapply(sel$iter, sel$vars, function(z) format.iqr(round(iqr(z))))
   diffs <- tapply(sel$diff, sel$vars, median)
@@ -237,6 +241,7 @@ summary.nestfs <- function(res) {
   vars <- names(props)
   fullname <- tryCatch(comp2bio(vars), error=function(e) names(props))
   ttt <- data.frame(vars, fullname, freq=props, emp.pval=1 - props / nfolds,
+                    coef=coefs, coefIQR=coefs.iqr,
                     rank=ranks, rankIQR=ranks.iqr,
                     diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr)
   ttt <- ttt[order(ttt$emp.pval, ttt$rank), ]
