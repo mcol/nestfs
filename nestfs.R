@@ -223,8 +223,8 @@ plain.logreg <- function(x, y, folds) {
 }
 
 summary.nestfs <- function(res) {
-  iqr <- function(x) quantile(x, c(0.25, 0.75))
-  format.iqr <- function(x) sprintf("(%.2g, %.2g)", x[1], x[2])
+  iqr <- function(x) quantile(x, c(0.25, 0.75), na.rm=TRUE)
+  format.iqr <- function(x) sprintf("(%.2f, %.2f)", x[1], x[2])
   nfolds <- length(res)
   sel <- NULL
   for (fold in 1:nfolds) {
@@ -243,7 +243,8 @@ summary.nestfs <- function(res) {
   ttt <- data.frame(vars, fullname, freq=props, emp.pval=1 - props / nfolds,
                     coef=coefs, coefIQR=coefs.iqr,
                     rank=ranks, rankIQR=ranks.iqr,
-                    diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr)
+                    diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr,
+                    stringsAsFactors=FALSE)
   ttt <- ttt[order(ttt$emp.pval, ttt$rank), ]
   rownames(ttt) <- NULL
   return(ttt)
