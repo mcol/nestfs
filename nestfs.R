@@ -191,6 +191,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
     sel <- fs$fs$vars[!is.na(fs$fs$iter)]
+    fs$fs$coef <- NA
     fs$fs$coef[match(sel, fs$fs$vars)] <- model$regr$coef[sel]
     res <- list(fs=fs$fs, fit=model$fit, caseness.test=model$caseness.test,
                 model=summary(model$regr), iter1=fs$iter1, test.idx=test.idx)
