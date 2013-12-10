@@ -95,6 +95,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     x.all <- x.all[, keep.idx]
   }
   all.vars <- colnames(x.all)
+  all.iter <- list()
 
   ## variable selection
   for (iter in 1:max.iters) {
@@ -112,6 +113,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     for (fold in 1:length(res.inner))
       all.llk <- cbind(all.llk, res.inner[[fold]][, 4])
 
+    all.iter[[iter]] <- all.llk
     base.llk <- sum(all.llk[1, ])
     total.llk <- rowSums(all.llk[-1, ])
     tt.pvals <- paired.pvals(all.llk, pval.test)
@@ -161,7 +163,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   return(list(fs=data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
                 diffs=c(NA, diff(model.llks)), iter=model.iter,
                 row.names=NULL, stringsAsFactors=FALSE),
-              iter1=iter1))
+              iter1=iter1, all.iter=all.iter))
 }
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
