@@ -243,12 +243,12 @@ summary.nestfs <- function(res) {
   diffs.iqr <- tapply(sel$diff, sel$vars, function(z) format.iqr(iqr(z)))
   vars <- names(props)
   fullname <- tryCatch(comp2bio(vars), error=function(e) names(props))
-  ttt <- data.frame(vars, fullname, freq=props, emp.pval=1 - props / nfolds,
+  ttt <- data.frame(vars, fullname, percent=round(props/nfolds * 100, 2),
                     coef=coefs, coefIQR=coefs.iqr,
                     rank=ranks, rankIQR=ranks.iqr,
                     diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr,
                     stringsAsFactors=FALSE)
-  ttt <- ttt[order(ttt$emp.pval, ttt$rank), ]
+  ttt <- ttt[order(-ttt$percent, ttt$rank), ]
   rownames(ttt) <- NULL
   return(ttt)
 }
