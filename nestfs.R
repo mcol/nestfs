@@ -101,6 +101,8 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   for (iter in 1:max.iters) {
 
     other.vars <- setdiff(all.vars, model.vars)
+    if (length(other.vars) == 0)
+      break
 
     ## loop over the folds
     res.inner <- (foreach(fold=1:num.folds)
