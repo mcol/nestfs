@@ -1,9 +1,9 @@
 ## run the forward selection starting from a set of variables or a model
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
-                              sel.crit=c("paired.test", "total.loglik"),
+                              sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=init.vars,
                               num.folds=50, max.iters=30, max.pval=0.5,
-                              min.llk.diff=0, n.add=1, seed=50,
+                              min.llk.diff=0, seed=50,
                               init.model=NULL) {
   univ.logreg <- function(model, x.train, x.test) {
     regr <- glm(as.formula(model), data=x.train, family="binomial")
@@ -118,27 +118,28 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     for (fold in 1:num.folds)
       all.llk <- cbind(all.llk, res.inner[[fold]][, 4])
     all.iter[[iter]] <- all.llk
-    base.llk <- sum(all.llk[1, ])
-    total.llk <- rowSums(all.llk[-1, ])
-    tt.pvals <- paired.pvals(all.llk, pval.test)
+    inner.stats <- data.frame(p.value=paired.pvals(all.llk, pval.test),
+                              total.llk=rowSums(all.llk[-1, ]))
 
     ## choose the best variable according to a paired test
-    if (sel.crit == "paired.test") {
-      thresh.pval <- sort(tt.pvals)[n.add]
-      idx.pval <- which(tt.pvals <= thresh.pval)
-      chosen.pval <- sort(tt.pvals[idx.pval])
-      chosen.var <- names(chosen.pval)
-      chosen.llk <- total.llk[chosen.var]
+    if (sel.crit == "paired.test")
+      idx.sel <- which.min(inner.stats$p.value)
+
+    ## choose the best variable according to the total log-likelihood
+    if (sel.crit == "total.loglik")
+      idx.sel <- which.max(inner.stats$total.llk)
+
+    ## choose the best variables according to the total log-likelihood among
+    ## those with smallest paired p-value
+    else if (sel.crit == "both") {
+      ord <- order(inner.stats$p.value)[1:5]
+      idx.sel <- ord[which.max(inner.stats$total.llk[ord])]
     }
 
-    ## choose the best variable according to the total loglikelihood
-    else {
-      thresh.llk <- sort(total.llk, decreasing=TRUE)[n.add]
-      idx.llk <- which(total.llk >= thresh.llk)
-      chosen.llk <- sort(total.llk[idx.llk])
-      chosen.var <- names(chosen.llk)
-      chosen.pval <- tt.pvals[chosen.var]
-    }
+    ## apply selection
+    chosen.var <- rownames(inner.stats)[idx.sel]
+    chosen.llk <- inner.stats$total.llk[idx.sel]
+    chosen.pval <- inner.stats$p.value[idx.sel]
 
     ## compute the loglikelihood for the initialization model
     if (iter == 1) {
@@ -172,7 +173,8 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                                      test=c("t", "wilcoxon"), num.inner.folds,
-                                     sel.crit=c("paired.test", "total.loglik"),
+                                     sel.crit=c("paired.test", "total.loglik",
+                                         "both"),
                                      max.pval=0.5, min.llk.diff=0, max.iters=50,
                                      num.filter=0, filter.ignore=model.vars,
                                      seed=50) {
