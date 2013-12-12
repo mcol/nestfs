@@ -5,20 +5,16 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               num.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, n.add=1, seed=50,
                               init.model=NULL) {
-  univ.logreg <- function(model, x.train, x.test, mean.llk=FALSE) {
+  univ.logreg <- function(model, x.train, x.test) {
     regr <- glm(as.formula(model), data=x.train, family="binomial")
-    rsum <- summary(regr)
-
     y.pred <- predict(regr, newdata=x.test, type="response")
     y.test <- x.test$y
 
     acc <- sum(round(y.pred) == y.test) / length(y.pred)
     loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
-    if (mean.llk)
-      loglik <- loglik / length(y.pred)
 
-    res <- cbind(coef(regr), coefficients(rsum)[, 4], acc, loglik)
-    colnames(res) <- c("LogEstimate", "p.value", "TestAcc", "TestLogLik")
+    res <- cbind(coefficients(summary(regr))[, c(1, 4)], acc, loglik)
+    colnames(res) <- c("coef", "p.value", "valid.acc", "valid.llk")
     return(res)
   }
   inner.fold <- function(x.all, y.all, model, other.vars, test.idx) {
@@ -31,9 +27,9 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     all.stats <- tail(tt.curr, n=1)
 
     ## models augmented with one additional variable at a time
-    for (met in other.vars) {
-      model.met <- paste(model, met, sep=" + ")
-      tt <- univ.logreg(model.met, x.train, x.test)
+    for (var in other.vars) {
+      model.var <- paste(model, var, sep=" + ")
+      tt <- univ.logreg(model.var, x.train, x.test)
       all.stats <- rbind(all.stats, tail(tt, n=1))
     }
     rownames(all.stats) <- c("Base", other.vars)
@@ -45,7 +41,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     test.function <- list(t=t.test, wilcoxon=wilcox.test)
     pvals <- NULL
     for (i in 2:nrow(all.llk)) {
-      ttt <- test.function[[test]](all.llk[i, ], all.llk[1, ],
+      ttt <- test.function[[test]](all.llk[i, ], all.llk["Base", ],
                                    paired=TRUE, alternative="greater")
       pvals <- c(pvals, ttt$p.value)
     }
@@ -110,11 +106,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                   inner.fold(x.all, y.all, model, other.vars,
                              all.folds[[fold]]))
 
-    ## summarise the loglikelihoods
+    ## collect all validation log-likelihoods
     all.llk <- NULL
-    for (fold in 1:length(res.inner))
+    for (fold in 1:num.folds)
       all.llk <- cbind(all.llk, res.inner[[fold]][, 4])
-
     all.iter[[iter]] <- all.llk
     base.llk <- sum(all.llk[1, ])
     total.llk <- rowSums(all.llk[-1, ])
@@ -125,8 +120,8 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       thresh.pval <- sort(tt.pvals)[n.add]
       idx.pval <- which(tt.pvals <= thresh.pval)
       chosen.pval <- sort(tt.pvals[idx.pval])
-      chosen.met <- names(chosen.pval)
-      chosen.llk <- total.llk[chosen.met]
+      chosen.var <- names(chosen.pval)
+      chosen.llk <- total.llk[chosen.var]
     }
 
     ## choose the best variable according to the total loglikelihood
@@ -134,8 +129,8 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       thresh.llk <- sort(total.llk, decreasing=TRUE)[n.add]
       idx.llk <- which(total.llk >= thresh.llk)
       chosen.llk <- sort(total.llk[idx.llk])
-      chosen.met <- names(chosen.llk)
-      chosen.pval <- tt.pvals[chosen.met]
+      chosen.var <- names(chosen.llk)
+      chosen.pval <- tt.pvals[chosen.var]
     }
 
     ## compute the loglikelihood for the initialization model
@@ -155,11 +150,11 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       break
 
     ## append the chosen variable to the existing ones
-    model.vars <- c(model.vars, chosen.met)
+    model.vars <- c(model.vars, chosen.var)
     model.pvals <- c(model.pvals, chosen.pval)
     model.llks <- c(model.llks, chosen.llk)
-    model.iter <- c(model.iter, rep(iter, length(chosen.met)))
-    model <- paste(model, chosen.met, sep=" + ")
+    model.iter <- c(model.iter, rep(iter, length(chosen.var)))
+    model <- paste(model, chosen.var, sep=" + ")
   }
 
   return(list(fs=data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
@@ -259,6 +254,7 @@ summary.nestfs <- function(res) {
 summary.iter1 <- function(res) {
   iqr <- function(x) quantile(x, c(0.25, 0.75))
   format.iqr <- function(x, n) sprintf("(%.*f, %.*f)", n, x[1], n, x[2])
+  stopifnot(class(res) == "nestfs")
   iter1.pvals <- NULL
   iter1.diffs <- NULL
   num.folds <- length(res)
@@ -279,18 +275,18 @@ summary.iter1 <- function(res) {
 }
 
 ## contribution to the AUCs by adding one marker at a time
-aucs.fs.incremental <- function(x, y, selection, clin, folds, num.keep) {
+aucs.fs.incremental <- function(x, y, selection, init, folds, num.keep) {
   num.folds <- length(folds)
   stopifnot(all.equal(length(selection), num.folds))
   all.res <- list()
   for (fold in 1:num.folds) {
 
     ## cut the selection to the specified number
-    pred <- union(clin, head(selection[[fold]], num.keep))
+    vars <- union(init, head(selection[[fold]], num.keep))
 
     ## fit a logistic regression model on the training/test split
     test.idx <- folds[[fold]]
-    res <- plain.logreg(x[, pred], y, list(test.idx))[[1]]
+    res <- plain.logreg(x[, vars], y, list(test.idx))[[1]]
     res$test.idx <- test.idx
     all.res[[fold]] <- res
   }
