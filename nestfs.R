@@ -48,6 +48,13 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     names(pvals) <- rownames(all.llk)[-1]
     return(pvals)
   }
+  report.iter <- function(iter, var, pval, llk, diff.llk) {
+    fmt <- "%2d %35s %9.5f %9.2f %7.2f\n"
+    if (iter == 1)
+      cat(sprintf("%2s %35s %9s %9s %7s\n",
+                  "#", "Variable", "P-value", "Log-Lik", "Diff"))
+    cat(sprintf(fmt, iter, var, pval, llk, diff.llk))
+  }
   stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
   sel.crit <- match.arg(sel.crit)
@@ -141,7 +148,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
     ## report iteration summary
     diff.llk <- chosen.llk - max(model.llks, na.rm=TRUE)
-    print(data.frame(chosen.pval, chosen.llk, diff.llk))
+    report.iter(iter, chosen.var, chosen.pval, chosen.llk, diff.llk)
 
     ## check for early termination
     if (max(chosen.pval) > max.pval)
