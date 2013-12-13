@@ -168,6 +168,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   return(list(fs=data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
                 diffs=c(NA, diff(model.llks)), iter=model.iter,
                 row.names=NULL, stringsAsFactors=FALSE),
+              panel=setdiff(model.vars, init.vars),
               iter1=iter1, all.iter=all.iter))
 }
 
@@ -198,12 +199,12 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
-    sel <- fs$fs$vars[!is.na(fs$fs$iter)]
+    panel <- fs$panel
     fs$fs$coef <- NA
-    fs$fs$coef[match(sel, fs$fs$vars)] <- model$regr$coef[sel]
+    fs$fs$coef[match(panel, fs$fs$vars)] <- model$regr$coef[panel]
     res <- list(fs=fs$fs, fit=model$fit, caseness.test=model$caseness.test,
-                model=summary(model$regr), iter1=fs$iter1, test.idx=test.idx)
-    res$call <- match.call()
+                panel=panel, model=summary(model$regr), test.idx=test.idx,
+                iter1=fs$iter1, all.iter=fs$all.iter, call=match.call())
     all.res[[fold]] <- res
   }
   class(all.res) <- "nestfs"
