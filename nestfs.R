@@ -2,7 +2,7 @@
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=init.vars,
-                              num.folds=50, max.iters=30, max.pval=0.5,
+                              num.inner.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, seed=50,
                               init.model=NULL) {
   univ.logreg <- function(model, x.train, x.test) {
@@ -67,7 +67,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     init.vars <- unlist(strsplit(init.vars, "\\+" ))
   }
 
-  all.folds <- create.folds(num.folds, nrow(x.all), seed=seed)
+  all.folds <- create.folds(num.inner.folds, nrow(x.all), seed=seed)
   num.init.vars <- length(init.vars)
   model.vars <- init.vars
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
@@ -79,7 +79,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
     ## run the filter on the training part of all inner folds
     all.filt.idx <- NULL
-    for (fold in 1:num.folds) {
+    for (fold in 1:num.inner.folds) {
 
       train.idx <- setdiff(seq(nrow(x.all)), all.folds[[fold]])
       x.train <- x.all[train.idx, ]
@@ -106,14 +106,14 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       break
 
     ## loop over the folds
-    res.inner <- (foreach(fold=1:num.folds)
+    res.inner <- (foreach(fold=1:num.inner.folds)
                   %dopar%
                   inner.fold(x.all, y.all, model, other.vars,
                              all.folds[[fold]]))
 
     ## collect all validation log-likelihoods
     all.llk <- NULL
-    for (fold in 1:num.folds)
+    for (fold in 1:num.inner.folds)
       all.llk <- cbind(all.llk, res.inner[[fold]][, 3])
     all.iter[[iter]] <- all.llk
     inner.stats <- data.frame(p.value=paired.pvals(all.llk, pval.test),
@@ -177,12 +177,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 }
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
-                                     test=c("t", "wilcoxon"), num.inner.folds,
-                                     sel.crit=c("paired.test", "total.loglik",
-                                         "both"),
-                                     max.pval=0.5, min.llk.diff=0, max.iters=50,
-                                     num.filter=0, filter.ignore=model.vars,
-                                     seed=50) {
+                                     ...) {
   all.res <- list()
   num.folds <- length(all.folds)
   for (fold in 1:num.folds) {
@@ -194,12 +189,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
 
-    fs <- forward.selection(x.train, y.train, model.vars, test=test,
-                            sel.crit=sel.crit,
-                            num.filter=num.filter, filter.ignore=filter.ignore,
-                            max.iters=max.iters, num.folds=num.inner.folds,
-                            max.pval=max.pval, min.llk.diff=min.llk.diff,
-                            seed=seed)
+    fs <- forward.selection(x.train, y.train, model.vars, ...)
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
