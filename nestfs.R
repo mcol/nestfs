@@ -37,7 +37,6 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     return(all.stats)
   }
   paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
-    test <- match.arg(test)
     test.function <- list(t=t.test, wilcoxon=wilcox.test)
     pvals <- NULL
     for (i in 2:nrow(all.llk)) {
@@ -140,11 +139,17 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     chosen.var <- rownames(inner.stats)[idx.sel]
     chosen.llk <- inner.stats$total.llk[idx.sel]
     chosen.pval <- inner.stats$p.value[idx.sel]
-
-    ## compute the loglikelihood for the initialization model
     if (iter == 1) {
-      model.llks[num.init.vars] <- base.llk
-      iter1 <- data.frame(diff.llk=total.llk - base.llk, p.value=tt.pvals)
+      ## compute the log-likelihood for the initialization model
+      model.llks[num.init.vars] <- sum(all.llk["Base", ])
+
+      ## differences in validation log-likelihoods
+      univ.diffs <- all.llk[-1, ]
+      for (i in 1:nrow(univ.diffs))
+        univ.diffs[i, ] <- univ.diffs[i, ] - all.llk["Base", ]
+      iter1 <- data.frame(median.diff.llk=apply(univ.diffs, 1, median),
+                          total.diff.llk=apply(univ.diffs, 1, sum),
+                          p.value=inner.stats$p.value)
     }
 
     ## report iteration summary
@@ -270,7 +275,7 @@ summary.iter1 <- function(res) {
   num.folds <- length(res)
   for (fold in 1:num.folds) {
     fold.iter1 <- res[[fold]]$iter1
-    iter1.diffs <- cbind(iter1.diffs, fold.iter1$diff.llk)
+    iter1.diffs <- cbind(iter1.diffs, fold.iter1$total.diff.llk)
     iter1.pvals <- cbind(iter1.pvals, fold.iter1$p.value)
   }
   med.diffs <- round(apply(iter1.diffs, 1, median), 2)
