@@ -10,11 +10,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     y.pred <- predict(regr, newdata=x.test, type="response")
     y.test <- x.test$y
 
-    acc <- sum(round(y.pred) == y.test) / length(y.pred)
     loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
 
-    res <- cbind(coefficients(summary(regr))[, c(1, 4)], acc, loglik)
-    colnames(res) <- c("coef", "p.value", "valid.acc", "valid.llk")
+    res <- cbind(coefficients(summary(regr))[, c(1, 4)], loglik)
+    colnames(res) <- c("coef", "p.value", "valid.llk")
     return(res)
   }
   inner.fold <- function(x.all, y.all, model, other.vars, test.idx) {
@@ -115,7 +114,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     ## collect all validation log-likelihoods
     all.llk <- NULL
     for (fold in 1:num.folds)
-      all.llk <- cbind(all.llk, res.inner[[fold]][, 4])
+      all.llk <- cbind(all.llk, res.inner[[fold]][, 3])
     all.iter[[iter]] <- all.llk
     inner.stats <- data.frame(p.value=paired.pvals(all.llk, pval.test),
                               total.llk=rowSums(all.llk[-1, ]))
@@ -229,10 +228,9 @@ plain.logreg <- function(x, y, folds) {
     model <- paste("y.train ~", paste(colnames(x.train), collapse=" + "))
     regr <- glm(as.formula(model), data=x.train, family="binomial")
     y.pred <- predict(regr, newdata=x.test, type="response")
-    acc <- sum(round(y.pred) == y.test) / length(y.test)
     loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
     res[[fold]] <- list(regr=regr, fit=y.pred, caseness.test=y.test,
-                        acc=acc, llk=loglik, test.idx=idx.test)
+                        llk=loglik, test.idx=idx.test)
   }
   return(res)
 }
