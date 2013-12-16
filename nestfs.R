@@ -1,16 +1,23 @@
+binomial.llk <- function(y.pred, y.test, dummy)
+  sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
+gaussian.llk <- function(y.pred, y.test, disp)
+  -0.5 * sum(log(disp) + (y.pred - y.test)^2 / disp)
+llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
+
 ## run the forward selection starting from a set of variables or a model
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
+                              family=c("binomial", "gaussian"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=init.vars,
                               num.inner.folds=50, max.iters=30, max.pval=0.5,
                               min.llk.diff=0, seed=50,
                               init.model=NULL) {
   univ.logreg <- function(model, x.train, x.test) {
-    regr <- glm(as.formula(model), data=x.train, family="binomial")
+    regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
     y.test <- x.test$y
 
-    loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
+    loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
 
     res <- cbind(coefficients(summary(regr))[, c(1, 4)], loglik)
     colnames(res) <- c("coef", "p.value", "valid.llk")
@@ -53,7 +60,9 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                   "#", "Variable", "P-value", "Log-Lik", "Diff"))
     cat(sprintf(fmt, iter, var, pval, llk, diff.llk))
   }
-  stopifnot(all.equal(names(table(y.all)), c("0", "1")))
+  family <- match.arg(family)
+  if (family == "binomial")
+    stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
   sel.crit <- match.arg(sel.crit)
   if (is.null(init.model))
@@ -177,7 +186,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 }
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
-                                     ...) {
+                                     family=c("binomial", "gaussian"), ...) {
   all.res <- list()
   num.folds <- length(all.folds)
   for (fold in 1:num.folds) {
@@ -191,7 +200,8 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
 
     fs <- forward.selection(x.train, y.train, model.vars, ...)
     this.fold <- list(test.idx)
-    model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold)[[1]]
+    model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold,
+                          family=family)[[1]]
     stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
     panel <- fs$panel
     fs$fs$coef <- NA
@@ -205,8 +215,9 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
   return(all.res)
 }
 
-plain.logreg <- function(x, y, folds) {
+plain.logreg <- function(x, y, folds, family=c("binomial", "gaussian")) {
   stopifnot(all.equal(nrow(x), length(y)))
+  family <- match.arg(family)
   res <- list()
   for (fold in 1:length(folds)) {
     if (fold %% 10 == 0)
@@ -216,9 +227,9 @@ plain.logreg <- function(x, y, folds) {
     x.test <- x[idx.test, ]; x.train <- x[idx.train, ]
     y.test <- y[idx.test];   y.train <- y[idx.train]
     model <- paste("y.train ~", paste(colnames(x.train), collapse=" + "))
-    regr <- glm(as.formula(model), data=x.train, family="binomial")
+    regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
-    loglik <- sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
+    loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
     res[[fold]] <- list(regr=regr, fit=y.pred, caseness.test=y.test,
                         llk=loglik, test.idx=idx.test)
   }
