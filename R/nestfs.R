@@ -39,7 +39,6 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       all.stats <- rbind(all.stats, tail(tt, n=1))
     }
     rownames(all.stats) <- c("Base", other.vars)
-
     return(all.stats)
   }
   paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
@@ -187,6 +186,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
 nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
                                      family=c("binomial", "gaussian"), ...) {
+  family <- match.arg(family)
   all.res <- list()
   num.folds <- length(all.folds)
   for (fold in 1:num.folds) {
@@ -198,7 +198,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
 
-    fs <- forward.selection(x.train, y.train, model.vars, ...)
+    fs <- forward.selection(x.train, y.train, model.vars, family=family, ...)
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold,
                           family=family)[[1]]
