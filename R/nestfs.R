@@ -184,7 +184,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
               iter1=iter1, all.iter=all.iter))
 }
 
-nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
+nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
                                      family=c("binomial", "gaussian"), ...) {
   family <- match.arg(family)
   all.res <- list()
@@ -198,7 +198,7 @@ nested.forward.selection <- function(x.all, y.all, model.vars, all.folds,
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
 
-    fs <- forward.selection(x.train, y.train, model.vars, family=family, ...)
+    fs <- forward.selection(x.train, y.train, init.vars, family=family, ...)
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold,
                           family=family)[[1]]
