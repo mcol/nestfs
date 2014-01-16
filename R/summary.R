@@ -1,3 +1,8 @@
+## report the forward selection panel
+summary.fs <- function(object, ...) {
+  return(object$fs)
+}
+
 ## summarise the results across the nested folds
 summary.nestfs <- function(object, iter1=FALSE, ...) {
   iqr <- function(x) quantile(x, c(0.25, 0.75), na.rm=TRUE)
