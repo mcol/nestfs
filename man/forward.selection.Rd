@@ -1,12 +1,11 @@
-\name{nestfs}
+\name{forward.selection}
 \alias{forward.selection}
-\alias{nested.forward.selection}
 
 \title{
   Forward Selection
 }
 \description{
-  Run (nested) forward selection starting from a set of variables or a model.
+  Run forward selection starting from a set of variables or a model.
 }
 \usage{
   forward.selection(x.all, y.all, init.vars, test = c("t", "wilcoxon"),
@@ -15,9 +14,6 @@
                     num.filter = 0, filter.ignore = init.vars,
                     num.inner.folds = 50, max.iters = 30, max.pval = 0.5,
                     min.llk.diff = 0, seed = 50, init.model = NULL)
-
-  nested.forward.selection(x.all, y.all, init.vars, all.folds,
-                           family = c("binomial", "gaussian"), ...)
 }
 \arguments{
   \item{x.all}{
@@ -72,26 +68,34 @@
     Formula that describes the initial model: if specified, this
     overrides \code{init.vars}.
   }
-  \item{all.folds}{
-    Set of outer folds.
-  }
-  \item{...}{
-    Arguments to \code{forward.selection()}.
-  }
 }
 \details{
-  \code{forward.selection()} is used to choose a panel of variables on
-  the data; \code{nested.forward.selection()} allows to obtain an
-  unbiased estimate of the performance of the selected panels on
-  withdrawn data.
+  This function is used to choose a panel of variables on the data. As
+  it uses all observations in the \code{x.all} data frame, it is not
+  possible to produce unbiased estimates of the predictive performance
+  of the panel selected (use \code{nested.forward.selection} for that).
 }
 \value{
-  A list.
+  A list containing the following fields:
+  \item{fs}{
+    A data frame containing the forward selection summary.
+  }
+  \item{panel}{
+    Names of variables selected (in order).
+  }
+  \item{iter1}{
+    Summary statistics for all variables at the first iteration.
+  }
+  \item{all.iter}{
+    Validation log-likelihoods for all inner folds at all iterations.
+  }
 }
 \author{
   Marco Colombo
 }
-
+\seealso{
+  \code{\link{nested.forward.selection}}
+}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,

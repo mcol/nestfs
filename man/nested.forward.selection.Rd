@@ -1,0 +1,56 @@
+\name{nested.forward.selection}
+\alias{nested.forward.selection}
+
+\title{
+  Nested Forward Selection
+}
+\description{
+  Run nested forward selection starting from a set of variables or a model.
+}
+\usage{
+  nested.forward.selection(x.all, y.all, init.vars, all.folds,
+                           family = c("binomial", "gaussian"), ...)
+}
+\arguments{
+  \item{x.all}{
+    Data frame.
+  }
+  \item{y.all}{
+    Outcome variable.
+  }
+  \item{init.vars}{
+    Initial set of variables.
+  }
+  \item{all.folds}{
+    Set of outer folds.
+  }
+  \item{family}{
+    Type of link function to be used in the model.
+  }
+  \item{...}{
+    Arguments to \code{forward.selection}.
+  }
+}
+\details{
+  This function allows to obtain an unbiased estimate of the performance
+  of the selected panels on withdrawn data.
+}
+\value{
+  An object of class "nestfs" of length equal to
+  \code{length(all.folds)}.
+}
+\author{
+  Marco Colombo
+}
+\seealso{
+  \code{\link{forward.selection}}
+}
+
+\examples{
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+}
+
+\keyword{multivariate}
