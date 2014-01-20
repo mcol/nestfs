@@ -38,12 +38,14 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
   diffs <- tapply(sel$diff, sel$vars, median)
   diffs.iqr <- tapply(sel$diff, sel$vars, function(z) format.iqr(iqr(z)))
   vars <- names(props)
-  fullname <- tryCatch(comp2bio(vars), error=function(e) names(props))
-  res <- data.frame(vars, fullname, percent=round(props/num.folds * 100, 2),
+  fullname <- tryCatch(get("getfullname")(vars), error=function(e) NULL)
+  res <- data.frame(percent=round(props/num.folds * 100, 2),
                     coef=coefs, coefIQR=coefs.iqr,
                     rank=ranks, rankIQR=ranks.iqr,
                     diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr,
                     stringsAsFactors=FALSE)
+  if (!is.null(fullname)) res <- cbind(fullname, res)
+  res <- cbind(vars, res)
   res <- res[order(-res$percent, res$rank), ]
   rownames(res) <- NULL
   return(res)
