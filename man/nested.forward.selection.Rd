@@ -47,10 +47,14 @@
 }
 
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
+\dontrun{
+  data(diabetes)
+  all.folds <- create.folds(10, nrow(diabetes), seed=1)
+  nfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
+                                      c("age", "sex"), all.folds,
+                                      family="gaussian")
+  summary(nfs.res)
+  }
 }
 
 \keyword{multivariate}

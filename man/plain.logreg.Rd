@@ -27,7 +27,7 @@
 \details{
   This can be used to establish a baseline model, often built only on
   the initial set of covariates (those that would be passed through the
-  \var{init.vars} argument to \code{forward.selection()}.
+  \code{init.vars} argument to \code{forward.selection}.
 }
 \value{
   A set of results.
@@ -37,9 +37,13 @@
 }
 
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+\dontrun{
+  data(diabetes)
+  all.folds <- create.folds(10, nrow(diabetes), seed=1)
+  lr.res <- plain.logreg(diabetes[, c("age", "sex", "bmi", "tc",
+                                      "ldl", "hdl", "ltg", "glu")],
+                         diabetes$Y, all.folds, family="gaussian")
+  }
 }
 
-\keyword{multivariate}
+\keyword{internal}

@@ -96,11 +96,15 @@
 \seealso{
   \code{\link{nested.forward.selection}}
 }
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
+\examples{
+\dontrun{
+  data(diabetes)
+  fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
+                              c("age", "sex"), family="gaussian",
+                              max.iters=5)
+  summary(fs.res)
+  }
 }
 
 \keyword{multivariate}

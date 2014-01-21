@@ -30,7 +30,7 @@
   For an object of class \code{"nestfs"} the function summarizes the
   selected panels across the outer folds.
 
-  A function of name \code{"getfullname") to match variable names to
+  A function of name \code{"getfullname"} to match variable names to
   full names is searched on the current workspace, and if found full
   names are included in the summary data frame.
 }
