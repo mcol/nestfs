@@ -37,7 +37,23 @@
 }
 \value{
   An object of class "nestfs" of length equal to
-  \code{length(all.folds)}.
+  \code{length(all.folds)}, where each element is an object of class
+  \code{"fs"} containing the following additional fields:
+  \item{fit}{
+    Predicted values for the withdrawn observations.
+  }
+  \item{caseness.test}{
+    Observed values for the withdrawn observations.
+  }
+  \item{test.idx}{
+    Indices of the the withdrawn observations for this fold.
+  }
+  \item{model}{
+    Summary of the model built using the selected panel.
+  }
+  \item{call}{
+    Arguments to \code{nestfs}.
+  }
 }
 \author{
   Marco Colombo

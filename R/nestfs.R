@@ -209,10 +209,12 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
     panel <- fs$panel
     fs$fs$coef <- NA
     fs$fs$coef[match(panel, fs$fs$vars)] <- model$regr$coef[panel]
-    res <- list(fs=fs$fs, fit=model$fit, caseness.test=model$caseness.test,
-                panel=panel, model=summary(model$regr), test.idx=test.idx,
-                iter1=fs$iter1, all.iter=fs$all.iter, call=match.call())
-    all.res[[fold]] <- res
+    fs$fit <- model$fit
+    fs$caseness.test <- model$caseness.test
+    fs$test.idx <- test.idx
+    fs$model <- summary(model$regr)
+    fs$call <- match.call()
+    all.res[[fold]] <- fs
   }
   class(all.res) <- "nestfs"
   return(all.res)
