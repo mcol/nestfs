@@ -180,7 +180,9 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   res <- list(fs=data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
                   diffs=c(NA, diff(model.llks)), iter=model.iter,
                   row.names=NULL, stringsAsFactors=FALSE),
+              init=init.vars,
               panel=setdiff(model.vars, init.vars),
+              family=family,
               iter1=iter1,
               all.iter=all.iter)
   class(res) <- "fs"

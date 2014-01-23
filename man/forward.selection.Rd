@@ -76,12 +76,18 @@
   of the panel selected (use \code{nested.forward.selection} for that).
 }
 \value{
-  A list containing the following fields:
+  An object of class \code{"fs"} containing the following fields:
   \item{fs}{
     A data frame containing the forward selection summary.
   }
+  \item{init}{
+    The set of variables used in the initialization.
+  }
   \item{panel}{
     Names of variables selected (in order).
+  }
+  \item{family}{
+    Type of model fitted.
   }
   \item{iter1}{
     Summary statistics for all variables at the first iteration.
