@@ -9,7 +9,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               family=c("binomial", "gaussian"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=init.vars,
-                              num.inner.folds=50, max.iters=30, max.pval=0.5,
+                              num.inner.folds=30, max.iters=15, max.pval=0.5,
                               min.llk.diff=0, seed=50,
                               init.model=NULL) {
   univ.logreg <- function(model, x.train, x.test) {
