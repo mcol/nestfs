@@ -1,1 +1,11 @@
-exportPattern("^[[:alpha:]]+")
+export(
+    create.folds,
+    filter.predictors,
+    forward.selection,
+    nested.forward.selection,
+    plain.logreg
+    )
+S3method(print, fs)
+S3method(print, nestfs)
+S3method(summary, fs)
+S3method(summary, nestfs)
