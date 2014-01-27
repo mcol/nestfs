@@ -42,7 +42,7 @@
   \item{fit}{
     Predicted values for the withdrawn observations.
   }
-  \item{caseness.test}{
+  \item{obs}{
     Observed values for the withdrawn observations.
   }
   \item{test.idx}{

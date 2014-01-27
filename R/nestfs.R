@@ -207,12 +207,12 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
     this.fold <- list(test.idx)
     model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold,
                           family=family)[[1]]
-    stopifnot(all.equal(model$caseness.test, y.all[test.idx]))
+    stopifnot(all.equal(model$obs, y.all[test.idx]))
     panel <- fs$panel
     fs$fs$coef <- NA
     fs$fs$coef[match(panel, fs$fs$vars)] <- model$regr$coef[panel]
     fs$fit <- model$fit
-    fs$caseness.test <- model$caseness.test
+    fs$obs <- model$obs
     fs$test.idx <- test.idx
     fs$model <- summary(model$regr)
     fs$call <- match.call()
@@ -237,7 +237,7 @@ plain.logreg <- function(x, y, folds, family=c("binomial", "gaussian")) {
     regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
     loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
-    res[[fold]] <- list(regr=regr, fit=y.pred, caseness.test=y.test,
+    res[[fold]] <- list(regr=regr, fit=y.pred, obs=y.test,
                         llk=loglik, test.idx=idx.test)
   }
   return(res)
