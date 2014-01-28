@@ -42,10 +42,9 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
   res <- data.frame(percent=round(props/num.folds * 100, 2),
                     coef=coefs, coefIQR=coefs.iqr,
                     rank=ranks, rankIQR=ranks.iqr,
-                    diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr,
-                    stringsAsFactors=FALSE)
-  if (!is.null(fullname)) res <- cbind(fullname, res)
-  res <- cbind(vars, res)
+                    diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr)
+  if (!is.null(fullname)) res <- cbind(fullname, res, stringsAsFactors=FALSE)
+  res <- cbind(vars, res, stringsAsFactors=FALSE)
   res <- res[order(-res$percent, res$rank), ]
   rownames(res) <- NULL
   return(res)
