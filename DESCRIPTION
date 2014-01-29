@@ -8,3 +8,4 @@ Maintainer: Marco Colombo <m.colombo@ed.ac.uk>
 Description: Implementation of forward selection based on cross-validated
              linear and logistic regression
 License: GPL 2.0
+Depends: doMC, dgof
