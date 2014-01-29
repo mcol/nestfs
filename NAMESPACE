@@ -3,7 +3,7 @@ export(
     filter.predictors,
     forward.selection,
     nested.forward.selection,
-    plain.logreg
+    nested.glm
     )
 S3method(print, fs)
 S3method(print, nestfs)

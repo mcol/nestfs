@@ -12,7 +12,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
                               min.llk.diff=0, seed=50,
                               init.model=NULL) {
-  univ.logreg <- function(model, x.train, x.test) {
+  univ.glm <- function(model, x.train, x.test) {
     regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
     y.test <- x.test$y
@@ -29,13 +29,13 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     x.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
 
     ## current model
-    tt.curr <- univ.logreg(model, x.train, x.test)
+    tt.curr <- univ.glm(model, x.train, x.test)
     all.stats <- tail(tt.curr, n=1)
 
     ## models augmented with one additional variable at a time
     for (var in other.vars) {
       model.var <- paste(model, var, sep=" + ")
-      tt <- univ.logreg(model.var, x.train, x.test)
+      tt <- univ.glm(model.var, x.train, x.test)
       all.stats <- rbind(all.stats, tail(tt, n=1))
     }
     rownames(all.stats) <- c("Base", other.vars)
@@ -205,8 +205,8 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
 
     fs <- forward.selection(x.train, y.train, init.vars, family=family, ...)
     this.fold <- list(test.idx)
-    model <- plain.logreg(x.all[, fs$fs$vars], y.all, this.fold,
-                          family=family)[[1]]
+    model <- nested.glm(x.all[, fs$fs$vars], y.all, this.fold,
+                        family=family)[[1]]
     stopifnot(all.equal(model$obs, y.all[test.idx]))
     panel <- fs$panel
     fs$fs$coef <- NA
@@ -222,7 +222,8 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
   return(all.res)
 }
 
-plain.logreg <- function(x, y, folds, family=c("binomial", "gaussian")) {
+## run glm on a set of cross-validation folds
+nested.glm <- function(x, y, folds, family=c("binomial", "gaussian")) {
   stopifnot(all.equal(nrow(x), length(y)))
   family <- match.arg(family)
   res <- list()

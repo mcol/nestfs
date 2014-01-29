@@ -1,14 +1,14 @@
-\name{plain.logreg}
-\alias{plain.logreg}
+\name{nested.glm}
+\alias{nested.glm}
 
 \title{
-  Cross-validated Logistic Regression
+  Cross-validated Generalized Linear Models
 }
 \description{
-  Run logistic regression on the set of cross-validation folds.
+  Run linear or logistic regression on the set of cross-validation folds.
 }
 \usage{
-  plain.logreg(x, y, folds, family = c("binomial", "gaussian"))
+  nested.glm(x, y, folds, family = c("binomial", "gaussian"))
 }
 \arguments{
   \item{x}{
@@ -40,9 +40,9 @@
 \dontrun{
   data(diabetes)
   all.folds <- create.folds(10, nrow(diabetes), seed=1)
-  lr.res <- plain.logreg(diabetes[, c("age", "sex", "bmi", "tc",
-                                      "ldl", "hdl", "ltg", "glu")],
-                         diabetes$Y, all.folds, family="gaussian")
+  lr.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
+                                    "ldl", "hdl", "ltg", "glu")],
+                       diabetes$Y, all.folds, family="gaussian")
   }
 }
 
