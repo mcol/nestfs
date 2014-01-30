@@ -51,9 +51,6 @@
   \item{model}{
     Summary of the model built using the selected panel.
   }
-  \item{call}{
-    Arguments to \code{nestfs}.
-  }
 }
 \author{
   Marco Colombo

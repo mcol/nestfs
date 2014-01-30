@@ -89,6 +89,9 @@
   \item{family}{
     Type of model fitted.
   }
+  \item{call}{
+    The call that created this object.
+  }
   \item{iter1}{
     Summary statistics for all variables at the first iteration.
   }

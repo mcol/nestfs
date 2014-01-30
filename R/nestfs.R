@@ -183,6 +183,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
               init=init.vars,
               panel=setdiff(model.vars, init.vars),
               family=family,
+              call=match.call(),
               iter1=iter1,
               all.iter=all.iter)
   class(res) <- "fs"
