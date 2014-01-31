@@ -21,19 +21,29 @@
     Set of cross-validation folds.
   }
   \item{family}{
-    Type of link function to be used in the model.
+    Type of model fitted.
   }
 }
 \details{
   This can be used to establish a baseline model, often built only on
   the initial set of covariates (those that would be passed through the
-  \code{init.vars} argument to \code{forward.selection}.
+  \code{init.vars} argument to \code{forward.selection}).
 }
 \value{
-  A set of results.
-}
-\author{
-  Marco Colombo
+  A list of length equal to \code{length(folds)}, where each entry
+  contains the following fields:
+  \item{fit}{
+    Predicted values for the withdrawn observations.
+  }
+  \item{obs}{
+    Observed values for the withdrawn observations.
+  }
+  \item{llk}{
+    Log-likelihood.
+  }
+  \item{test.idx}{
+    Indices of the the withdrawn observations for this fold.
+  }
 }
 
 \examples{

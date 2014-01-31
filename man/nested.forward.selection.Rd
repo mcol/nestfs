@@ -13,7 +13,9 @@
 }
 \arguments{
   \item{x.all}{
-    Data frame.
+    Data frame of predictors: this should include all variables in the
+    initial set and the variables that are allowed to enter the selected
+    panel.
   }
   \item{y.all}{
     Outcome variable.
@@ -25,7 +27,8 @@
     Set of outer folds.
   }
   \item{family}{
-    Type of link function to be used in the model.
+    Type of model fitted: if \code{"binomial"}, then the outcome
+    variable is expected to only have \code{0-1} entries.
   }
   \item{...}{
     Arguments to \code{forward.selection}.
@@ -51,9 +54,6 @@
   \item{model}{
     Summary of the model built using the selected panel.
   }
-}
-\author{
-  Marco Colombo
 }
 \seealso{
   \code{\link{forward.selection}}

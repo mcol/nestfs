@@ -2,10 +2,10 @@ Package: nestfs
 Type: Package
 Title: Cross-validated (nested) forward selection
 Version: 0.7
-Date: 2013-12-21
-Author: Marco Colombo
+Date: 2014-01-31
+Author: Marco Colombo, Felix Agakov
 Maintainer: Marco Colombo <m.colombo@ed.ac.uk>
 Description: Implementation of forward selection based on cross-validated
              linear and logistic regression
-License: GPL 2.0
+License: GPL-2
 Depends: doMC, dgof

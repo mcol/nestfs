@@ -17,7 +17,9 @@
 }
 \arguments{
   \item{x.all}{
-    Data frame.
+    Data frame of predictors: this should include all variables in the
+    initial set and the variables that are allowed to enter the selected
+    panel.
   }
   \item{y.all}{
     Outcome variable.
@@ -26,19 +28,21 @@
     Initial set of variables.
   }
   \item{test}{
-    Type of statistical test to use.
+    Type of statistical paired test to use: it's ignored if
+    \code{sel.crit="total.loglik"}.
   }
   \item{family}{
-    Type of link function to be used in the model.
+    Type of model fitted: if \code{"binomial"}, then the outcome
+    variable is expected to only have \code{0-1} entries.
   }
   \item{sel.crit}{
-    Selection criterion: "paired.test" chooses the variable with best
-    p-value on the paired test indicated by \code{test}; "total.loglik"
-    chooses the variable that provides the largest increase in
-    log-likelihood; "both" attempts to combine both previous criteria,
-    choosing the variable that produces the largest increase in
-    log-likelihood only among the best 5 variables ranked according to the
-    paired-test p-value.
+    Selection criterion: \code{"paired.test"} chooses the variable with
+    best p-value on the paired test indicated by \code{test};
+    \code{"total.loglik"} chooses the variable that provides the largest
+    increase in log-likelihood; \code{"both"} attempts to combine both
+    previous criteria, choosing the variable that produces the largest
+    increase in log-likelihood only among the best 5 variables ranked
+    according to the paired-test p-value.
   }
   \item{num.filter}{
     Number of variables to be retained by the filter (0 to use all).
@@ -48,7 +52,7 @@
     (so that they are always retained).
   }
   \item{num.inner.folds}{
-    Number of inner folds.
+    Number of folds in the inner cross-validation.
   }
   \item{max.iters}{
     Maximum number of iterations.
@@ -70,10 +74,16 @@
   }
 }
 \details{
+  At each iteration, this function runs cross-validation to choose which
+  variable enters the final panel by fitting the current model (defined
+  by \code{init.vars} at the first iteration) augmented by one of the
+  remaining variables at a time.
+
   This function is used to choose a panel of variables on the data. As
   it uses all observations in the \code{x.all} data frame, it is not
   possible to produce unbiased estimates of the predictive performance
-  of the panel selected (use \code{nested.forward.selection} for that).
+  of the panel selected (use \code{\link{nested.forward.selection}} for
+  that purpose).
 }
 \value{
   An object of class \code{"fs"} containing the following fields:
@@ -98,9 +108,6 @@
   \item{all.iter}{
     Validation log-likelihoods for all inner folds at all iterations.
   }
-}
-\author{
-  Marco Colombo
 }
 \seealso{
   \code{\link{nested.forward.selection}}

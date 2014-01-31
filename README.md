@@ -1,4 +1,4 @@
 nestfs
 ======
 
-Cross-validated (nested) forward selection
+An R package for cross-validated (nested) forward selection.

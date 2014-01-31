@@ -31,8 +31,5 @@
 \value{
   An array of indices of variables that are retained by the filter.
 }
-\author{
-  Marco Colombo
-}
 
 \keyword{internal}

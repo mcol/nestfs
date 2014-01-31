@@ -1,7 +1,6 @@
 \name{print.nestfs}
 \alias{print.nestfs}
 \alias{print.fs}
-\alias{print}
 
 \title{
   Print an Object
@@ -25,10 +24,6 @@
 }
 \value{
   This returns \code{summary} invisibly.
-}
-
-\author{
-  Marco Colombo
 }
 \seealso{
   \code{\link{forward.selection}},

@@ -1,7 +1,7 @@
 \name{create.folds}
 \alias{create.folds}
 \title{
-  Cross-validation Folds
+  Cross-Validation Folds
 }
 \description{
   Create a list of indices corresponding to cross-validation folds.
@@ -28,14 +28,7 @@
   exactly the same if \code{num.folds} is not an integer divisor of
   \code{num.rows}.
 }
-\author{
-  Marco Colombo
-}
 
 \examples{
   all.folds <- create.folds(50, 307, 0)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
