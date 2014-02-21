@@ -13,7 +13,7 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
   iter1.diffs <- NULL
   for (fold in 1:num.folds) {
     fs <- object[[fold]]$fs[, c("vars", "coef", "diffs", "iter")]
-    sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exlude init model
+    sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exclude init model
     fold.iter1 <- object[[fold]]$iter1
     iter1.diffs <- cbind(iter1.diffs, fold.iter1$total.diff.llk)
     iter1.pvals <- cbind(iter1.pvals, fold.iter1$p.value)
@@ -24,9 +24,12 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
     med.pvals <- round(apply(iter1.pvals, 1, median), 3)
     iqr.diffs <- apply(iter1.diffs, 1, function(z) format.iqr(iqr(z)))
     iqr.pvals <- apply(iter1.pvals, 1, function(z) format.iqr(iqr(z), 3))
+    vars <- rownames(fold.iter1)
+    fullname <- tryCatch(get("getfullname")(vars), error=function(e) NULL)
     res <- data.frame(row.names=rownames(fold.iter1),
                       med.diff.llk=med.diffs, iqr.diff.llk=iqr.diffs,
                       med.pvalue=med.pvals, iqr.pvalue=iqr.pvals)
+    if (!is.null(fullname)) res <- cbind(fullname, res, stringsAsFactors=FALSE)
     res <- res[order(res$med.diff.llk, decreasing=TRUE), ]
     return(res)
   }
