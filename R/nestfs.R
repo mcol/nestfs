@@ -211,11 +211,11 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
     stopifnot(all.equal(model$obs, y.all[test.idx]))
     panel <- fs$panel
     fs$fs$coef <- NA
-    fs$fs$coef[match(panel, fs$fs$vars)] <- model$regr$coef[panel]
+    fs$fs$coef[match(panel, fs$fs$vars)] <- model$coef[panel]
     fs$fit <- model$fit
     fs$obs <- model$obs
     fs$test.idx <- test.idx
-    fs$model <- summary(model$regr)
+    fs$model <- model$summary
     fs$call <- match.call()
     all.res[[fold]] <- fs
   }
@@ -224,7 +224,8 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
 }
 
 ## run glm on a set of cross-validation folds
-nested.glm <- function(x, y, folds, family=c("binomial", "gaussian")) {
+nested.glm <- function(x, y, folds, family=c("binomial", "gaussian"),
+                       store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
   family <- match.arg(family)
   res <- list()
@@ -239,8 +240,10 @@ nested.glm <- function(x, y, folds, family=c("binomial", "gaussian")) {
     regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
     loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
-    res[[fold]] <- list(regr=regr, fit=y.pred, obs=y.test,
-                        llk=loglik, test.idx=idx.test)
+    res[[fold]] <- list(summary=summary(regr), coef=regr$coef,
+                        fit=y.pred, obs=y.test,
+                        test.llk=loglik, test.idx=idx.test)
+    if (store.glm) res[[fold]]$regr <- regr
   }
   return(res)
 }

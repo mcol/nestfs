@@ -8,7 +8,8 @@
   Run linear or logistic regression on the set of cross-validation folds.
 }
 \usage{
-  nested.glm(x, y, folds, family = c("binomial", "gaussian"))
+  nested.glm(x, y, folds, family = c("binomial", "gaussian"),
+             store.glm = FALSE)
 }
 \arguments{
   \item{x}{
@@ -23,6 +24,9 @@
   \item{family}{
     Type of model fitted.
   }
+  \item{store.glm}{
+    Whether the object produced by glm should be stored.
+  }
 }
 \details{
   This can be used to establish a baseline model, often built only on
@@ -32,17 +36,26 @@
 \value{
   A list of length equal to \code{length(folds)}, where each entry
   contains the following fields:
+  \item{summary}{
+    Summary of the fitted model.
+  }
+  \item{coef}{
+    Coefficients of the fitted model.
+  }
   \item{fit}{
     Predicted values for the withdrawn observations.
   }
   \item{obs}{
     Observed values for the withdrawn observations.
   }
-  \item{llk}{
-    Log-likelihood.
+  \item{test.llk}{
+    Test log-likelihood.
   }
   \item{test.idx}{
     Indices of the the withdrawn observations for this fold.
+  }
+  \item{regr}{
+    Object created by glm (only if \code{store.glm=TRUE}).
   }
 }
 
