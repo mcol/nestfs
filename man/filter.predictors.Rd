@@ -2,7 +2,7 @@
 \alias{filter.predictors}
 
 \title{
-  Filtering of predictors
+  Filtering of Predictors
 }
 \description{
   Filter the predictors, retaining only the top n.

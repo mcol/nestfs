@@ -22,7 +22,8 @@
     panel.
   }
   \item{y.all}{
-    Outcome variable.
+    Outcome variable: if \code{family="binomial"}, it has to only have
+    \code{0-1} entries.
   }
   \item{init.vars}{
     Initial set of variables.
@@ -84,6 +85,14 @@
   possible to produce unbiased estimates of the predictive performance
   of the panel selected (use \code{\link{nested.forward.selection}} for
   that purpose).
+
+  If \code{num.filter} is positive, then all available predictors
+  (excluding those whose name is matched by \code{filter.ignore}) are
+  tested for univariate association with the outcome. This is done on
+  the training part of all inner folds, and the top \code{num.filter}
+  are retained for selection, while the others are filtered
+  out. Filtering can enhance the performance of forward selection when
+  the number of available variables exceeds about 30--40.
 }
 \value{
   An object of class \code{"fs"} containing the following fields:

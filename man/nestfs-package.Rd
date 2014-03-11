@@ -40,7 +40,7 @@
   However, when the number of variables is much larger than that,
   forward selection, besides being unbearably slow, may be more subject
   to overfitting, which is in the nature of its greedy-like
-  desing. These undesirable effects can be somewhat remedied by applying
+  design. These undesirable effects can be somewhat remedied by applying
   some filtering (see \code{"num.filter"} argument to
   \code{\link{forward.selection}}, thus reducing the number or variables
   entering the selection phase.
