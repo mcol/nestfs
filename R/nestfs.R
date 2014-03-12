@@ -8,6 +8,7 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               family=c("binomial", "gaussian"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
+                              choose.from=seq(ncol(x.all)),
                               num.filter=0, filter.ignore=init.vars,
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
                               min.llk.diff=0, seed=50,
@@ -59,6 +60,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                   "#", "Variable", "P-value", "Log-Lik", "Diff"))
     cat(sprintf(fmt, iter, var, pval, llk, diff.llk))
   }
+  stopifnot(min(choose.from) >= 1, max(choose.from) <= ncol(x.all))
   family <- match.arg(family)
   if (family == "binomial")
     stopifnot(all.equal(names(table(y.all)), c("0", "1")))
@@ -81,6 +83,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
   model.pvals <- model.iter <- rep(NA, num.init.vars)
   model <- init.model
+
+  ## limit the number of variables to choose from
+  keep.vars <- union(choose.from, match(init.vars, colnames(x.all)))
+  x.all <- x.all[, keep.vars]
 
   ## filtering according to association with outcome
   if (num.filter > 0) {

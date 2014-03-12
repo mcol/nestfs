@@ -11,6 +11,7 @@
   forward.selection(x.all, y.all, init.vars, test = c("t", "wilcoxon"),
                     family = c("binomial", "gaussian"),
                     sel.crit = c("paired.test", "total.loglik", "both"),
+                    choose.from = seq(ncol(x.all)),
                     num.filter = 0, filter.ignore = init.vars,
                     num.inner.folds = 30, max.iters = 15, max.pval = 0.5,
                     min.llk.diff = 0, seed = 50, init.model = NULL)
@@ -44,6 +45,9 @@
     previous criteria, choosing the variable that produces the largest
     increase in log-likelihood only among the best 5 variables ranked
     according to the paired-test p-value.
+  }
+  \item{choose.from}{
+    Indices of the variables among which the selection should be done.
   }
   \item{num.filter}{
     Number of variables to be retained by the filter (0 to use all).
