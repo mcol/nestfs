@@ -131,7 +131,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
       all.llk <- cbind(all.llk, res.inner[[fold]][, 3])
     all.iter[[iter]] <- all.llk
     inner.stats <- data.frame(p.value=paired.pvals(all.llk, pval.test),
-                              total.llk=rowSums(all.llk[-1, ]))
+                              total.llk=rowSums(all.llk[-1, , drop=FALSE]))
 
     ## choose the best variable according to a paired test
     if (sel.crit == "paired.test")
