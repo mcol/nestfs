@@ -72,9 +72,8 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     ## work out the variables from the initialization model
     cat("Using init.model, ignoring init.vars\n")
     stopifnot(length(grep("~", init.model)) > 0)
-    init.vars <- unlist(strsplit(init.model, "~" ))[2]
-    init.vars <- gsub(" ", "", init.vars)
-    init.vars <- unlist(strsplit(init.vars, "\\+" ))
+    model.terms <- terms(as.formula(init.model))
+    init.vars <- attributes(model.terms)$term.labels
   }
 
   all.folds <- create.folds(num.inner.folds, nrow(x.all), seed=seed)
@@ -86,6 +85,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
   ## limit the number of variables to choose from
   keep.vars <- union(choose.from, match(init.vars, colnames(x.all)))
+  keep.vars <- keep.vars[!is.na(keep.vars)] # remove NAs from interaction terms
   x.all <- x.all[, keep.vars]
 
   ## filtering according to association with outcome
