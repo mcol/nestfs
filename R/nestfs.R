@@ -13,10 +13,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
                               min.llk.diff=0, seed=50,
                               init.model=NULL) {
-  univ.glm <- function(model, x.train, x.test) {
-    regr <- glm(as.formula(model), data=x.train, family=family)
-    y.pred <- predict(regr, newdata=x.test, type="response")
-    y.test <- x.test$y
+  univ.glm <- function(model, xy.train, xy.test) {
+    regr <- glm(as.formula(model), data=xy.train, family=family)
+    y.pred <- predict(regr, newdata=xy.test, type="response")
+    y.test <- xy.test$y
 
     loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
 
@@ -26,17 +26,17 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   }
   inner.fold <- function(x.all, y.all, model, other.vars, test.idx) {
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
-    x.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
-    x.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
+    xy.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
+    xy.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
 
     ## current model
-    tt.curr <- univ.glm(model, x.train, x.test)
+    tt.curr <- univ.glm(model, xy.train, xy.test)
     all.stats <- tail(tt.curr, n=1)
 
     ## models augmented with one additional variable at a time
     for (var in other.vars) {
       model.var <- paste(model, var, sep=" + ")
-      tt <- univ.glm(model.var, x.train, x.test)
+      tt <- univ.glm(model.var, xy.train, xy.test)
       all.stats <- rbind(all.stats, tail(tt, n=1))
     }
     rownames(all.stats) <- c("Base", other.vars)
