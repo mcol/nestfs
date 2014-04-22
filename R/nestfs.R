@@ -66,8 +66,10 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
   sel.crit <- match.arg(sel.crit)
-  if (is.null(init.model))
+  if (is.null(init.model)) {
+    stopifnot(all(init.vars %in% colnames(x.all)))
     init.model <- paste("y ~", paste(init.vars, collapse= " + "))
+  }
   else {
     ## work out the variables from the initialization model
     cat("Using init.model, ignoring init.vars\n")
