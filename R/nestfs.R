@@ -60,6 +60,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                   "#", "Variable", "P-value", "Log-Lik", "Diff"))
     cat(sprintf(fmt, iter, var, pval, llk, diff.llk))
   }
+  stopifnot(all.equal(nrow(x.all), length(y.all)))
   stopifnot(min(choose.from) >= 1, max(choose.from) <= ncol(x.all))
   family <- match.arg(family)
   if (family == "binomial")
