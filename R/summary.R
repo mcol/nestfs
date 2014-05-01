@@ -9,24 +9,30 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
   format.iqr <- function(x, n=2) sprintf("(%.*f, %.*f)", n, x[1], n, x[2])
   num.folds <- length(object)
   sel <- NULL
-  iter1.pvals <- NULL
-  iter1.diffs <- NULL
   for (fold in 1:num.folds) {
     fs <- object[[fold]]$fs[, c("vars", "coef", "diffs", "iter")]
     sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exclude init model
-    fold.iter1 <- object[[fold]]$iter1
-    iter1.diffs <- cbind(iter1.diffs, fold.iter1$total.diff.llk)
-    iter1.pvals <- cbind(iter1.pvals, fold.iter1$p.value)
   }
   if (iter1) {
+    ## with filtering, outer folds may contain different variables
+    all.iter1 <- NULL
+    for (fold in 1:num.folds) {
+      fold.iter1 <- object[[fold]]$iter1[, c("total.diff.llk", "p.value")]
+      fold.iter1 <- data.frame(vars=rownames(fold.iter1), fold.iter1)
+      all.iter1 <- rbind(all.iter1, fold.iter1)
+    }
+
     ## summarise all variables at the first iteration
-    med.diffs <- round(apply(iter1.diffs, 1, median), 2)
-    med.pvals <- round(apply(iter1.pvals, 1, median), 3)
-    iqr.diffs <- apply(iter1.diffs, 1, function(z) format.iqr(iqr(z)))
-    iqr.pvals <- apply(iter1.pvals, 1, function(z) format.iqr(iqr(z), 3))
-    vars <- rownames(fold.iter1)
+    all.vars <- all.iter1$vars
+    med.diffs <- round(tapply(all.iter1$total.diff.llk, all.vars, median), 2)
+    iqr.diffs <- tapply(all.iter1$total.diff.llk, all.vars,
+                        function(z) format.iqr(iqr(z), 2))
+    med.pvals <- round(tapply(all.iter1$p.value, all.vars, median), 3)
+    iqr.pvals <- tapply(all.iter1$p.value, all.vars,
+                        function(z) format.iqr(iqr(z), 3))
+    vars <- names(med.diffs)
     fullname <- tryCatch(get("getfullname")(vars), error=function(e) NULL)
-    res <- data.frame(row.names=rownames(fold.iter1),
+    res <- data.frame(row.names=vars,
                       med.diff.llk=med.diffs, iqr.diff.llk=iqr.diffs,
                       med.pvalue=med.pvals, iqr.pvalue=iqr.pvals)
     if (!is.null(fullname)) res <- cbind(fullname, res, stringsAsFactors=FALSE)
