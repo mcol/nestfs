@@ -8,11 +8,6 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
   iqr <- function(x) quantile(x, c(0.25, 0.75), na.rm=TRUE)
   format.iqr <- function(x, n=2) sprintf("(%.*f, %.*f)", n, x[1], n, x[2])
   num.folds <- length(object)
-  sel <- NULL
-  for (fold in 1:num.folds) {
-    fs <- object[[fold]]$fs[, c("vars", "coef", "diffs", "iter")]
-    sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exclude init model
-  }
   if (iter1) {
     ## with filtering, outer folds may contain different variables
     all.iter1 <- NULL
@@ -38,6 +33,11 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
     if (!is.null(fullname)) res <- cbind(fullname, res, stringsAsFactors=FALSE)
     res <- res[order(res$med.diff.llk, decreasing=TRUE), ]
     return(res)
+  }
+  sel <- NULL
+  for (fold in 1:num.folds) {
+    fs <- object[[fold]]$fs[, c("vars", "coef", "diffs", "iter")]
+    sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exclude init model
   }
   props <- tapply(sel$vars, sel$vars, length)
   coefs <- round(tapply(sel$coef, sel$vars, median), 3)
