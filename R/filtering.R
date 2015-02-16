@@ -4,6 +4,10 @@ library(dgof)
 ks.pval <- function(x, y) {
   require(dgof)
   is.discrete <- apply(x, 1, function(z) length(unique(z)) < 10)
+
+  ## add some jitter to continuous variables to avoid warnings about ties
+  ## note that because of this, results may be slightly different according
+  ## to the number of continuous variables in the dataset
   x[!is.discrete, ] <- jitter(x[!is.discrete, ], factor=1e-5)
   x.ctrls <- x[, which(y == 0)]
   x.cases <- x[, which(y == 1)]
