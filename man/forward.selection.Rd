@@ -110,7 +110,7 @@
     Names of variables selected (in order).
   }
   \item{final.model}{
-    Formula corresponding to the final model.
+    Right-hand side of the formula corresponding to the final model.
   }
   \item{family}{
     Type of model fitted.
