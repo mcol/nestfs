@@ -1,8 +1,5 @@
-library(dgof)
-
 ## compare p(x|y=0) and p(x|y=1) with the Kolmogorov-Smirnov test
 ks.pval <- function(x, y) {
-  require(dgof)
   is.discrete <- apply(x, 1, function(z) length(unique(z)) < 10)
 
   ## add some jitter to continuous variables to avoid warnings about ties

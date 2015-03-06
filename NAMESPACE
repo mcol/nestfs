@@ -1,3 +1,7 @@
+import(
+    dgof,
+    doMC
+    )
 export(
     create.folds,
     filter.predictors,
