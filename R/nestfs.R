@@ -79,6 +79,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     model.terms <- terms(as.formula(init.model))
     init.vars <- attributes(model.terms)$term.labels
   }
+  stopifnot(all(!is.na(x.all[, init.vars])))
 
   all.folds <- create.folds(num.inner.folds, nrow(x.all), seed=seed)
   num.init.vars <- length(init.vars)
