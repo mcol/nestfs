@@ -239,6 +239,7 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
 nested.glm <- function(x, y, folds, family=c("binomial", "gaussian"),
                        store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
+  stopifnot(max(unlist(folds)) <= nrow(x))
   family <- match.arg(family)
   res <- list()
   for (fold in 1:length(folds)) {
