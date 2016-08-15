@@ -29,7 +29,7 @@
   The code is parallelized over the inner folds, thanks to package
   \pkg{doMC}, therefore user time depends on the number of available
   cores. This can can be set through the "cores" options, e.g.
-  \command{option(cores=8)}.
+  \command{options(cores=8)}.
 
   The main advantage of forward selection is that it provides an
   immediately interpretable model, and the panel of variables obtained

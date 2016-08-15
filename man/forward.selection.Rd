@@ -71,11 +71,11 @@
     log-likelihood is smaller than this threshold.
   }
   \item{seed}{
-    Seed of the random number generator.
+    Seed of the random number generator for the inner folds.
   }
   \item{init.model}{
-    Formula that describes the initial model: if specified, this
-    overrides \code{init.vars}.
+    Formula that describes the initial model, where the outcome variable
+    should be called \code{y}: if specified, this overrides \code{init.vars}.
   }
 }
 \details{
@@ -135,6 +135,9 @@
   fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
                               c("age", "sex"), family="gaussian",
                               max.iters=5)
+  fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
+                                init.model="y ~ 1", family="gaussian",
+                                max.iters=5)
   summary(fs.res)
   }
 }

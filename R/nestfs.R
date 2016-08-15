@@ -20,7 +20,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 
     loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
 
-    res <- cbind(coefficients(summary(regr))[, c(1, 4)], loglik)
+    res <- cbind(coefficients(summary(regr))[, c(1, 4), drop=FALSE], loglik)
     colnames(res) <- c("coef", "p.value", "valid.llk")
     return(res)
   }
@@ -79,11 +79,19 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     model.terms <- terms(as.formula(init.model))
     init.vars <- attributes(model.terms)$term.labels
   }
-  stopifnot(all(!is.na(x.all[, init.vars])))
 
+  ## check that there is no missingness in the variables of the initial model,
+  ## excluding the interaction terms
+  stopifnot(all(!is.na(x.all[, init.vars[!grepl(":", init.vars)]])))
+
+  ## create the inner folds
   all.folds <- create.folds(num.inner.folds, nrow(x.all), seed=seed)
-  num.init.vars <- length(init.vars)
+
+  ## if the model contains only the intercept term, count 1 variable
+  num.init.vars <- max(length(init.vars), 1)
   model.vars <- init.vars
+  if (length(model.vars) == 0)
+    model.vars <- "<empty>"
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
   model.pvals <- model.iter <- rep(NA, num.init.vars)
   model <- init.model

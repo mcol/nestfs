@@ -1,8 +1,8 @@
 Package: nestfs
 Type: Package
 Title: Cross-validated (nested) forward selection
-Version: 0.7.20150729
-Date: 2015-07-29
+Version: 0.7.20160815
+Date: 2016-08-15
 Author: Marco Colombo, Felix Agakov
 Maintainer: Marco Colombo <m.colombo@ed.ac.uk>
 Description: Implementation of forward selection based on cross-validated
