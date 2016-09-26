@@ -54,11 +54,11 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     return(pvals)
   }
   report.iter <- function(iter, var, pval, llk, diff.llk) {
-    fmt <- "%2d %35s %9.5f %9.2f %7.2f\n"
+    fmt <- "%2d %40s %9.5f %9.2f %7.2f\n"
     if (iter == 1)
-      cat(sprintf("%2s %35s %9s %9s %7s\n",
+      cat(sprintf("%2s %40s %9s %9s %7s\n",
                   "#", "Variable", "P-value", "Log-Lik", "Diff"))
-    cat(sprintf(fmt, iter, var, pval, llk, diff.llk))
+    cat(sprintf(fmt, iter, substr(var, 1, 40), pval, llk, diff.llk))
   }
   stopifnot(!any(is.na(y.all)))
   stopifnot(all.equal(nrow(x.all), length(y.all)))
