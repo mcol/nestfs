@@ -196,7 +196,7 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
     model <- paste(model, chosen.var, sep=" + ")
   }
 
-  res <- list(fs=data.frame(vars=model.vars, pvals=model.pvals, llks=model.llks,
+  res <- list(fs=data.frame(vars=model.vars, fdr=model.pvals, llks=model.llks,
                   diffs=c(NA, diff(model.llks)), iter=model.iter,
                   row.names=NULL, stringsAsFactors=FALSE),
               init=init.vars,
