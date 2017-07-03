@@ -4,7 +4,94 @@ gaussian.llk <- function(y.pred, y.test, disp)
   -0.5 * sum(log(disp) + (y.pred - y.test)^2 / disp)
 llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 
-## run the forward selection starting from a set of variables or a model
+#' Run forward selection
+#'
+#' Run forward selection starting from a set of variables or a model.
+#'
+#' At each iteration, this function runs cross-validation to choose which
+#' variable enters the final panel by fitting the current model (defined either
+#' by \code{init.vars} or \code{init.model} at the first iteration) augmented
+#' by one of the remaining variables at a time.
+#'
+#' This function is used to choose a panel of variables on the data. As it uses
+#' all observations in the \code{x.all} dataframe, it is not possible to
+#' produce unbiased estimates of the predictive performance of the panel
+#' selected (use \code{\link{nested.forward.selection}} for that purpose).
+#'
+#' If \code{num.filter} is positive, then all available predictors (excluding
+#' those whose name is matched by \code{filter.ignore}) are tested for
+#' univariate association with the outcome. This is done on the training part
+#' of all inner folds, and the top \code{num.filter} are retained for
+#' selection, while the others are filtered out. Filtering can enhance the
+#' performance of forward selection when the number of available variables
+#' exceeds about 30--40.
+#'
+#' @param x.all Dataframe of predictors: this should include all variables in
+#'        the initial set and the variables that are allowed to enter the
+#'        selected panel.
+#' @param y.all Outcome variable: if \code{family="binomial"}, it is expected
+#'        to only have \code{0-1} entries.
+#' @param init.vars Initial set of variables (ignored if \code{init.model} is
+#'        not \code{NULL}).
+#' @param test Type of statistical paired test to use (ignored if
+#'        \code{sel.crit="total.loglik"}).
+#' @param family Type of model fitted: \code{"gaussian"} for linear regression
+#'        or \code{"binomial"} for logistic regression. If \code{"binomial"},
+#'        then the outcome variable is expected to only have \code{0-1} entries.
+#' @param sel.crit Selection criterion: \code{"paired.test"} chooses the
+#'        variable with best p-value on the paired test indicated by
+#'        \code{test}; \code{"total.loglik"} chooses the variable that provides
+#'        the largest increase in log-likelihood; \code{"both"} attempts to
+#'        combine both previous criteria, choosing the variable that produces
+#'        the largest increase in log-likelihood only among the best 5
+#'        variables ranked according to the paired-test p-value.
+#' @param choose.from Indices of the variables among which the selection should
+#'        be done.
+#' @param num.filter Number of variables to be retained by the filter (0 to use
+#'        all).
+#' @param filter.ignore Regular expression for variables that should be ignored
+#'        by the filter (so that they are always retained).
+#' @param num.inner.folds Number of folds in the inner cross-validation.
+#' @param max.iters Maximum number of iterations.
+#' @param max.pval Interrupt the selection when the best achievable p-value
+#'        exceeds this threshold.
+#' @param min.llk.diff Interrupt the selection when the best achievable
+#'        improvement in log-likelihood is smaller than this threshold.
+#' @param seed Seed of the random number generator for the inner folds.
+#' @param init.model Formula that describes the initial model, where the
+#'        outcome variable should be called \code{y}: if specified, this
+#'        overrides \code{init.vars}.
+#'
+#' @return
+#' An object of class \code{"fs"} containing the following fields:
+#' \describe{
+#' \item{fs:}{A dataframe containing the forward selection summary.}
+#' \item{init:}{The set of variables used in the initialization.}
+#' \item{panel:}{ Names of variables selected (in order).}
+#' \item{final.model:}{Right-hand side of the formula corresponding to the
+#'       final model.}
+#' \item{family:}{Type of model fitted.}
+#' \item{call:}{The call that created this object.}
+#' \item{iter1:}{Summary statistics for all variables at the first iteration.}
+#' \item{all.iter:}{Validation log-likelihoods for all inner folds at all
+#'       iterations.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#'    data(diabetes)
+#'    fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
+#'                                c("age", "sex"), family="gaussian",
+#'                                max.iters=5)
+#'    fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
+#'                                  init.model="y ~ 1", family="gaussian",
+#'                                  max.iters=5)
+#'    summary(fs.res)
+#' }
+#' @seealso \code{\link{nested.forward.selection}}
+#' @keywords multivariate
+#' @importFrom foreach foreach %dopar%
+#' @export
 forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
                               family=c("binomial", "gaussian"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
@@ -210,6 +297,48 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
   return(res)
 }
 
+#' Run nested forward selection
+#'
+#' Run nested forward selection starting from a set of variables or a model.
+#'
+#' This function allows to obtain an unbiased estimate of the performance
+#' of the selected panels on withdrawn data.
+#'
+#' @param x.all Dataframe of predictors: this should include all variables in
+#'        the initial set and the variables that are allowed to enter the
+#'        selected panel.
+#' @param y.all Outcome variable: if \code{family="binomial"}, it is expected
+#'        to only have \code{0-1} entries.
+#' @param init.vars Initial set of variables.
+#' @param all.folds Set of cross-validation folds.
+#' @param family Type of model fitted: \code{"gaussian"} for linear regression
+#'        or \code{"binomial"} for logistic regression. If \code{"binomial"},
+#'        then the outcome variable is expected to only have \code{0-1} entries.
+#' @param ... Arguments to \code{forward.selection}.
+#'
+#' @return
+#' An object of class \code{"nestfs"} of length equal to
+#' \code{length(all.folds)}, where each element is an object of class
+#' \code{"fs"} containing the following additional fields:
+#' \describe{
+#' \item{fit:}{Predicted values for the withdrawn observations.}
+#' \item{obs:}{Observed values for the withdrawn observations.}
+#' \item{test.idx:}{Indices of the the withdrawn observations for this fold.}
+#' \item{model:}{Summary of the model built using the selected panel.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#'    data(diabetes)
+#'    all.folds <- create.folds(10, nrow(diabetes), seed=1)
+#'    nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
+#'                                           c("age", "sex"), all.folds,
+#'                                           family="gaussian")
+#'    summary(nestfs.res)
+#' }
+#' @seealso \code{\link{forward.selection}}
+#' @keywords multivariate
+#' @export
 nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
                                      family=c("binomial", "gaussian"), ...) {
   family <- match.arg(family)
@@ -243,7 +372,44 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
   return(all.res)
 }
 
-## run glm on a set of cross-validation folds
+#' Cross-validated generalized linear models
+#'
+#' Run linear or logistic regression on a set of cross-validation folds
+#'
+#' This can be used to establish a baseline model, often built only on the
+#' initial set of covariates (those that would be passed through the
+#' \code{init.vars} argument to \code{forward.selection}).
+#'
+#' @param x Dataframe of predictors.
+#' @param y Outcome variable.
+#' @param folds Set of cross-validation folds.
+#' @param family Type of model fitted: \code{"gaussian"} for linear regression
+#'        or \code{"binomial"} for logistic regression.
+#' @param store.glm Whether the object produced by \code{glm} should be
+#'        stored.
+#'
+#' @return
+#' A list of length equal to \code{length(folds)}, where each entry contains
+#' the following fields:
+#' \describe{
+#' \item{summary:}{Summary of the fitted model.}
+#' \item{coef:}{Coefficients of the fitted model.}
+#' \item{fit:}{Predicted values for the withdrawn observations.}
+#' \item{obs:}{Observed values for the withdrawn observations.}
+#' \item{test.llk:}{Test log-likelihood.}
+#' \item{test.idx:}{Indices of the the withdrawn observations for this fold.}
+#' \item{regr:}{Object created by glm (only if \code{store.glm=TRUE}).}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#'    data(diabetes)
+#'    all.folds <- create.folds(10, nrow(diabetes), seed=1)
+#'    base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
+#'                                        "ldl", "hdl", "ltg", "glu")],
+#'                           diabetes$Y, all.folds, family="gaussian")
+#' }
+#' @export
 nested.glm <- function(x, y, folds, family=c("binomial", "gaussian"),
                        store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))

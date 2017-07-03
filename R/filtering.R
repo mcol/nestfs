@@ -1,4 +1,5 @@
-## compare p(x|y=0) and p(x|y=1) with the Kolmogorov-Smirnov test
+## Compare p(x|y=0) and p(x|y=1) with the Kolmogorov-Smirnov test
+#' @importFrom dgof ks.test
 ks.pval <- function(x, y) {
   is.discrete <- apply(x, 1, function(z) length(unique(z)) < 10)
 
@@ -19,7 +20,23 @@ ks.pval <- function(x, y) {
   return(-log(p.values))
 }
 
-## filter the predictors, retaining only the top n
+#' Filtering of predictors
+#'
+#' Filter the predictors, retaining only the top \code{n}.
+#'
+#' This performs a univariate test of association of each predictor (not listed
+#' in \code{ignore}) with the outcome, and retains the top \code{n} variables
+#' with smallest p-value according to a Kolmogorov-Smirnov test.
+#'
+#' @param x Design matrix.
+#' @param y Outcome variable.
+#' @param n Number of variables to retain.
+#' @param ignore Names of variables that should be ignored by the filter.
+#'
+#' @return
+#' An array of indices of variables that are retained by the filter.
+#'
+#' @keywords internal
 filter.predictors <- function(x, y, n, ignore=NULL) {
   stopifnot(n <= ncol(x))
   if (!is.matrix(x))
