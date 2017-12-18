@@ -27,7 +27,7 @@ create.folds <- function(num.folds, num.rows, seed=NULL) {
   full.idx <- numeric(ceiling(num.rows / num.folds) * num.folds)
   full.idx[1:num.rows] <- sample(num.rows)
   fold.matrix <- as.data.frame(matrix(full.idx, ncol=num.folds, byrow=TRUE))
-  folds <- lapply(fold.matrix, function(z) z[z > 0])
+  folds <- lapply(fold.matrix, function(z) sort(z[z > 0]))
   names(folds) <- NULL
   return(folds)
 }
