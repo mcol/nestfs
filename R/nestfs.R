@@ -33,11 +33,13 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #'        to only have \code{0-1} entries.
 #' @param init.vars Initial set of variables (ignored if \code{init.model} is
 #'        not \code{NULL}).
-#' @param test Type of statistical paired test to use (ignored if
-#'        \code{sel.crit="total.loglik"}).
 #' @param family Type of model fitted: \code{"gaussian"} for linear regression
 #'        or \code{"binomial"} for logistic regression. If \code{"binomial"},
 #'        then the outcome variable is expected to only have \code{0-1} entries.
+#' @param choose.from Indices of the variables among which the selection should
+#'        be done.
+#' @param test Type of statistical paired test to use (ignored if
+#'        \code{sel.crit="total.loglik"}).
 #' @param sel.crit Selection criterion: \code{"paired.test"} chooses the
 #'        variable with best p-value on the paired test indicated by
 #'        \code{test}; \code{"total.loglik"} chooses the variable that provides
@@ -45,8 +47,6 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #'        combine both previous criteria, choosing the variable that produces
 #'        the largest increase in log-likelihood only among the best 5
 #'        variables ranked according to the paired-test p-value.
-#' @param choose.from Indices of the variables among which the selection should
-#'        be done.
 #' @param num.filter Number of variables to be retained by the filter (0 to use
 #'        all).
 #' @param filter.ignore Regular expression for variables that should be ignored
@@ -94,10 +94,10 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
 #' @export
-forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
+forward.selection <- function(x.all, y.all, init.vars,
                               family=c("binomial", "gaussian"),
+                              choose.from=seq(ncol(x.all)), test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
-                              choose.from=seq(ncol(x.all)),
                               num.filter=0, filter.ignore=init.vars,
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
                               min.llk.diff=0, seed=50,
