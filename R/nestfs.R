@@ -79,14 +79,16 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #'
 #' @examples
 #' \dontrun{
-#'    data(diabetes)
-#'    fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
-#'                                c("age", "sex"), family="gaussian",
-#'                                max.iters=5)
-#'    fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
-#'                                  init.model="y ~ 1", family="gaussian",
-#'                                  max.iters=5)
-#'    summary(fs.res)
+#' data(diabetes)
+#' fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
+#'                             c("age", "sex"), family="gaussian",
+#'                             max.iters=5)
+#' summary(fs.res)
+#'
+#' # using a formula for the initial model
+#' fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
+#'                               init.model="y ~ 1", family="gaussian",
+#'                               max.iters=5)
 #' }
 #' @seealso \code{\link{nested.forward.selection}}
 #' @keywords multivariate
@@ -329,12 +331,12 @@ forward.selection <- function(x.all, y.all, init.vars, test=c("t", "wilcoxon"),
 #'
 #' @examples
 #' \dontrun{
-#'    data(diabetes)
-#'    all.folds <- create.folds(10, nrow(diabetes), seed=1)
-#'    nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
-#'                                           c("age", "sex"), all.folds,
-#'                                           family="gaussian")
-#'    summary(nestfs.res)
+#' data(diabetes)
+#' all.folds <- create.folds(10, nrow(diabetes), seed=1)
+#' nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
+#'                                        c("age", "sex"), all.folds,
+#'                                        family="gaussian")
+#' summary(nestfs.res)
 #' }
 #' @seealso \code{\link{forward.selection}}
 #' @keywords multivariate
@@ -403,11 +405,11 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
 #'
 #' @examples
 #' \dontrun{
-#'    data(diabetes)
-#'    all.folds <- create.folds(10, nrow(diabetes), seed=1)
-#'    base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
-#'                                        "ldl", "hdl", "ltg", "glu")],
-#'                           diabetes$Y, all.folds, family="gaussian")
+#' data(diabetes)
+#' all.folds <- create.folds(10, nrow(diabetes), seed=1)
+#' base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
+#'                                     "ldl", "hdl", "ltg", "glu")],
+#'                        diabetes$Y, all.folds, family="gaussian")
 #' }
 #' @export
 nested.glm <- function(x, y, folds, family=c("binomial", "gaussian"),

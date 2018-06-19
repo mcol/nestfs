@@ -28,5 +28,5 @@ exactly the same if \code{num.folds} is not an integer divisor of
 \code{num.rows}.
 }
 \examples{
-   all.folds <- create.folds(50, 307, 0)
+all.folds <- create.folds(50, 307, 0)
 }

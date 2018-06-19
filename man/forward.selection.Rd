@@ -19,10 +19,10 @@ selected panel.}
 to only have \code{0-1} entries.}
 
 \item{init.vars}{Initial set of variables (ignored if \code{init.model} is
-not \code{NULL}.}
+not \code{NULL}).}
 
-\item{test}{Type of statistical paired test to use: it's ignored if
-\code{sel.crit="total.loglik"}.}
+\item{test}{Type of statistical paired test to use (ignored if
+\code{sel.crit="total.loglik"}).}
 
 \item{family}{Type of model fitted: \code{"gaussian"} for linear regression
 or \code{"binomial"} for logistic regression. If \code{"binomial"},
@@ -100,14 +100,16 @@ exceeds about 30--40.
 }
 \examples{
 \dontrun{
-   data(diabetes)
-   fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
-                               c("age", "sex"), family="gaussian",
-                               max.iters=5)
-   fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
-                                 init.model="y ~ 1", family="gaussian",
-                                 max.iters=5)
-   summary(fs.res)
+data(diabetes)
+fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
+                            c("age", "sex"), family="gaussian",
+                            max.iters=5)
+summary(fs.res)
+
+# using a formula for the initial model
+fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
+                              init.model="y ~ 1", family="gaussian",
+                              max.iters=5)
 }
 }
 \seealso{

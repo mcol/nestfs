@@ -45,12 +45,12 @@ of the selected panels on withdrawn data.
 }
 \examples{
 \dontrun{
-   data(diabetes)
-   all.folds <- create.folds(10, nrow(diabetes), seed=1)
-   nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
-                                          c("age", "sex"), all.folds,
-                                          family="gaussian")
-   summary(nestfs.res)
+data(diabetes)
+all.folds <- create.folds(10, nrow(diabetes), seed=1)
+nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
+                                       c("age", "sex"), all.folds,
+                                       family="gaussian")
+summary(nestfs.res)
 }
 }
 \seealso{

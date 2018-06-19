@@ -43,10 +43,10 @@ initial set of covariates (those that would be passed through the
 }
 \examples{
 \dontrun{
-   data(diabetes)
-   all.folds <- create.folds(10, nrow(diabetes), seed=1)
-   base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
-                                       "ldl", "hdl", "ltg", "glu")],
-                          diabetes$Y, all.folds, family="gaussian")
+data(diabetes)
+all.folds <- create.folds(10, nrow(diabetes), seed=1)
+base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
+                                    "ldl", "hdl", "ltg", "glu")],
+                       diabetes$Y, all.folds, family="gaussian")
 }
 }

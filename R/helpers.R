@@ -18,7 +18,7 @@
 #' \code{num.rows}.
 #'
 #' @examples
-#'    all.folds <- create.folds(50, 307, 0)
+#' all.folds <- create.folds(50, 307, 0)
 #' @export
 create.folds <- function(num.folds, num.rows, seed=NULL) {
   if (!is.null(seed))
