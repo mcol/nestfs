@@ -26,16 +26,7 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #' performance of forward selection when the number of available variables
 #' exceeds about 30--40.
 #'
-#' @param x.all Dataframe of predictors: this should include all variables in
-#'        the initial set and the variables that are allowed to enter the
-#'        selected panel.
-#' @param y.all Outcome variable: if \code{family="binomial"}, it is expected
-#'        to only have \code{0-1} entries.
-#' @param init.vars Initial set of variables (ignored if \code{init.model} is
-#'        not \code{NULL}).
-#' @param family Type of model fitted: \code{"gaussian"} for linear regression
-#'        or \code{"binomial"} for logistic regression. If \code{"binomial"},
-#'        then the outcome variable is expected to only have \code{0-1} entries.
+#' @template args-forward
 #' @param choose.from Indices of the variables among which the selection should
 #'        be done.
 #' @param test Type of statistical paired test to use (ignored if
@@ -306,16 +297,8 @@ forward.selection <- function(x.all, y.all, init.vars,
 #' This function allows to obtain an unbiased estimate of the performance
 #' of the selected panels on withdrawn data.
 #'
-#' @param x.all Dataframe of predictors: this should include all variables in
-#'        the initial set and the variables that are allowed to enter the
-#'        selected panel.
-#' @param y.all Outcome variable: if \code{family="binomial"}, it is expected
-#'        to only have \code{0-1} entries.
-#' @param init.vars Initial set of variables.
+#' @template args-forward
 #' @param all.folds Set of cross-validation folds.
-#' @param family Type of model fitted: \code{"gaussian"} for linear regression
-#'        or \code{"binomial"} for logistic regression. If \code{"binomial"},
-#'        then the outcome variable is expected to only have \code{0-1} entries.
 #' @param ... Arguments to \code{forward.selection}.
 #'
 #' @return
