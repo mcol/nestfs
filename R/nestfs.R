@@ -137,7 +137,7 @@ forward.selection <- function(x.all, y.all, init.vars,
     fmt <- "%2d %40s %9.5f %9.2f %7.2f\n"
     if (iter == 1)
       cat(sprintf("%2s %40s %9s %9s %7s\n",
-                  "#", "Variable", "P-value", "Log-Lik", "Diff"))
+                  "#", "Variable", "FDR", "Log-Lik", "Diff"))
     cat(sprintf(fmt, iter, substr(var, 1, 40), pval, llk, diff.llk))
   }
 
