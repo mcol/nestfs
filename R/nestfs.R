@@ -140,14 +140,28 @@ forward.selection <- function(x.all, y.all, init.vars,
                   "#", "Variable", "P-value", "Log-Lik", "Diff"))
     cat(sprintf(fmt, iter, substr(var, 1, 40), pval, llk, diff.llk))
   }
-  stopifnot(!any(is.na(y.all)))
-  stopifnot(all.equal(nrow(x.all), length(y.all)))
-  stopifnot(min(choose.from) >= 1, max(choose.from) <= ncol(x.all))
+
+  ## argument checks
+  if (nrow(x.all) != length(y.all))
+    stop("Mismatched dimensions.")
+  if (any(is.na(y.all)))
+    stop("Outcome variable contains missing values.")
+  if (min(choose.from) < 1 || max(choose.from) > ncol(x.all))
+    stop("choose.from contains out of bound indices.")
   family <- match.arg(family)
   if (family == "binomial")
     stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
   sel.crit <- match.arg(sel.crit)
+  if (num.inner.folds < 10)
+    stop("num.inner.folds should be at least 10.")
+  if (max.iters < 1)
+    stop("max.iters should be at least 1.")
+  if (max.pval <= 0 || max.pval >= 1)
+    stop("max.pval should be between 0 and 1.")
+  if (min.llk.diff < 0)
+    stop("min.llk.diff cannot be negative.")
+
   if (is.null(init.model)) {
     stopifnot(all(init.vars %in% colnames(x.all)))
     init.model <- paste("y ~", paste(init.vars, collapse= " + "))
