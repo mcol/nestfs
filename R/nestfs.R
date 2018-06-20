@@ -86,8 +86,7 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
 #' @export
-forward.selection <- function(x.all, y.all, init.vars,
-                              family=c("binomial", "gaussian"),
+forward.selection <- function(x.all, y.all, init.vars, family,
                               choose.from=seq(ncol(x.all)), test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=init.vars,
@@ -411,8 +410,7 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds, ...) {
 #'                        diabetes$Y, all.folds, family=gaussian())
 #' }
 #' @export
-nested.glm <- function(x, y, folds, family=c("binomial", "gaussian"),
-                       store.glm=FALSE) {
+nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
   stopifnot(max(unlist(folds)) <= nrow(x))
   family <- validate.family(family)
