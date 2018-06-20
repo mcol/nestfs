@@ -153,8 +153,10 @@ forward.selection <- function(x.all, y.all, init.vars,
     init.model <- paste("y ~", paste(init.vars, collapse= " + "))
   }
   else {
+    if (!missing(init.vars))
+      cat("Using init.model, ignoring init.vars\n")
+
     ## work out the variables from the initialization model
-    cat("Using init.model, ignoring init.vars\n")
     stopifnot(length(grep("~", init.model)) > 0)
     model.terms <- terms(as.formula(init.model))
     init.vars <- attributes(model.terms)$term.labels
