@@ -316,7 +316,6 @@ forward.selection <- function(x.all, y.all, init.vars,
 #'
 #' @template args-forward
 #' @param all.folds Set of cross-validation folds.
-#' @template args-family
 #' @param ... Arguments to \code{forward.selection}.
 #'
 #' @return
@@ -342,9 +341,9 @@ forward.selection <- function(x.all, y.all, init.vars,
 #' @seealso \code{\link{forward.selection}}
 #' @keywords multivariate
 #' @export
-nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
-                                     family=c("binomial", "gaussian"), ...) {
-  family <- match.arg(family)
+nested.forward.selection <- function(x.all, y.all, init.vars, all.folds, ...) {
+
+  family <- list(...)$family
   all.res <- list()
   num.folds <- length(all.folds)
   for (fold in 1:num.folds) {
@@ -356,7 +355,7 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
     train.idx <- setdiff(seq(nrow(x.all)), test.idx)
     x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
 
-    fs <- forward.selection(x.train, y.train, init.vars, family=family, ...)
+    fs <- forward.selection(x.train, y.train, init.vars, ...)
     this.fold <- list(test.idx)
     model <- nested.glm(x.all[, fs$fs$vars], y.all, this.fold,
                         family=family)[[1]]
