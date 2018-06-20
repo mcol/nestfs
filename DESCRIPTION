@@ -13,4 +13,6 @@ Description: Implementation of forward selection based on cross-validated
              linear and logistic regression.
 License: GPL-2
 Imports: doMC, dgof, foreach
+Suggests:
+  testthat (>= 2.0.0)
 RoxygenNote: 6.0.1
