@@ -25,3 +25,21 @@ test_that("argument checks", {
   expect_error(forward.selection(diabetes, y.binom, "age", max.pval=1))
   expect_error(forward.selection(diabetes, y.binom, "age", min.llk.diff=-1))
 })
+
+context("family validation")
+test_that("invalid family inputs",
+{
+  expect_error(validate.family())
+  expect_error(validate.family(NULL))
+  expect_error(validate.family(diabetes))
+  expect_error(validate.family("nonexisting"))
+  expect_error(validate.family(poisson))
+})
+
+test_that("valid family inputs",
+{
+  expect_equal(validate.family("binomial")$family, "binomial")
+  expect_equal(validate.family("gaussian")$family, "gaussian")
+  expect_equal(validate.family(gaussian())$family, "gaussian")
+  expect_equal(validate.family(gaussian)$family,   "gaussian")
+})

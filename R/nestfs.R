@@ -73,13 +73,13 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #' \dontrun{
 #' data(diabetes)
 #' fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
-#'                             c("age", "sex"), family="gaussian",
+#'                             c("age", "sex"), family=gaussian(),
 #'                             max.iters=5)
 #' summary(fs.res)
 #'
 #' # using a formula for the initial model
 #' fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
-#'                               init.model="y ~ 1", family="gaussian",
+#'                               init.model="y ~ 1", family=gaussian(),
 #'                               max.iters=5)
 #' }
 #' @seealso \code{\link{nested.forward.selection}}
@@ -99,7 +99,7 @@ forward.selection <- function(x.all, y.all, init.vars,
     y.pred <- predict(regr, newdata=xy.test, type="response")
     y.test <- xy.test$y
 
-    loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
+    loglik <- llk.function[[family$family]](y.pred, y.test, summary(regr)$dispersion)
 
     res <- cbind(coefficients(summary(regr))[, c(1, 4), drop=FALSE], loglik)
     colnames(res) <- c("coef", "p.value", "valid.llk")
@@ -149,8 +149,8 @@ forward.selection <- function(x.all, y.all, init.vars,
     stop("Outcome variable contains missing values.")
   if (min(choose.from) < 1 || max(choose.from) > ncol(x.all))
     stop("choose.from contains out of bound indices.")
-  family <- match.arg(family)
-  if (family == "binomial")
+  family <- validate.family(family)
+  if (family$family == "binomial")
     stopifnot(all.equal(names(table(y.all)), c("0", "1")))
   pval.test <- match.arg(test)
   sel.crit <- match.arg(sel.crit)
@@ -299,7 +299,7 @@ forward.selection <- function(x.all, y.all, init.vars,
               init=init.vars,
               panel=setdiff(model.vars, init.vars),
               final.model=gsub("^y ~ ", "", model),
-              family=family,
+              family=family$family,
               call=match.call(),
               iter1=iter1,
               all.iter=all.iter)
@@ -335,7 +335,7 @@ forward.selection <- function(x.all, y.all, init.vars,
 #' all.folds <- create.folds(10, nrow(diabetes), seed=1)
 #' nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
 #'                                        c("age", "sex"), all.folds,
-#'                                        family="gaussian")
+#'                                        family=gaussian())
 #' summary(nestfs.res)
 #' }
 #' @seealso \code{\link{forward.selection}}
@@ -408,14 +408,14 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds, ...) {
 #' all.folds <- create.folds(10, nrow(diabetes), seed=1)
 #' base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
 #'                                     "ldl", "hdl", "ltg", "glu")],
-#'                        diabetes$Y, all.folds, family="gaussian")
+#'                        diabetes$Y, all.folds, family=gaussian())
 #' }
 #' @export
 nested.glm <- function(x, y, folds, family=c("binomial", "gaussian"),
                        store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
   stopifnot(max(unlist(folds)) <= nrow(x))
-  family <- match.arg(family)
+  family <- validate.family(family)
   res <- list()
   for (fold in 1:length(folds)) {
     if (fold %% 10 == 0)
@@ -427,11 +427,32 @@ nested.glm <- function(x, y, folds, family=c("binomial", "gaussian"),
     model <- paste("y.train ~", paste(colnames(x.train), collapse=" + "))
     regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
-    loglik <- llk.function[[family]](y.pred, y.test, summary(regr)$dispersion)
+    loglik <- llk.function[[family$family]](y.pred, y.test, summary(regr)$dispersion)
     res[[fold]] <- list(summary=summary(regr), coef=regr$coef,
                         fit=y.pred, obs=y.test,
                         test.llk=loglik, test.idx=idx.test)
     if (store.glm) res[[fold]]$regr <- regr
   }
   return(res)
+}
+
+#' This is inspired by code in \code{\link{glm}}.
+#' @noRd
+validate.family <- function(family) {
+  if (missing(family))
+    stop("Argument of 'family' is missing.", call.=FALSE)
+  if (is.character(family))
+    tryCatch(
+      family <- get(family, mode="function", envir=parent.frame(2)),
+      error=function(e)
+        stop("'", family, "' is not a valid family.", call.=FALSE)
+    )
+  if (is.function(family))
+    family <- family()
+  if (!is(family, "family"))
+    stop("Argument of 'family' is not a valid family.", call.=FALSE)
+  if (!family$family %in% c("gaussian", "binomial"))
+    stop("Only supported families are 'gaussian' or 'binomial'.", call.=FALSE)
+
+  return(family)
 }
