@@ -27,6 +27,7 @@ llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
 #' exceeds about 30--40.
 #'
 #' @template args-forward
+#' @template args-family
 #' @param choose.from Indices of the variables among which the selection should
 #'        be done.
 #' @param test Type of statistical paired test to use (ignored if
@@ -315,6 +316,7 @@ forward.selection <- function(x.all, y.all, init.vars,
 #'
 #' @template args-forward
 #' @param all.folds Set of cross-validation folds.
+#' @template args-family
 #' @param ... Arguments to \code{forward.selection}.
 #'
 #' @return
@@ -384,8 +386,7 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds,
 #' @param x Dataframe of predictors.
 #' @param y Outcome variable.
 #' @param folds Set of cross-validation folds.
-#' @param family Type of model fitted: \code{"gaussian"} for linear regression
-#'        or \code{"binomial"} for logistic regression.
+#' @template args-family
 #' @param store.glm Whether the object produced by \code{glm} should be
 #'        stored.
 #'
