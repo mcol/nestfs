@@ -1,5 +1,7 @@
-## Compare p(x|y=0) and p(x|y=1) with the Kolmogorov-Smirnov test
+#' Compare p(x|y=0) and p(x|y=1) using a Kolmogorov-Smirnov test.
+#'
 #' @importFrom dgof ks.test
+#' @noRd
 ks.pval <- function(x, y) {
   is.discrete <- apply(x, 1, function(z) length(unique(z)) < 10)
 
