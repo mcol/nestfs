@@ -4,8 +4,7 @@
 \alias{nested.glm}
 \title{Cross-validated generalized linear models}
 \usage{
-nested.glm(x, y, folds, family = c("binomial", "gaussian"),
-  store.glm = FALSE)
+nested.glm(x, y, folds, family, store.glm = FALSE)
 }
 \arguments{
 \item{x}{Dataframe of predictors.}
@@ -14,8 +13,9 @@ nested.glm(x, y, folds, family = c("binomial", "gaussian"),
 
 \item{folds}{Set of cross-validation folds.}
 
-\item{family}{Type of model fitted: \code{"gaussian"} for linear regression
-or \code{"binomial"} for logistic regression.}
+\item{family}{Type of model fitted: \code{gaussian} for linear regression
+or \code{binomial} for logistic regression. If \code{binomial},
+then the outcome variable is expected to only have \code{0-1} entries.}
 
 \item{store.glm}{Whether the object produced by \code{glm} should be
 stored.}
@@ -47,6 +47,6 @@ data(diabetes)
 all.folds <- create.folds(10, nrow(diabetes), seed=1)
 base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
                                     "ldl", "hdl", "ltg", "glu")],
-                       diabetes$Y, all.folds, family="gaussian")
+                       diabetes$Y, all.folds, family=gaussian())
 }
 }

@@ -4,9 +4,9 @@
 \alias{forward.selection}
 \title{Run forward selection}
 \usage{
-forward.selection(x.all, y.all, init.vars, test = c("t", "wilcoxon"),
-  family = c("binomial", "gaussian"), sel.crit = c("paired.test",
-  "total.loglik", "both"), choose.from = seq(ncol(x.all)), num.filter = 0,
+forward.selection(x.all, y.all, init.vars, family,
+  choose.from = seq(ncol(x.all)), test = c("t", "wilcoxon"),
+  sel.crit = c("paired.test", "total.loglik", "both"), num.filter = 0,
   filter.ignore = init.vars, num.inner.folds = 30, max.iters = 15,
   max.pval = 0.5, min.llk.diff = 0, seed = 50, init.model = NULL)
 }
@@ -21,12 +21,15 @@ to only have \code{0-1} entries.}
 \item{init.vars}{Initial set of variables (ignored if \code{init.model} is
 not \code{NULL}).}
 
+\item{family}{Type of model fitted: \code{gaussian} for linear regression
+or \code{binomial} for logistic regression. If \code{binomial},
+then the outcome variable is expected to only have \code{0-1} entries.}
+
+\item{choose.from}{Indices of the variables among which the selection should
+be done.}
+
 \item{test}{Type of statistical paired test to use (ignored if
 \code{sel.crit="total.loglik"}).}
-
-\item{family}{Type of model fitted: \code{"gaussian"} for linear regression
-or \code{"binomial"} for logistic regression. If \code{"binomial"},
-then the outcome variable is expected to only have \code{0-1} entries.}
 
 \item{sel.crit}{Selection criterion: \code{"paired.test"} chooses the
 variable with best p-value on the paired test indicated by
@@ -35,9 +38,6 @@ the largest increase in log-likelihood; \code{"both"} attempts to
 combine both previous criteria, choosing the variable that produces
 the largest increase in log-likelihood only among the best 5
 variables ranked according to the paired-test p-value.}
-
-\item{choose.from}{Indices of the variables among which the selection should
-be done.}
 
 \item{num.filter}{Number of variables to be retained by the filter (0 to use
 all).}
@@ -102,13 +102,13 @@ exceeds about 30--40.
 \dontrun{
 data(diabetes)
 fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
-                            c("age", "sex"), family="gaussian",
+                            c("age", "sex"), family=gaussian(),
                             max.iters=5)
 summary(fs.res)
 
 # using a formula for the initial model
 fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
-                              init.model="y ~ 1", family="gaussian",
+                              init.model="y ~ 1", family=gaussian(),
                               max.iters=5)
 }
 }

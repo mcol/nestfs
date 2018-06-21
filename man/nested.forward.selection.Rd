@@ -4,8 +4,7 @@
 \alias{nested.forward.selection}
 \title{Run nested forward selection}
 \usage{
-nested.forward.selection(x.all, y.all, init.vars, all.folds,
-  family = c("binomial", "gaussian"), ...)
+nested.forward.selection(x.all, y.all, init.vars, all.folds, ...)
 }
 \arguments{
 \item{x.all}{Dataframe of predictors: this should include all variables in
@@ -15,13 +14,10 @@ selected panel.}
 \item{y.all}{Outcome variable: if \code{family="binomial"}, it is expected
 to only have \code{0-1} entries.}
 
-\item{init.vars}{Initial set of variables.}
+\item{init.vars}{Initial set of variables (ignored if \code{init.model} is
+not \code{NULL}).}
 
 \item{all.folds}{Set of cross-validation folds.}
-
-\item{family}{Type of model fitted: \code{"gaussian"} for linear regression
-or \code{"binomial"} for logistic regression. If \code{"binomial"},
-then the outcome variable is expected to only have \code{0-1} entries.}
 
 \item{...}{Arguments to \code{forward.selection}.}
 }
@@ -49,7 +45,7 @@ data(diabetes)
 all.folds <- create.folds(10, nrow(diabetes), seed=1)
 nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
                                        c("age", "sex"), all.folds,
-                                       family="gaussian")
+                                       family=gaussian())
 summary(nestfs.res)
 }
 }
