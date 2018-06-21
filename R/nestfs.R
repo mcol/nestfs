@@ -1,9 +1,3 @@
-binomial.llk <- function(y.pred, y.test, dummy)
-  sum(log(y.pred[y.test == 1])) + sum(log(1 - y.pred[y.test == 0]))
-gaussian.llk <- function(y.pred, y.test, disp)
-  -0.5 * sum(log(disp) + (y.pred - y.test)^2 / disp)
-llk.function <- list(binomial=binomial.llk, gaussian=gaussian.llk)
-
 #' Run forward selection
 #'
 #' Run forward selection starting from a set of variables or a model.
@@ -97,9 +91,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     regr <- glm(as.formula(model), data=xy.train, family=family)
     y.pred <- predict(regr, newdata=xy.test, type="response")
     y.test <- xy.test$y
-
-    loglik <- llk.function[[family$family]](y.pred, y.test, summary(regr)$dispersion)
-
+    loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
     res <- cbind(coefficients(summary(regr))[, c(1, 4), drop=FALSE], loglik)
     colnames(res) <- c("coef", "p.value", "valid.llk")
     return(res)
@@ -425,13 +417,27 @@ nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
     model <- paste("y.train ~", paste(colnames(x.train), collapse=" + "))
     regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
-    loglik <- llk.function[[family$family]](y.pred, y.test, summary(regr)$dispersion)
+    loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
     res[[fold]] <- list(summary=summary(regr), coef=regr$coef,
                         fit=y.pred, obs=y.test,
                         test.llk=loglik, test.idx=idx.test)
     if (store.glm) res[[fold]]$regr <- regr
   }
   return(res)
+}
+
+#' Log-likelihood function.
+#'
+#' Compute the log-likelihood up to a constant.
+#'
+#' @param family Type of model fitted.
+#' @param obs Vector of observed values.
+#' @param fit Vector of predicted values.
+#' @param disp Dispersion parameter (1 for logistic regression).
+#'
+#' @keywords internal
+loglikelihood <- function(family, obs, fit, disp) {
+  sum(family$dev.resids(obs, fit, -0.5 / disp) - log(disp) / 2)
 }
 
 #' This is inspired by code in \code{\link{glm}}.
