@@ -8,7 +8,7 @@
 #' by one of the remaining variables at a time.
 #'
 #' This function is used to choose a panel of variables on the data. As it uses
-#' all observations in the \code{x.all} dataframe, it is not possible to
+#' all observations in the \code{x} dataframe, it is not possible to
 #' produce unbiased estimates of the predictive performance of the panel
 #' selected (use \code{\link{nested.forward.selection}} for that purpose).
 #'
@@ -21,9 +21,10 @@
 #' exceeds about 30--40.
 #'
 #' @template args-forward
+#' @template args-outcome
 #' @template args-family
 #' @param choose.from Indices or variable names over which the selection should
-#'        be performed. If \code{NULL} (default), all variables in \code{x.all}
+#'        be performed. If \code{NULL} (default), all variables in \code{x}
 #'        that are not in \code{init.vars} or \code{init.model} are considered.
 #' @param test Type of statistical paired test to use (ignored if
 #'        \code{sel.crit="total.loglik"}).
@@ -81,7 +82,7 @@
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
 #' @export
-forward.selection <- function(x.all, y.all, init.vars, family,
+forward.selection <- function(x, y, init.vars, family,
                               choose.from=NULL, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=init.vars,
@@ -116,18 +117,18 @@ forward.selection <- function(x.all, y.all, init.vars, family,
   }
 
   ## argument checks
-  if (nrow(x.all) != length(y.all))
+  if (nrow(x) != length(y))
     stop("Mismatched dimensions.")
-  y.all <- validate.outcome(y.all)
+  y <- validate.outcome(y)
   if (is.null(choose.from))
-    choose.from <- seq(ncol(x.all))
+    choose.from <- seq(ncol(x))
   else {
     if (is.integer(choose.from)) {
-      if (min(choose.from) < 1 || max(choose.from) > ncol(x.all))
+      if (min(choose.from) < 1 || max(choose.from) > ncol(x))
         stop("choose.from contains out of bound indices.")
     }
     else if (is.character(choose.from)) {
-      choose.from <- match(choose.from, colnames(x.all))
+      choose.from <- match(choose.from, colnames(x))
       if (any(is.na(choose.from)))
         stop("choose.from contains names that cannot be matched.")
     }
@@ -136,7 +137,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
   }
   family <- validate.family(family)
   if (family$family == "binomial")
-    stopifnot(length(names(table(y.all))) == 2)
+    stopifnot(length(names(table(y))) == 2)
   pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[match.arg(test)]]
   sel.crit <- match.arg(sel.crit)
   if (num.inner.folds < 10)
@@ -149,7 +150,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     stop("min.llk.diff cannot be negative.")
 
   if (is.null(init.model)) {
-    stopifnot(all(init.vars %in% colnames(x.all)))
+    stopifnot(all(init.vars %in% colnames(x)))
     init.model <- paste("y ~", paste(init.vars, collapse= " + "))
   }
   else {
@@ -164,10 +165,10 @@ forward.selection <- function(x.all, y.all, init.vars, family,
 
   ## check that there is no missingness in the variables of the initial model,
   ## excluding the interaction terms
-  stopifnot(all(!is.na(x.all[, init.vars[!grepl(":", init.vars)]])))
+  stopifnot(all(!is.na(x[, init.vars[!grepl(":", init.vars)]])))
 
   ## create the inner folds
-  all.folds <- create.folds(num.inner.folds, nrow(x.all), seed=seed)
+  folds <- create.folds(num.inner.folds, nrow(x), seed=seed)
 
   ## if the model contains only the intercept term, count 1 variable
   num.init.vars <- max(length(init.vars), 1)
@@ -179,9 +180,9 @@ forward.selection <- function(x.all, y.all, init.vars, family,
   model <- init.model
 
   ## limit the number of variables to choose from
-  keep.vars <- union(choose.from, match(init.vars, colnames(x.all)))
+  keep.vars <- union(choose.from, match(init.vars, colnames(x)))
   keep.vars <- keep.vars[!is.na(keep.vars)] # remove NAs from interaction terms
-  x.all <- x.all[, keep.vars]
+  x <- x[, keep.vars]
 
   ## filtering according to association with outcome
   if (num.filter > 0) {
@@ -190,9 +191,9 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     all.filt.idx <- NULL
     for (fold in 1:num.inner.folds) {
 
-      train.idx <- setdiff(seq(nrow(x.all)), all.folds[[fold]])
-      x.train <- x.all[train.idx, ]
-      y.train <- y.all[train.idx]
+      train.idx <- setdiff(seq(nrow(x)), folds[[fold]])
+      x.train <- x[train.idx, ]
+      y.train <- y[train.idx]
       filt.idx <- filter.predictors(x.train, y.train, num.filter,
                                     ignore=filter.ignore)
       all.filt.idx <- c(all.filt.idx, filt.idx)
@@ -202,9 +203,9 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     filt.idx <- sort(table(all.filt.idx), decreasing=TRUE)
     filt.idx <- as.integer(names(filt.idx))[1:num.filter]
     keep.idx <- union(match(filter.ignore, colnames(x.train)), filt.idx)
-    x.all <- x.all[, keep.idx]
+    x <- x[, keep.idx]
   }
-  all.vars <- colnames(x.all)
+  all.vars <- colnames(x)
   all.iter <- list()
   iter1 <- NULL
 
@@ -218,10 +219,10 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     ## loop over the folds
     res.inner <- foreach(fold=1:num.inner.folds) %dopar% {
 
-      test.idx <- all.folds[[fold]]
-      train.idx <- setdiff(seq(nrow(x.all)), test.idx)
-      xy.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
-      xy.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
+      test.idx <- folds[[fold]]
+      train.idx <- setdiff(seq(nrow(x)), test.idx)
+      xy.train <- cbind(y=y[train.idx], x[train.idx, ])
+      xy.test <- cbind(y=y[test.idx], x[test.idx, ])
 
       ## current model
       curr <- univ.glm(model, xy.train, xy.test)
@@ -316,12 +317,13 @@ forward.selection <- function(x.all, y.all, init.vars, family,
 #' of the selected panels on withdrawn data.
 #'
 #' @template args-forward
-#' @param all.folds Set of cross-validation folds.
+#' @template args-outcome
+#' @template args-folds
 #' @param ... Arguments to \code{forward.selection}.
 #'
 #' @return
 #' An object of class \code{"nestfs"} of length equal to
-#' \code{length(all.folds)}, where each element is an object of class
+#' \code{length(folds)}, where each element is an object of class
 #' \code{"fs"} containing the following additional fields:
 #' \describe{
 #' \item{fit:}{Predicted values for the withdrawn observations.}
@@ -342,25 +344,25 @@ forward.selection <- function(x.all, y.all, init.vars, family,
 #' @seealso \code{\link{forward.selection}}
 #' @keywords multivariate
 #' @export
-nested.forward.selection <- function(x.all, y.all, init.vars, all.folds, ...) {
+nested.forward.selection <- function(x, y, init.vars, folds, ...) {
 
   family <- list(...)$family
   all.res <- list()
-  num.folds <- length(all.folds)
+  num.folds <- length(folds)
   for (fold in 1:num.folds) {
 
     cat("* Outer Fold", fold, "of", num.folds,
         "-", format(Sys.time(), "%H:%M"), "\n")
 
-    test.idx <- all.folds[[fold]]
-    train.idx <- setdiff(seq(nrow(x.all)), test.idx)
-    x.train <- x.all[train.idx, ]; y.train <- y.all[train.idx]
+    test.idx <- folds[[fold]]
+    train.idx <- setdiff(seq(nrow(x)), test.idx)
+    x.train <- x[train.idx, ]; y.train <- y[train.idx]
 
     fs <- forward.selection(x.train, y.train, init.vars, ...)
     this.fold <- list(test.idx)
-    model <- nested.glm(x.all[, fs$fs$vars], y.all, this.fold,
+    model <- nested.glm(x[, fs$fs$vars], y, this.fold,
                         family=family)[[1]]
-    stopifnot(all.equal(model$obs, y.all[test.idx]))
+    stopifnot(all.equal(model$obs, y[test.idx]))
     panel <- fs$panel
     fs$fs$coef <- NA
     fs$fs$coef[match(panel, fs$fs$vars)] <- model$coef[panel]
@@ -384,8 +386,8 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds, ...) {
 #' \code{init.vars} argument to \code{forward.selection}).
 #'
 #' @param x Dataframe of predictors.
-#' @param y Outcome variable.
-#' @param folds Set of cross-validation folds.
+#' @template args-outcome
+#' @template args-folds
 #' @template args-family
 #' @param store.glm Whether the object produced by \code{glm} should be
 #'        stored.
