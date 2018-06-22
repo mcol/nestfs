@@ -30,3 +30,13 @@ test_that("logistic regression",
                                 num.inner.folds=10, max.iters=3)
   expect_equal(fs.binom, fs.binom.ok)
 })
+
+test_that("choose.from",
+{
+  ## no new variables to choose from
+  fs.gauss <- forward.selection(X, Y, c("age"), family="gaussian",
+                                choose.from=c("age"))
+  expect_length(fs.gauss$panel, 0)
+  expect_length(fs.gauss$iter1, 0)
+  expect_length(fs.gauss$all.iter, 0)
+})

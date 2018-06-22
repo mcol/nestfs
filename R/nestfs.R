@@ -212,6 +212,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
   }
   all.vars <- colnames(x.all)
   all.iter <- list()
+  iter1 <- NULL
 
   ## variable selection
   for (iter in 1:max.iters) {
