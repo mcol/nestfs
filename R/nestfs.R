@@ -118,8 +118,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
   ## argument checks
   if (nrow(x.all) != length(y.all))
     stop("Mismatched dimensions.")
-  if (any(is.na(y.all)))
-    stop("Outcome variable contains missing values.")
+  y.all <- validate.outcome(y.all)
   if (is.null(choose.from))
     choose.from <- seq(ncol(x.all))
   else {
@@ -137,7 +136,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
   }
   family <- validate.family(family)
   if (family$family == "binomial")
-    stopifnot(all.equal(names(table(y.all)), c("0", "1")))
+    stopifnot(length(names(table(y.all))) == 2)
   pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[match.arg(test)]]
   sel.crit <- match.arg(sel.crit)
   if (num.inner.folds < 10)
@@ -416,6 +415,7 @@ nested.forward.selection <- function(x.all, y.all, init.vars, all.folds, ...) {
 nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
   stopifnot(max(unlist(folds)) <= nrow(x))
+  y <- validate.outcome(y)
   family <- validate.family(family)
   res <- list()
   for (fold in 1:length(folds)) {
@@ -470,4 +470,28 @@ validate.family <- function(family) {
     stop("Only supported families are 'gaussian' or 'binomial'.", call.=FALSE)
 
   return(family)
+}
+
+#' Ensure that the outcome variable has been specified correctly.
+#'
+#' @param y Outcome variable to test.
+#'
+#' @return
+#' A valid outcome variable. The function throws an error if the the outcome
+#' variable cannot be used.
+#'
+#' @noRd
+validate.outcome <- function(y) {
+  if (any(is.na(y)))
+    stop("Outcome variable contains missing values.", call.=FALSE)
+  if (is.character(y))
+    stop("Outcome variable cannot be a character vector.", call.=FALSE)
+  if (is.factor(y)) {
+    if (length(levels(y)) != 2)
+      stop("A factor outcome variable can only have two levels.", call.=FALSE)
+    y <- as.integer(y) - 1
+  }
+  if (!(is.numeric(y) || is.integer(y) || is.logical(y)))
+    stop("Outcome variable of invalid type.", call.=FALSE)
+  return(y)
 }

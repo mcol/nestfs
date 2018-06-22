@@ -29,6 +29,18 @@ test_that("logistic regression",
   fs.binom <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
                                 num.inner.folds=10, max.iters=3)
   expect_equal(fs.binom, fs.binom.ok)
+
+  ## logical outcome variable
+  y.binom <- diabetes$Y > 140
+  fs.logic <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
+                                num.inner.folds=10, max.iters=3)
+  expect_equal(fs.logic, fs.binom.ok)
+
+  ## factor outcome variable
+  y.binom <- factor(diabetes$Y > 140)
+  fs.logic <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
+                                num.inner.folds=10, max.iters=3)
+  expect_equal(fs.logic, fs.binom.ok)
 })
 
 test_that("choose.from",

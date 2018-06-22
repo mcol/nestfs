@@ -4,14 +4,11 @@ data(diabetes)
 y.gauss <- diabetes$Y
 y.binom <- as.integer(diabetes$Y > 140)
 y.short <- y.binom[1:10]
-y.hasna <- y.binom
-y.hasna[50] <- NA
 
 test_that("argument checks",
 {
   expect_error(forward.selection(diabetes, y.binom, family=binomial()))
   expect_error(forward.selection(diabetes, y.short, "age", binomial()))
-  expect_error(forward.selection(diabetes, y.hasna, "age", binomial()))
   expect_error(forward.selection(diabetes, y.binom, "nonexisting", binomial()))
 
   ## tests for family
@@ -43,6 +40,22 @@ test_that("argument checks",
                                  max.pval=1))
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  min.llk.diff=-1))
+})
+
+context("outcome validation")
+test_that("invalid family inputs",
+{
+  y.binom[50] <- NA
+  y.categ <- as.factor(y.gauss)
+  y.strng <- as.character(y.categ)
+  y.inval <- data.frame(matrix(seq(length(y.binom) * 2), nrow=2))
+  y.dates <- rep(Sys.Date(), length(y.binom))
+
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial()))
+  expect_error(forward.selection(diabetes, y.categ, "age", binomial()))
+  expect_error(forward.selection(diabetes, y.strng, "age", gaussian()))
+  expect_error(forward.selection(diabetes, y.inval, "age", gaussian()))
+  expect_error(forward.selection(diabetes, y.dates, "age", gaussian()))
 })
 
 context("family validation")
