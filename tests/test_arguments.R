@@ -46,12 +46,14 @@ context("outcome validation")
 test_that("invalid family inputs",
 {
   y.binom[50] <- NA
+  y.large <- sample(1:2, length(y.binom), replace=TRUE)
   y.categ <- as.factor(y.gauss)
   y.strng <- as.character(y.categ)
   y.inval <- data.frame(matrix(seq(length(y.binom) * 2), nrow=2))
   y.dates <- rep(Sys.Date(), length(y.binom))
 
   expect_error(forward.selection(diabetes, y.binom, "age", binomial()))
+  expect_error(forward.selection(diabetes, y.large, "age", binomial()))
   expect_error(forward.selection(diabetes, y.categ, "age", binomial()))
   expect_error(forward.selection(diabetes, y.strng, "age", gaussian()))
   expect_error(forward.selection(diabetes, y.inval, "age", gaussian()))

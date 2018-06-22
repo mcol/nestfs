@@ -136,8 +136,12 @@ forward.selection <- function(x, y, init.vars, family,
       stop("choose.from should be an integer or character vector.")
   }
   family <- validate.family(family)
-  if (family$family == "binomial")
-    stopifnot(length(names(table(y))) == 2)
+  if (family$family == "binomial") {
+    if (length(table(y)) != 2)
+      stop("More than two classes in y with family=binomial().")
+    if (any(y < 0 | y > 1))
+      stop("Values in y must be between 0 and 1.")
+  }
   pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[match.arg(test)]]
   sel.crit <- match.arg(sel.crit)
   if (num.inner.folds < 10)
