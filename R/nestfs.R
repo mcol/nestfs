@@ -97,12 +97,11 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     colnames(res) <- c("coef", "p.value", "valid.llk")
     return(res)
   }
-  paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
-    test.function <- list(t=t.test, wilcoxon=wilcox.test)
+  paired.pvals <- function(all.llk, test.function) {
     pvals <- NULL
     for (i in 2:nrow(all.llk)) {
-      ttt <- test.function[[test]](all.llk[i, ], all.llk["Base", ],
-                                   paired=TRUE, alternative="greater")
+      ttt <- test.function(all.llk[i, ], all.llk["Base", ],
+                           paired=TRUE, alternative="greater")
       pvals <- c(pvals, ttt$p.value)
     }
     names(pvals) <- rownames(all.llk)[-1]
@@ -139,7 +138,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
   family <- validate.family(family)
   if (family$family == "binomial")
     stopifnot(all.equal(names(table(y.all)), c("0", "1")))
-  pval.test <- match.arg(test)
+  pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[match.arg(test)]]
   sel.crit <- match.arg(sel.crit)
   if (num.inner.folds < 10)
     stop("num.inner.folds should be at least 10.")
