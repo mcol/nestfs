@@ -13,6 +13,15 @@ test_that("linear regression",
   fs.gauss <- forward.selection(X, Y, c("age", "sex"), family="gaussian",
                                 num.inner.folds=10, max.iters=3)
   expect_equal(fs.gauss, fs.gauss.ok)
+
+  fs.gauss <- forward.selection(X, Y, c("age"), family="gaussian",
+                                choose.from=c("sex"))
+  expect_is(fs.gauss, "fs")
+  expect_equal(fs.gauss$final.model, "age")
+  expect_named(fs.gauss$iter1, c("median.diff.llk", "total.diff.llk", "p.value"))
+  expect_equal(dim(fs.gauss$all.iter[[1]]), c(2, 30))
+  expect_length(fs.gauss$all.iter, 1)
+  expect_length(fs.gauss$panel, 0)
 })
 
 test_that("logistic regression",

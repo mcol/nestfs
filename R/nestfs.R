@@ -258,7 +258,7 @@ forward.selection <- function(x.all, y.all, init.vars, family,
       model.llks[num.init.vars] <- sum(all.llk["Base", ])
 
       ## differences in validation log-likelihoods
-      univ.diffs <- all.llk[-1, ]
+      univ.diffs <- all.llk[-1, , drop=FALSE]
       for (i in 1:nrow(univ.diffs))
         univ.diffs[i, ] <- univ.diffs[i, ] - all.llk["Base", ]
       iter1 <- data.frame(median.diff.llk=apply(univ.diffs, 1, median),
