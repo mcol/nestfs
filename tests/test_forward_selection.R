@@ -39,4 +39,14 @@ test_that("choose.from",
   expect_length(fs.gauss$panel, 0)
   expect_length(fs.gauss$iter1, 0)
   expect_length(fs.gauss$all.iter, 0)
+
+  ## choose.from with indices and variable names
+  fs.1 <- forward.selection(X, Y, c("age", "sex"), family="gaussian",
+                            choose.from=c(3:6),
+                            num.inner.folds=10, max.iters=3)
+  fs.2 <- forward.selection(X, Y, c("age", "sex"), family="gaussian",
+                            choose.from=c("bmi", "map", "tc", "ldl"),
+                            num.inner.folds=10, max.iters=3)
+  fs.1$call <- fs.2$call <- NULL
+  expect_equal(fs.1, fs.2)
 })

@@ -22,8 +22,9 @@
 #'
 #' @template args-forward
 #' @template args-family
-#' @param choose.from Indices of the variables among which the selection should
-#'        be done.
+#' @param choose.from Indices or variable names over which the selection should
+#'        be performed. If \code{NULL} (default), all variables in \code{x.all}
+#'        that are not in \code{init.vars} or \code{init.model} are considered.
 #' @param test Type of statistical paired test to use (ignored if
 #'        \code{sel.crit="total.loglik"}).
 #' @param sel.crit Selection criterion: \code{"paired.test"} chooses the
@@ -81,7 +82,7 @@
 #' @importFrom foreach foreach %dopar%
 #' @export
 forward.selection <- function(x.all, y.all, init.vars, family,
-                              choose.from=seq(ncol(x.all)), test=c("t", "wilcoxon"),
+                              choose.from=NULL, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=init.vars,
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
@@ -138,8 +139,21 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     stop("Mismatched dimensions.")
   if (any(is.na(y.all)))
     stop("Outcome variable contains missing values.")
-  if (min(choose.from) < 1 || max(choose.from) > ncol(x.all))
-    stop("choose.from contains out of bound indices.")
+  if (is.null(choose.from))
+    choose.from <- seq(ncol(x.all))
+  else {
+    if (is.integer(choose.from)) {
+      if (min(choose.from) < 1 || max(choose.from) > ncol(x.all))
+        stop("choose.from contains out of bound indices.")
+    }
+    else if (is.character(choose.from)) {
+      choose.from <- match(choose.from, colnames(x.all))
+      if (any(is.na(choose.from)))
+        stop("choose.from contains names that cannot be matched.")
+    }
+    else
+      stop("choose.from should be an integer or character vector.")
+  }
   family <- validate.family(family)
   if (family$family == "binomial")
     stopifnot(all.equal(names(table(y.all)), c("0", "1")))

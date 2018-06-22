@@ -19,10 +19,20 @@ test_that("argument checks",
   expect_error(forward.selection(diabetes, y.gauss, "age", binomial()))
   expect_error(forward.selection(diabetes, y.gauss, "age", poisson()))
 
+  ## tests for choose.from
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  choose.from=0))
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  choose.from=120))
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 choose.from="nonexisting"))
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 choose.from=NA))
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 choose.from=c(TRUE, FALSE)))
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 choose.from=diabetes))
+
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  num.inner.folds=1))
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
