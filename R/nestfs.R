@@ -97,24 +97,6 @@ forward.selection <- function(x.all, y.all, init.vars, family,
     colnames(res) <- c("coef", "p.value", "valid.llk")
     return(res)
   }
-  inner.fold <- function(x.all, y.all, model, other.vars, test.idx) {
-    train.idx <- setdiff(seq(nrow(x.all)), test.idx)
-    xy.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
-    xy.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
-
-    ## current model
-    tt.curr <- univ.glm(model, xy.train, xy.test)
-    all.stats <- tail(tt.curr, n=1)
-
-    ## models augmented with one additional variable at a time
-    for (var in other.vars) {
-      model.var <- paste(model, var, sep=" + ")
-      tt <- univ.glm(model.var, xy.train, xy.test)
-      all.stats <- rbind(all.stats, tail(tt, n=1))
-    }
-    rownames(all.stats) <- c("Base", other.vars)
-    return(all.stats)
-  }
   paired.pvals <- function(all.llk, test=c("t", "wilcoxon")) {
     test.function <- list(t=t.test, wilcoxon=wilcox.test)
     pvals <- NULL
@@ -236,10 +218,25 @@ forward.selection <- function(x.all, y.all, init.vars, family,
       break
 
     ## loop over the folds
-    res.inner <- (foreach(fold=1:num.inner.folds)
-                  %dopar%
-                  inner.fold(x.all, y.all, model, other.vars,
-                             all.folds[[fold]]))
+    res.inner <- foreach(fold=1:num.inner.folds) %dopar% {
+
+      test.idx <- all.folds[[fold]]
+      train.idx <- setdiff(seq(nrow(x.all)), test.idx)
+      xy.train <- cbind(y=y.all[train.idx], x.all[train.idx, ])
+      xy.test <- cbind(y=y.all[test.idx], x.all[test.idx, ])
+
+      ## current model
+      curr <- univ.glm(model, xy.train, xy.test)
+      all.stats <- tail(curr, n=1)
+
+      ## models augmented with one additional variable at a time
+      for (var in other.vars) {
+        augm <- univ.glm(paste(model, var, sep=" + "), xy.train, xy.test)
+        all.stats <- rbind(all.stats, tail(augm, n=1))
+      }
+      rownames(all.stats) <- c("Base", other.vars)
+      return(all.stats)
+    }
 
     ## collect all validation log-likelihoods
     all.llk <- NULL
