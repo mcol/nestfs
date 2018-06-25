@@ -27,7 +27,7 @@
 #' The main advantage of forward selection is that it provides an immediately
 #' interpretable model, and the panel of variables obtained is in some sense
 #' the least redundant one, particularly if the number of variables to choose
-#' from is not too large (in our experience, up to about 30--40 variables).
+#' from is not too large (in our experience, up to about 30-40 variables).
 #'
 #' However, when the number of variables is much larger than that, forward
 #' selection, besides being unbearably slow, may be more subject to

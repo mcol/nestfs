@@ -12,13 +12,13 @@
 #' produce unbiased estimates of the predictive performance of the panel
 #' selected (use \code{\link{nested.forward.selection}} for that purpose).
 #'
-#' If \code{num.filter} is positive, then all available predictors (excluding
-#' those whose name is matched by \code{filter.ignore}) are tested for
-#' univariate association with the outcome. This is done on the training part
-#' of all inner folds, and the top \code{num.filter} are retained for
-#' selection, while the others are filtered out. Filtering can enhance the
-#' performance of forward selection when the number of available variables
-#' exceeds about 30--40.
+#' If \code{num.filter} is set to a positive value, then all available
+#' predictors (excluding those whose name is matched by \code{filter.ignore})
+#' are tested for univariate association with the outcome, and only the first
+#' \code{num.filter} enter the selection phase, while the others are filtered
+#' out. This is done on the training part of all inner folds. Filtering can
+#' enhance the performance of forward selection when the number of available
+#' variables exceeds about 30-40.
 #'
 #' @template args-forward
 #' @template args-outcome
@@ -35,23 +35,26 @@
 #'        combine both previous criteria, choosing the variable that produces
 #'        the largest increase in log-likelihood only among the best 5
 #'        variables ranked according to the paired-test p-value.
-#' @param num.filter Number of variables to be retained by the filter (0 to use
-#'        all).
+#' @param num.filter Number of variables to be retained by the univariate
+#'        association filter (see \strong{Details}). If set to 0 (default),
+#'        the filter is disabled.
 #' @param filter.ignore Regular expression for variables that should be ignored
 #'        by the filter (so that they are always retained).
-#' @param num.inner.folds Number of folds in the inner cross-validation.
+#' @param num.inner.folds Number of folds in the inner cross-validation. It
+#'        must be at least 10 (default: 30).
 #' @param max.iters Maximum number of iterations.
 #' @param max.pval Interrupt the selection when the best achievable p-value
-#'        exceeds this threshold.
+#'        exceeds this threshold (default: 0.5).
 #' @param min.llk.diff Interrupt the selection when the best achievable
-#'        improvement in log-likelihood is smaller than this threshold.
+#'        improvement in log-likelihood is smaller than this threshold
+#'        (default: 0).
 #' @param seed Seed of the random number generator for the inner folds.
 #' @param init.model Formula that describes the initial model, where the
 #'        outcome variable should be called \code{y}: if specified, this
 #'        overrides \code{init.vars}.
 #'
 #' @return
-#' An object of class \code{"fs"} containing the following fields:
+#' An object of class \code{fs} containing the following fields:
 #' \describe{
 #' \item{fs:}{A dataframe containing the forward selection summary.}
 #' \item{init:}{The set of variables used in the initialization.}
@@ -318,7 +321,8 @@ forward.selection <- function(x, y, init.vars, family,
 #' Run nested forward selection starting from a set of variables or a model.
 #'
 #' This function allows to obtain an unbiased estimate of the performance
-#' of the selected panels on withdrawn data.
+#' of the selected panels on withdrawn data by running forward selection on
+#' a predetermined set of folds.
 #'
 #' @template args-forward
 #' @template args-outcome
@@ -326,9 +330,9 @@ forward.selection <- function(x, y, init.vars, family,
 #' @param ... Arguments to \code{forward.selection}.
 #'
 #' @return
-#' An object of class \code{"nestfs"} of length equal to
+#' An object of class \code{nestfs} of length equal to
 #' \code{length(folds)}, where each element is an object of class
-#' \code{"fs"} containing the following additional fields:
+#' \code{fs} containing the following additional fields:
 #' \describe{
 #' \item{fit:}{Predicted values for the withdrawn observations.}
 #' \item{obs:}{Observed values for the withdrawn observations.}
@@ -383,7 +387,7 @@ nested.forward.selection <- function(x, y, init.vars, folds, ...) {
 
 #' Cross-validated generalized linear models
 #'
-#' Run linear or logistic regression on a set of cross-validation folds
+#' Run linear or logistic regression on a set of cross-validation folds.
 #'
 #' This can be used to establish a baseline model, often built only on the
 #' initial set of covariates (those that would be passed through the
@@ -394,7 +398,7 @@ nested.forward.selection <- function(x, y, init.vars, folds, ...) {
 #' @template args-folds
 #' @template args-family
 #' @param store.glm Whether the object produced by \code{glm} should be
-#'        stored.
+#'        stored (default: \code{FALSE}).
 #'
 #' @return
 #' A list of length equal to \code{length(folds)}, where each entry contains
@@ -443,11 +447,11 @@ nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   return(res)
 }
 
-#' Log-likelihood function.
+#' Log-likelihood function
 #'
 #' Compute the log-likelihood up to a constant.
 #'
-#' @param family Type of model fitted.
+#' @template args-family
 #' @param obs Vector of observed values.
 #' @param fit Vector of predicted values.
 #' @param disp Dispersion parameter (1 for logistic regression).
@@ -457,7 +461,17 @@ loglikelihood <- function(family, obs, fit, disp) {
   sum(family$dev.resids(obs, fit, -0.5 / disp) - log(disp) / 2)
 }
 
+#' Validate the family argument
+#'
+#' Ensure that the family argument has been specified correctly.
 #' This is inspired by code in \code{\link{glm}}.
+#'
+#' @param family Family argument to test.
+#'
+#' @return
+#' A valid family. The function throws an error if the family argument cannot
+#' be used.
+#'
 #' @noRd
 validate.family <- function(family) {
   if (missing(family))
@@ -478,12 +492,14 @@ validate.family <- function(family) {
   return(family)
 }
 
+#' Validate the outcome variable
+#'
 #' Ensure that the outcome variable has been specified correctly.
 #'
 #' @param y Outcome variable to test.
 #'
 #' @return
-#' A valid outcome variable. The function throws an error if the the outcome
+#' A valid outcome variable. The function throws an error if the outcome
 #' variable cannot be used.
 #'
 #' @noRd

@@ -2,7 +2,7 @@
 #'
 #' Report summary statistics from a single run of forward selection.
 #'
-#' @param object An object of class \code{"fs"}.
+#' @param object An object of class \code{fs}.
 #' @param ... Further arguments passed to or from other methods.
 #'        These are currently ignored.
 #'
@@ -32,7 +32,7 @@ summary.fs <- function(object, ...) {
 #' Report summary statistics from a run of nested forward selection across the
 #' outer folds.
 #'
-#' @param object An object of class \code{"nestfs"}.
+#' @param object An object of class \code{nestfs}.
 #' @param iter1 Whether the summary should be over all variables at the first
 #'        iteration: this can be interpreted as a cross-validated univariate
 #'        test for association.
@@ -118,7 +118,7 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
 #'
 #' Report summary statistics from a run of (nested) forward selection.
 #'
-#' @param x An object of class \code{"nestfs"} or \code{"fs"}.
+#' @param x An object of class \code{nestfs} or \code{fs}.
 #' @param ... Further arguments passed to or from other methods.
 #'        These are currently ignored.
 #'
