@@ -43,6 +43,17 @@ test_that("logistic regression",
   expect_equal(fs.logic, fs.binom.ok)
 })
 
+test_that("init.vars",
+{
+  ## empty init.vars
+  fs.1 <- forward.selection(X, Y, c(), family="gaussian",
+                            num.inner.folds=10, max.iters=3)
+  fs.2 <- forward.selection(X, Y, init.model="y ~ 1", family="gaussian",
+                            num.inner.folds=10, max.iters=3)
+  fs.1$call <- fs.2$call <- NULL
+  expect_equal(fs.1, fs.2)
+})
+
 test_that("choose.from",
 {
   ## no new variables to choose from

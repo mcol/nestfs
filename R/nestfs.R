@@ -156,10 +156,19 @@ forward.selection <- function(x, y, init.vars, family,
   if (min.llk.diff < 0)
     stop("min.llk.diff cannot be negative.")
 
+  ## setting up initial model using init.vars
   if (is.null(init.model)) {
     stopifnot(all(init.vars %in% colnames(x)))
-    init.model <- paste("y ~", paste(init.vars, collapse= " + "))
+    if (length(init.vars) > 0)
+      init.model <- paste("y ~", paste(init.vars, collapse= " + "))
+    else {
+      cat("Empty init.vars, starting from intercept-only model\n")
+      init.vars <- character(0)
+      init.model <- paste("y ~ 1")
+    }
   }
+
+  ## setting up initial model using init.model
   else {
     if (!missing(init.vars))
       cat("Using init.model, ignoring init.vars\n")
