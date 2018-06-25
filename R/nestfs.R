@@ -38,8 +38,9 @@
 #' @param num.filter Number of variables to be retained by the univariate
 #'        association filter (see \strong{Details}). If set to 0 (default),
 #'        the filter is disabled.
-#' @param filter.ignore Regular expression for variables that should be ignored
-#'        by the filter (so that they are always retained).
+#' @param filter.ignore Vector of variable names that should not be pruned by
+#'        the univariate association filter so that they are always allowed to
+#'        be selected (ignored if \code{num.filter=0}).
 #' @param num.inner.folds Number of folds in the inner cross-validation. It
 #'        must be at least 10 (default: 30).
 #' @param max.iters Maximum number of iterations.
@@ -88,7 +89,7 @@
 forward.selection <- function(x, y, init.vars, family,
                               choose.from=NULL, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
-                              num.filter=0, filter.ignore=init.vars,
+                              num.filter=0, filter.ignore=NULL,
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
                               min.llk.diff=0, seed=50,
                               init.model=NULL) {
