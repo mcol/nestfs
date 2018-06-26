@@ -153,9 +153,15 @@ forward.selection <- function(x, y, init.model, family,
   if (min.llk.diff < 0)
     stop("min.llk.diff cannot be negative.")
 
-  ## setting up initial model using init.vars
+  ## set up initial model
   init.model <- validate.init.model(init.model)
   init.vars <- setdiff(all.vars(init.model), "y")
+
+  ## check that all variables exist in the dataframe of predictors
+  var.match <- match(init.vars, colnames(x))
+  if (any(is.na(var.match)))
+    stop("'", paste(init.vars[is.na(var.match)], collapse="', '"),
+         "' not present in x.")
 
   ## check that there is no missingness in the variables of the initial model,
   ## excluding the interaction terms
