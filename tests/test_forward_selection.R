@@ -66,6 +66,18 @@ test_that("init.model",
                             num.inner.folds=10, max.iters=1)
   fs.1$call <- fs.2$call <- NULL
   expect_equal(fs.1, fs.2)
+
+  ## formula with misspecified or no left-hand side
+  fs.3 <- forward.selection(X, Y, Z ~ age + sex, family="gaussian",
+                            num.inner.folds=10, max.iters=1)
+  fs.4 <- forward.selection(X, Y, ~ age + sex, family="gaussian",
+                            num.inner.folds=10, max.iters=1)
+  fs.5 <- forward.selection(X, Y, "~ age + sex", family="gaussian",
+                            num.inner.folds=10, max.iters=1)
+  fs.3$call <- fs.4$call <- fs.5$call <- NULL
+  expect_equal(fs.1, fs.3)
+  expect_equal(fs.1, fs.4)
+  expect_equal(fs.1, fs.5)
 })
 
 test_that("choose.from",

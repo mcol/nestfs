@@ -499,6 +499,10 @@ validate.init.model <- function(model) {
   }
   else if (!is(model, "formula"))
     stop("init.model specified incorrectly.")
+
+  ## rename the left-hand side or add it if not present
+  model <- update(model, "y ~ .")
+
   return(model)
 }
 
