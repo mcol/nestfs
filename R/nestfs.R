@@ -451,7 +451,7 @@ nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
 #' @param fit Vector of predicted values.
 #' @param disp Dispersion parameter (1 for logistic regression).
 #'
-#' @keywords internal
+#' @noRd
 loglikelihood <- function(family, obs, fit, disp) {
   sum(family$dev.resids(obs, fit, -0.5 / disp) - log(disp) / 2)
 }
