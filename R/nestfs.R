@@ -92,7 +92,7 @@ forward.selection <- function(x, y, init.model, family,
   univ.glm <- function(model, xy.train, xy.test) {
     regr <- glm(as.formula(model), data=xy.train, family=family)
     y.pred <- predict(regr, newdata=xy.test, type="response")
-    y.test <- xy.test$y
+    y.test <- xy.test$nestfs_y_
     loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
     res <- cbind(coefficients(summary(regr))[, c(1, 4), drop=FALSE], loglik)
     colnames(res) <- c("coef", "p.value", "valid.llk")
@@ -155,7 +155,7 @@ forward.selection <- function(x, y, init.model, family,
 
   ## set up initial model
   init.model <- validate.init.model(init.model)
-  init.vars <- setdiff(all.vars(init.model), "y")
+  init.vars <- setdiff(all.vars(init.model), "nestfs_y_")
 
   ## check that all variables exist in the dataframe of predictors
   var.match <- match(init.vars, colnames(x))
@@ -222,8 +222,8 @@ forward.selection <- function(x, y, init.model, family,
 
       test.idx <- folds[[fold]]
       train.idx <- setdiff(seq(nrow(x)), test.idx)
-      xy.train <- cbind(y=y[train.idx], x[train.idx, ])
-      xy.test <- cbind(y=y[test.idx], x[test.idx, ])
+      xy.train <- cbind(nestfs_y_=y[train.idx], x[train.idx, ])
+      xy.test <- cbind(nestfs_y_=y[test.idx], x[test.idx, ])
 
       ## current model
       curr <- univ.glm(model, xy.train, xy.test)
@@ -507,7 +507,7 @@ validate.init.model <- function(model) {
     stop("init.model specified incorrectly.")
 
   ## rename the left-hand side or add it if not present
-  model <- update(model, "y ~ .")
+  model <- update(model, "nestfs_y_ ~ .")
 
   return(model)
 }
