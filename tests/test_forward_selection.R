@@ -52,6 +52,7 @@ test_that("init.vars",
                             num.inner.folds=10, max.iters=3)
   fs.1$call <- fs.2$call <- NULL
   expect_equal(fs.1, fs.2)
+  expect_equal(fs.1$panel, c("bmi", "ltg", "map"))
 })
 
 test_that("choose.from",
