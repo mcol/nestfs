@@ -7,11 +7,13 @@ Y <- diabetes$Y
 y.binom <- as.integer(Y > 140)
 
 source("dump_forward_selection.R")
+fs.gauss.ok$call <- fs.binom.ok$call <- NULL
 
 test_that("linear regression",
 {
   fs.gauss <- forward.selection(X, Y, c("age", "sex"), family="gaussian",
                                 num.inner.folds=10, max.iters=3)
+  fs.gauss$call <- NULL
   expect_equal(fs.gauss, fs.gauss.ok)
 
   fs.gauss <- forward.selection(X, Y, c("age"), family="gaussian",
@@ -28,18 +30,21 @@ test_that("logistic regression",
 {
   fs.binom <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
                                 num.inner.folds=10, max.iters=3)
+  fs.binom$call <- NULL
   expect_equal(fs.binom, fs.binom.ok)
 
   ## logical outcome variable
   y.binom <- diabetes$Y > 140
   fs.logic <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
                                 num.inner.folds=10, max.iters=3)
+  fs.logic$call <- NULL
   expect_equal(fs.logic, fs.binom.ok)
 
   ## factor outcome variable
   y.binom <- factor(diabetes$Y > 140)
   fs.logic <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
                                 num.inner.folds=10, max.iters=3)
+  fs.logic$call <- NULL
   expect_equal(fs.logic, fs.binom.ok)
 })
 
