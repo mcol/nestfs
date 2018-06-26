@@ -471,6 +471,32 @@ loglikelihood <- function(family, obs, fit, disp) {
   sum(family$dev.resids(obs, fit, -0.5 / disp) - log(disp) / 2)
 }
 
+#' Validate the outcome variable
+#'
+#' Ensure that the outcome variable has been specified correctly.
+#'
+#' @param y Outcome variable to test.
+#'
+#' @return
+#' A valid outcome variable. The function throws an error if the outcome
+#' variable cannot be used.
+#'
+#' @noRd
+validate.outcome <- function(y) {
+  if (any(is.na(y)))
+    stop("Outcome variable contains missing values.", call.=FALSE)
+  if (is.character(y))
+    stop("Outcome variable cannot be a character vector.", call.=FALSE)
+  if (is.factor(y)) {
+    if (length(levels(y)) != 2)
+      stop("A factor outcome variable can only have two levels.", call.=FALSE)
+    y <- as.integer(y) - 1
+  }
+  if (!(is.numeric(y) || is.integer(y) || is.logical(y)))
+    stop("Outcome variable of invalid type.", call.=FALSE)
+  return(y)
+}
+
 #' Validate the family argument
 #'
 #' Ensure that the family argument has been specified correctly.
@@ -500,30 +526,4 @@ validate.family <- function(family) {
     stop("Only supported families are 'gaussian' or 'binomial'.", call.=FALSE)
 
   return(family)
-}
-
-#' Validate the outcome variable
-#'
-#' Ensure that the outcome variable has been specified correctly.
-#'
-#' @param y Outcome variable to test.
-#'
-#' @return
-#' A valid outcome variable. The function throws an error if the outcome
-#' variable cannot be used.
-#'
-#' @noRd
-validate.outcome <- function(y) {
-  if (any(is.na(y)))
-    stop("Outcome variable contains missing values.", call.=FALSE)
-  if (is.character(y))
-    stop("Outcome variable cannot be a character vector.", call.=FALSE)
-  if (is.factor(y)) {
-    if (length(levels(y)) != 2)
-      stop("A factor outcome variable can only have two levels.", call.=FALSE)
-    y <- as.integer(y) - 1
-  }
-  if (!(is.numeric(y) || is.integer(y) || is.logical(y)))
-    stop("Outcome variable of invalid type.", call.=FALSE)
-  return(y)
 }
