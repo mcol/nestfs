@@ -3,9 +3,9 @@
 #' Run forward selection starting from a set of variables or a model.
 #'
 #' At each iteration, this function runs cross-validation to choose which
-#' variable enters the final panel by fitting the current model (defined either
-#' by \code{init.vars} or \code{init.model} at the first iteration) augmented
-#' by one of the remaining variables at a time.
+#' variable enters the final panel by fitting the current model (defined in
+#' \code{init.model} as a list of variables or a formula for the first
+#' iteration) augmented by one of the remaining variables at a time.
 #'
 #' This function is used to choose a panel of variables on the data. As it uses
 #' all observations in the \code{x} dataframe, it is not possible to
@@ -25,7 +25,7 @@
 #' @template args-family
 #' @param choose.from Indices or variable names over which the selection should
 #'        be performed. If \code{NULL} (default), all variables in \code{x}
-#'        that are not in \code{init.vars} or \code{init.model} are considered.
+#'        that are not in \code{init.model} are considered.
 #' @param test Type of statistical paired test to use (ignored if
 #'        \code{sel.crit="total.loglik"}).
 #' @param sel.crit Selection criterion: \code{"paired.test"} chooses the
@@ -50,9 +50,6 @@
 #'        improvement in log-likelihood is smaller than this threshold
 #'        (default: 0).
 #' @param seed Seed of the random number generator for the inner folds.
-#' @param init.model Formula that describes the initial model, where the
-#'        outcome variable should be called \code{y}: if specified, this
-#'        overrides \code{init.vars}.
 #'
 #' @return
 #' An object of class \code{fs} containing the following fields:
@@ -79,20 +76,19 @@
 #'
 #' # using a formula for the initial model
 #' fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
-#'                               init.model="y ~ 1", family=gaussian(),
+#'                               "y ~ 1", family=gaussian(),
 #'                               max.iters=5)
 #' }
 #' @seealso \code{\link{nested.forward.selection}}
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
 #' @export
-forward.selection <- function(x, y, init.vars, family,
+forward.selection <- function(x, y, init.model, family,
                               choose.from=NULL, test=c("t", "wilcoxon"),
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=NULL,
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
-                              min.llk.diff=0, seed=50,
-                              init.model=NULL) {
+                              min.llk.diff=0, seed=50) {
   univ.glm <- function(model, xy.train, xy.test) {
     regr <- glm(as.formula(model), data=xy.train, family=family)
     y.pred <- predict(regr, newdata=xy.test, type="response")
@@ -158,27 +154,8 @@ forward.selection <- function(x, y, init.vars, family,
     stop("min.llk.diff cannot be negative.")
 
   ## setting up initial model using init.vars
-  if (is.null(init.model)) {
-    stopifnot(all(init.vars %in% colnames(x)))
-    if (length(init.vars) > 0)
-      init.model <- paste("y ~", paste(init.vars, collapse= " + "))
-    else {
-      cat("Empty init.vars, starting from intercept-only model\n")
-      init.vars <- character(0)
-      init.model <- paste("y ~ 1")
-    }
-  }
-
-  ## setting up initial model using init.model
-  else {
-    if (!missing(init.vars))
-      cat("Using init.model, ignoring init.vars\n")
-
-    ## work out the variables from the initialization model
-    stopifnot(length(grep("~", init.model)) > 0)
-    model.terms <- terms(as.formula(init.model))
-    init.vars <- attributes(model.terms)$term.labels
-  }
+  init.model <- validate.init.model(init.model)
+  init.vars <- setdiff(all.vars(init.model), "y")
 
   ## check that there is no missingness in the variables of the initial model,
   ## excluding the interaction terms
@@ -222,11 +199,12 @@ forward.selection <- function(x, y, init.vars, family,
     keep.idx <- union(match(filter.ignore, colnames(x.train)), filt.idx)
     x <- x[, keep.idx]
   }
+
+  ## variable selection
   all.vars <- colnames(x)
   all.iter <- list()
   iter1 <- NULL
 
-  ## variable selection
   for (iter in 1:max.iters) {
 
     other.vars <- setdiff(all.vars, model.vars)
@@ -247,7 +225,8 @@ forward.selection <- function(x, y, init.vars, family,
 
       ## models augmented with one additional variable at a time
       for (var in other.vars) {
-        augm <- univ.glm(paste(model, var, sep=" + "), xy.train, xy.test)
+        model.augm <- update(model, paste(". ~ .", var, sep=" + "))
+        augm <- univ.glm(model.augm, xy.train, xy.test)
         all.stats <- rbind(all.stats, tail(augm, n=1))
       }
       rownames(all.stats) <- c("Base", other.vars)
@@ -309,7 +288,7 @@ forward.selection <- function(x, y, init.vars, family,
     model.pvals <- c(model.pvals, chosen.pval)
     model.llks <- c(model.llks, chosen.llk)
     model.iter <- c(model.iter, rep(iter, length(chosen.var)))
-    model <- paste(model, chosen.var, sep=" + ")
+    model <- update(model, paste(". ~ .", chosen.var, sep=" + "))
   }
 
   res <- list(fs=data.frame(vars=model.vars, fdr=model.pvals, llks=model.llks,
@@ -317,7 +296,7 @@ forward.selection <- function(x, y, init.vars, family,
                   row.names=NULL, stringsAsFactors=FALSE),
               init=init.vars,
               panel=setdiff(model.vars, c(init.vars, "<empty>")),
-              final.model=gsub("^y ~ ", "", model),
+              final.model=as.character(model)[3],
               family=family$family,
               call=match.call(),
               iter1=iter1,
@@ -362,7 +341,7 @@ forward.selection <- function(x, y, init.vars, family,
 #' @seealso \code{\link{forward.selection}}
 #' @keywords multivariate
 #' @export
-nested.forward.selection <- function(x, y, init.vars, folds, ...) {
+nested.forward.selection <- function(x, y, init.model, folds, ...) {
 
   family <- list(...)$family
   all.res <- list()
@@ -376,7 +355,7 @@ nested.forward.selection <- function(x, y, init.vars, folds, ...) {
     train.idx <- setdiff(seq(nrow(x)), test.idx)
     x.train <- x[train.idx, ]; y.train <- y[train.idx]
 
-    fs <- forward.selection(x.train, y.train, init.vars, ...)
+    fs <- forward.selection(x.train, y.train, init.model, ...)
     this.fold <- list(test.idx)
     model <- nested.glm(x[, fs$fs$vars], y, this.fold,
                         family=family)[[1]]
@@ -401,7 +380,7 @@ nested.forward.selection <- function(x, y, init.vars, folds, ...) {
 #'
 #' This can be used to establish a baseline model, often built only on the
 #' initial set of covariates (those that would be passed through the
-#' \code{init.vars} argument to \code{forward.selection}).
+#' \code{init.model} argument to \code{forward.selection}).
 #'
 #' @param x Dataframe of predictors.
 #' @template args-outcome
@@ -495,6 +474,32 @@ validate.outcome <- function(y) {
   if (!(is.numeric(y) || is.integer(y) || is.logical(y)))
     stop("Outcome variable of invalid type.", call.=FALSE)
   return(y)
+}
+
+#' Validate initial model
+#'
+#' Ensure that the initial model has been specified correctly.
+#'
+#' @param model Model definition to test.
+#'
+#' @return
+#' A formula describing the initial model. The function throws an error if the
+#' model parameter cannot be used.
+#'
+#' @noRd
+validate.init.model <- function(model) {
+  if (is.null(model) || length(model) == 0) {
+    model <- y ~ 1
+  }
+  else if (is.character(model)) {
+    if (length(model) == 1 && grepl("~", model))
+      model <- as.formula(model)
+    else
+      model <- as.formula(paste("y ~", paste(model, collapse= " + ")))
+  }
+  else if (!is(model, "formula"))
+    stop("init.model specified incorrectly.")
+  return(model)
 }
 
 #' Validate the family argument

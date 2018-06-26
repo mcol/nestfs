@@ -11,6 +11,13 @@ test_that("argument checks",
   expect_error(forward.selection(diabetes, y.short, "age", binomial()))
   expect_error(forward.selection(diabetes, y.binom, "nonexisting", binomial()))
 
+  ## tests for formulas in init.model
+  expect_error(forward.selection(diabetes, y.binom, y ~ nonexisting, binomial))
+  expect_error(forward.selection(diabetes, y.binom, y ~ NA, binomial))
+  expect_error(forward.selection(diabetes, y.binom, ~ age, binomial))
+  expect_error(forward.selection(diabetes, y.binom, "~ age", binomial))
+  expect_error(forward.selection(diabetes, y.binom, "~ age _ lll", binomial))
+
   ## tests for family
   expect_error(forward.selection(diabetes, y.binom, "age"))
   expect_error(forward.selection(diabetes, y.gauss, "age", binomial()))
