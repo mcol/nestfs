@@ -78,6 +78,17 @@ test_that("init.model",
   expect_equal(fs.1, fs.3)
   expect_equal(fs.1, fs.4)
   expect_equal(fs.1, fs.5)
+
+  ## models with interaction terms
+  fs.1 <- forward.selection(X, Y, y ~ age*sex, family="gaussian",
+                            num.inner.folds=10, max.iters=3)
+  fs.2 <- forward.selection(X, Y, "age*sex", family="gaussian",
+                            num.inner.folds=10, max.iters=3)
+  fs.3 <- forward.selection(X, Y, c("age", "sex", "age:sex"), family="gaussian",
+                            num.inner.folds=10, max.iters=3)
+  fs.1$call <- fs.2$call <- fs.3$call <- NULL
+  expect_equal(fs.1, fs.2)
+  expect_equal(fs.1, fs.3)
 })
 
 test_that("choose.from",
