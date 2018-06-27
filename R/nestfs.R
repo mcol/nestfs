@@ -321,6 +321,7 @@ forward.selection <- function(x, y, init.model, family,
 #'
 #' @template args-forward
 #' @template args-outcome
+#' @template args-family
 #' @template args-folds
 #' @param ... Arguments to \code{forward.selection}.
 #'
@@ -340,16 +341,14 @@ forward.selection <- function(x, y, init.model, family,
 #' data(diabetes)
 #' all.folds <- create.folds(10, nrow(diabetes), seed=1)
 #' nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
-#'                                        c("age", "sex"), all.folds,
-#'                                        family=gaussian())
+#'                                        ~ age + sex, gaussian(), all.folds)
 #' summary(nestfs.res)
 #' }
 #' @seealso \code{\link{forward.selection}}
 #' @keywords multivariate
 #' @export
-nested.forward.selection <- function(x, y, init.model, folds, ...) {
+nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 
-  family <- list(...)$family
   all.res <- list()
   num.folds <- length(folds)
   for (fold in 1:num.folds) {
@@ -361,7 +360,7 @@ nested.forward.selection <- function(x, y, init.model, folds, ...) {
     train.idx <- setdiff(seq(nrow(x)), test.idx)
     x.train <- x[train.idx, ]; y.train <- y[train.idx]
 
-    fs <- forward.selection(x.train, y.train, init.model, ...)
+    fs <- forward.selection(x.train, y.train, init.model, family, ...)
     this.fold <- list(test.idx)
     model <- nested.glm(x[, fs$fs$vars], y, this.fold,
                         family=family)[[1]]

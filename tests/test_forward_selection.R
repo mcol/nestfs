@@ -110,3 +110,18 @@ test_that("choose.from",
   fs.1$call <- fs.2$call <- NULL
   expect_equal(fs.1, fs.2)
 })
+
+context("nested forward selection")
+
+folds <- create.folds(3, nrow(X))
+
+test_that("nested forward selection",
+{
+  nest.1 <- nested.forward.selection(X, Y, ~ age + sex, gaussian(), folds,
+                                     num.inner.folds=10, max.iters=3)
+  nest.2 <- nested.forward.selection(X, Y, ~ age + sex, gaussian(), folds[1],
+                                     num.inner.folds=10, max.iters=3)
+  nest.1[[1]]$call <- NULL
+  nest.2[[1]]$call <- NULL
+  expect_equal(nest.1[[1]], nest.2[[1]])
+})

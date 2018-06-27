@@ -47,6 +47,10 @@ test_that("argument checks",
                                  max.pval=1))
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  min.llk.diff=-1))
+
+  ## tests for nested forward selection
+  expect_error(nested.forward.selection(diabetes, y.binom, "age"))
+  expect_error(nested.forward.selection(diabetes, y.binom, "age", binomial()))
 })
 
 context("outcome validation")
