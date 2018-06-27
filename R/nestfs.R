@@ -163,9 +163,9 @@ forward.selection <- function(x, y, init.model, family,
     stop("'", paste(init.vars[is.na(var.match)], collapse="', '"),
          "' not present in x.")
 
-  ## check that there is no missingness in the variables of the initial model,
-  ## excluding the interaction terms
-  stopifnot(all(!is.na(x[, init.vars[!grepl(":", init.vars)]])))
+  ## check that there is no missingness in the initial model
+  if (any(is.na(x[, init.vars])))
+    stop("Missing values in the variables of the initial model.")
 
   ## create the inner folds
   folds <- create.folds(num.inner.folds, nrow(x), seed=seed)
