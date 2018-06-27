@@ -55,12 +55,14 @@
 #' An object of class \code{fs} containing the following fields:
 #' \describe{
 #' \item{fs:}{A dataframe containing the forward selection summary.}
-#' \item{init:}{The set of variables used in the initialization.}
+#' \item{init:}{The set of variables used in the initial model.}
 #' \item{panel:}{ Names of variables selected (in order).}
+#' \item{init.model:}{Right-hand side of the formula corresponding to the
+#'       initial model.}
 #' \item{final.model:}{Right-hand side of the formula corresponding to the
 #'       final model.}
 #' \item{family:}{Type of model fitted.}
-#' \item{call:}{The call that created this object.}
+#' \item{params:}{List of parameters used.}
 #' \item{iter1:}{Summary statistics for all variables at the first iteration.}
 #' \item{all.iter:}{Validation log-likelihoods for all inner folds at all
 #'       iterations.}
@@ -114,6 +116,15 @@ forward.selection <- function(x, y, init.model, family,
       cat(sprintf("%2s %40s %9s %9s %7s\n",
                   "#", "Variable", "FDR", "Log-Lik", "Diff"))
     cat(sprintf(fmt, iter, substr(var, 1, 40), pval, llk, diff.llk))
+  }
+  extract.call.params <- function() {
+    args <- c("test", "sel.crit", "num.filter", "filter.ignore",
+              "num.inner.folds", "max.iters", "max.pval", "min.llk.diff", "seed")
+    args <- as.list(parent.env(environment()))[args]
+
+    ## for arguments with multiple default valuess keep only the first, which
+    ## is the one that is used
+    lapply(args, head, n=1)
   }
 
   ## argument checks
@@ -302,9 +313,10 @@ forward.selection <- function(x, y, init.model, family,
                   row.names=NULL, stringsAsFactors=FALSE),
               init=init.vars,
               panel=setdiff(model.vars, c(init.vars, "<empty>")),
+              init.model=as.character(init.model)[3],
               final.model=as.character(model)[3],
               family=family$family,
-              call=match.call(),
+              params=extract.call.params(),
               iter1=iter1,
               all.iter=all.iter)
   class(res) <- "fs"
@@ -372,7 +384,6 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
     fs$obs <- model$obs
     fs$test.idx <- test.idx
     fs$model <- model$summary
-    fs$call <- match.call()
     all.res[[fold]] <- fs
   }
   class(all.res) <- "nestfs"
