@@ -202,20 +202,21 @@ forward.selection <- function(x, y, init.model, family,
 
     ## run the filter on the training part of all inner folds
     all.filt.idx <- NULL
+    ignore.vars <- c(init.vars, filter.ignore)
     for (fold in 1:num.inner.folds) {
 
       train.idx <- setdiff(seq(nrow(x)), folds[[fold]])
       x.train <- x[train.idx, ]
       y.train <- y[train.idx]
       filt.idx <- filter.predictors(x.train, y.train, num.filter,
-                                    ignore=filter.ignore)
+                                    ignore=ignore.vars)
       all.filt.idx <- c(all.filt.idx, filt.idx)
     }
 
     ## keep the union of the variables retained in the inner folds
     filt.idx <- sort(table(all.filt.idx), decreasing=TRUE)
     filt.idx <- as.integer(names(filt.idx))[1:num.filter]
-    keep.idx <- union(match(filter.ignore, colnames(x.train)), filt.idx)
+    keep.idx <- union(match(ignore.vars, colnames(x)), filt.idx)
     x <- x[, keep.idx]
   }
 

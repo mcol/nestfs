@@ -102,6 +102,22 @@ test_that("choose.from",
   expect_equal(fs.1, fs.2)
 })
 
+test_that("num.filter",
+{
+  y.binom <- Y > 140
+  fs.1 <- forward.selection(X, y.binom, ~ age + sex, binomial(),
+                            num.filter=5,
+                            num.inner.folds=10, max.iters=3)
+  expect_equal(fs.1$fs, fs.binom.ok$fs)
+  expect_equal(dim(fs.1$iter1), c(5, 3))
+
+  fs.2 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
+                            choose.from=30:40, num.filter=5,
+                            num.inner.folds=10, max.iters=3)
+  expect_length(fs.2$panel, 0)
+  expect_equal(dim(fs.1$iter1), c(5, 3))
+})
+
 context("nested forward selection")
 
 folds <- create.folds(3, nrow(X))
