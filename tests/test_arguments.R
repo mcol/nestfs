@@ -1,8 +1,9 @@
 context("arguments")
 
 data(diabetes)
-y.gauss <- diabetes$Y
-y.binom <- as.integer(diabetes$Y > 140)
+diabetes <- X.diab
+y.gauss <- Y.diab
+y.binom <- as.integer(Y.diab > 140)
 y.short <- y.binom[1:10]
 
 test_that("argument checks",

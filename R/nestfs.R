@@ -71,15 +71,9 @@
 #' @examples
 #' \dontrun{
 #' data(diabetes)
-#' fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
-#'                             c("age", "sex"), family=gaussian(),
-#'                             max.iters=5)
+#' fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex,
+#'                             family=gaussian(), max.iters=5)
 #' summary(fs.res)
-#'
-#' # using a formula for the initial model
-#' fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
-#'                               "y ~ 1", family=gaussian(),
-#'                               max.iters=5)
 #' }
 #' @seealso \code{\link{nested.forward.selection}}
 #' @keywords multivariate
@@ -351,9 +345,9 @@ forward.selection <- function(x, y, init.model, family,
 #' @examples
 #' \dontrun{
 #' data(diabetes)
-#' all.folds <- create.folds(10, nrow(diabetes), seed=1)
-#' nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
-#'                                        ~ age + sex, gaussian(), all.folds)
+#' folds <- create.folds(10, nrow(X.diab), seed=1)
+#' nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
+#'                                        gaussian(), folds)
 #' summary(nestfs.res)
 #' }
 #' @seealso \code{\link{forward.selection}}
@@ -421,10 +415,10 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' @examples
 #' \dontrun{
 #' data(diabetes)
-#' all.folds <- create.folds(10, nrow(diabetes), seed=1)
-#' base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
-#'                                     "ldl", "hdl", "ltg", "glu")],
-#'                        diabetes$Y, all.folds, family=gaussian())
+#' folds <- create.folds(10, nrow(X.diab), seed=1)
+#' base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
+#'                                   "ldl", "hdl", "ltg", "glu")],
+#'                        Y.diab, folds, gaussian())
 #' }
 #' @export
 nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
