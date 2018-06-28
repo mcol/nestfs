@@ -38,6 +38,13 @@ test_that("argument checks",
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  choose.from=diabetes))
 
+  ## tests for num.filter
+  expect_error(forward.selection(diabetes, y.gauss, "age", gaussian(),
+                                 num.filter=10))
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 num.filter=ncol(diabetes)))
+
+  ## tests for other arguments
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  num.inner.folds=1))
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),

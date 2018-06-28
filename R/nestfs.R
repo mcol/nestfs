@@ -12,6 +12,8 @@
 #' produce unbiased estimates of the predictive performance of the panel
 #' selected (use \code{\link{nested.forward.selection}} for that purpose).
 #'
+#' In the case of a binary outcome when very large number of predictors is
+#' available, it may be convenient to apply a univariate association filter.
 #' If \code{num.filter} is set to a positive value, then all available
 #' predictors (excluding those whose name is matched by \code{filter.ignore})
 #' are tested for univariate association with the outcome, and only the first
@@ -36,8 +38,9 @@
 #'        the largest increase in log-likelihood only among the best 5
 #'        variables ranked according to the paired-test p-value.
 #' @param num.filter Number of variables to be retained by the univariate
-#'        association filter (see \strong{Details}). If set to 0 (default),
-#'        the filter is disabled.
+#'        association filter (see \strong{Details}), which can only be enabled
+#'        if \code{family=binomial()}. Variables listed in \code{init.model}
+#'        are never filtered. If set to 0 (default), the filter is disabled.
 #' @param filter.ignore Vector of variable names that should not be pruned by
 #'        the univariate association filter so that they are always allowed to
 #'        be selected (ignored if \code{num.filter=0}).
@@ -191,6 +194,11 @@ forward.selection <- function(x, y, init.model, family,
 
   ## filtering according to association with outcome
   if (num.filter > 0) {
+
+    if (family$family != "binomial")
+      stop("num.filter can only be used with family=binomial().")
+    if (num.filter >= ncol(x))
+      stop("num.filter cannot exceed the number of available predictors.")
 
     ## run the filter on the training part of all inner folds
     all.filt.idx <- NULL
