@@ -12,7 +12,7 @@ Description: Implementation of forward selection based on cross-validated
              linear and logistic regression.
 License: GPL-2
 BugReports: https://github.com/mcol/nestfs/issues
-Imports: doMC, dgof, foreach
+Imports: doParallel, dgof, foreach
 Suggests:
   testthat (>= 2.0.0)
 RoxygenNote: 6.0.1

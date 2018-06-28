@@ -20,7 +20,7 @@
 #' iteration, with the aim of guiding the selection towards variables that
 #' have better generalization properties.
 #'
-#' The code is parallelized over the inner folds, thanks to package \pkg{doMC},
+#' The code is parallelized over the inner folds, thanks to \pkg{doParallel},
 #' therefore user time depends on the number of available cores. This can can
 #' be set through the "cores" options, e.g. \command{options(cores=8)}.
 #'
@@ -43,10 +43,10 @@
 "_PACKAGE"
 
 ## Register the parallel backend
-#' @importFrom doMC registerDoMC
+#' @importFrom doParallel registerDoParallel
 #' @importFrom foreach getDoParWorkers
 .onAttach <- function(libname, pkgname) {
-  registerDoMC()
+  registerDoParallel()
   packageStartupMessage("nestfs: currently using ", getDoParWorkers(),
                         " cores, set 'options(cores=<n.cores>)' to change.")
 }
