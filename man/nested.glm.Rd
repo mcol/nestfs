@@ -9,16 +9,19 @@ nested.glm(x, y, folds, family, store.glm = FALSE)
 \arguments{
 \item{x}{Dataframe of predictors.}
 
-\item{y}{Outcome variable.}
+\item{y}{Outcome variable. If \code{family=binomial}, it can only contain
+two classes of values that can be coerced to 0-1.}
 
-\item{folds}{Set of cross-validation folds.}
+\item{folds}{List of cross-validation folds, where each element contains
+the indices of the observations to be withdrawn in that fold.}
 
-\item{family}{Type of model fitted: \code{gaussian} for linear regression
-or \code{binomial} for logistic regression. If \code{binomial},
-then the outcome variable is expected to only have \code{0-1} entries.}
+\item{family}{Type of model fitted: either \code{gaussian()} for linear
+regression or \code{binomial()} for logistic regression. This can be
+specified also as a function name (\code{gaussian}) or as a string
+(\code{"gaussian"}).}
 
 \item{store.glm}{Whether the object produced by \code{glm} should be
-stored.}
+stored (default: \code{FALSE}).}
 }
 \value{
 A list of length equal to \code{length(folds)}, where each entry contains
@@ -34,19 +37,21 @@ the following fields:
 }
 }
 \description{
-Run linear or logistic regression on a set of cross-validation folds
+Run linear or logistic regression on a set of cross-validation folds.
 }
 \details{
 This can be used to establish a baseline model, often built only on the
 initial set of covariates (those that would be passed through the
-\code{init.vars} argument to \code{forward.selection}).
+\code{init.model} argument to \code{forward.selection}).
 }
 \examples{
 \dontrun{
 data(diabetes)
-all.folds <- create.folds(10, nrow(diabetes), seed=1)
-base.res <- nested.glm(diabetes[, c("age", "sex", "bmi", "tc",
-                                    "ldl", "hdl", "ltg", "glu")],
-                       diabetes$Y, all.folds, family=gaussian())
+doParallel::registerDoParallel(10)
+folds <- create.folds(10, nrow(X.diab), seed=1)
+base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
+                                  "ldl", "hdl", "ltg", "glu")],
+                       Y.diab, folds, gaussian())
 }
 }
+\keyword{multivariate}

@@ -10,7 +10,7 @@
 \method{print}{fs}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{"nestfs"} or \code{"fs"}.}
+\item{x}{An object of class \code{nestfs} or \code{fs}.}
 
 \item{...}{Further arguments passed to or from other methods.
 These are currently ignored.}

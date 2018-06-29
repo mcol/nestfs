@@ -4,27 +4,34 @@
 \alias{nested.forward.selection}
 \title{Run nested forward selection}
 \usage{
-nested.forward.selection(x.all, y.all, init.vars, all.folds, ...)
+nested.forward.selection(x, y, init.model, family, folds, ...)
 }
 \arguments{
-\item{x.all}{Dataframe of predictors: this should include all variables in
+\item{x}{Dataframe of predictors: this should include all variables in
 the initial set and the variables that are allowed to enter the
 selected panel.}
 
-\item{y.all}{Outcome variable: if \code{family="binomial"}, it is expected
-to only have \code{0-1} entries.}
+\item{y}{Outcome variable. If \code{family=binomial}, it can only contain
+two classes of values that can be coerced to 0-1.}
 
-\item{init.vars}{Initial set of variables (ignored if \code{init.model} is
-not \code{NULL}).}
+\item{init.model}{Either a formula or a vector of names of the initial set
+of variables that define the model from which the forward selection
+should start.}
 
-\item{all.folds}{Set of cross-validation folds.}
+\item{family}{Type of model fitted: either \code{gaussian()} for linear
+regression or \code{binomial()} for logistic regression. This can be
+specified also as a function name (\code{gaussian}) or as a string
+(\code{"gaussian"}).}
+
+\item{folds}{List of cross-validation folds, where each element contains
+the indices of the observations to be withdrawn in that fold.}
 
 \item{...}{Arguments to \code{forward.selection}.}
 }
 \value{
-An object of class \code{"nestfs"} of length equal to
-\code{length(all.folds)}, where each element is an object of class
-\code{"fs"} containing the following additional fields:
+An object of class \code{nestfs} of length equal to
+\code{length(folds)}, where each element is an object of class
+\code{fs} containing the following additional fields:
 \describe{
 \item{fit:}{Predicted values for the withdrawn observations.}
 \item{obs:}{Observed values for the withdrawn observations.}
@@ -37,15 +44,16 @@ Run nested forward selection starting from a set of variables or a model.
 }
 \details{
 This function allows to obtain an unbiased estimate of the performance
-of the selected panels on withdrawn data.
+of the selected panels on withdrawn data by running forward selection on
+a predetermined set of folds.
 }
 \examples{
 \dontrun{
 data(diabetes)
-all.folds <- create.folds(10, nrow(diabetes), seed=1)
-nestfs.res <- nested.forward.selection(diabetes[, -1], diabetes$Y,
-                                       c("age", "sex"), all.folds,
-                                       family=gaussian())
+doParallel::registerDoParallel(10)
+folds <- create.folds(10, nrow(X.diab), seed=1)
+nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
+                                       gaussian(), folds)
 summary(nestfs.res)
 }
 }

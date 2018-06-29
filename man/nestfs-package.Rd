@@ -27,14 +27,17 @@ aggravated by the fact that an inner cross-validation happens at each
 iteration, with the aim of guiding the selection towards variables that
 have better generalization properties.
 
-The code is parallelized over the inner folds, thanks to package \pkg{doMC},
-therefore user time depends on the number of available cores. This can can
-be set through the "cores" options, e.g. \command{options(cores=8)}.
+The code is parallelized over the inner folds, thanks to the \pkg{foreach}
+package. User time therefore depends on the number of available cores, but
+there is no advantage in using more cores than inner folds. A parallel
+backend must be registered before starting, otherwise operations will run
+sequentially with a warning reported. This can be done through a call to
+\code{\link[doParallel]{registerDoParallel}}, for example.
 
 The main advantage of forward selection is that it provides an immediately
 interpretable model, and the panel of variables obtained is in some sense
 the least redundant one, particularly if the number of variables to choose
-from is not too large (in our experience, up to about 30--40 variables).
+from is not too large (in our experience, up to about 30-40 variables).
 
 However, when the number of variables is much larger than that, forward
 selection, besides being unbearably slow, may be more subject to
@@ -42,6 +45,14 @@ overfitting, which is in the nature of its greedy-like design. These
 undesirable effects can be somewhat remedied by applying some filtering
 (see \code{"num.filter"} argument to \code{\link{forward.selection}}, thus
 reducing the number or variables entering the selection phase.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/mcol/nestfs}
+  \item Report bugs at \url{https://github.com/mcol/nestfs/issues}
+}
+
 }
 \author{
 Marco Colombo \email{m.colombo@ed.ac.uk}

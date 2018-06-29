@@ -7,7 +7,7 @@
 \method{summary}{fs}(object, ...)
 }
 \arguments{
-\item{object}{An object of class \code{"fs"}.}
+\item{object}{An object of class \code{fs}.}
 
 \item{...}{Further arguments passed to or from other methods.
 These are currently ignored.}

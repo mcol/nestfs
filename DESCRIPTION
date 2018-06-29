@@ -1,8 +1,8 @@
 Package: nestfs
 Type: Package
 Title: Cross-Validated (Nested) Forward Selection
-Version: 0.8.1.9000
-Date: 2018-06-21
+Version: 0.8.2
+Date: 2018-06-29
 Authors@R: c(person("Marco", "Colombo",
                     email="m.colombo@ed.ac.uk", role=c("aut", "cre"),
                     comment=c(ORCID="0000-0001-6672-0623")),
@@ -11,6 +11,7 @@ Authors@R: c(person("Marco", "Colombo",
 Description: Implementation of forward selection based on cross-validated
              linear and logistic regression.
 License: GPL-2
+URL: https://github.com/mcol/nestfs
 BugReports: https://github.com/mcol/nestfs/issues
 Imports: dgof, foreach, methods, stats, utils
 Suggests:

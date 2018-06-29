@@ -7,7 +7,7 @@
 \method{summary}{nestfs}(object, iter1 = FALSE, ...)
 }
 \arguments{
-\item{object}{An object of class \code{"nestfs"}.}
+\item{object}{An object of class \code{nestfs}.}
 
 \item{iter1}{Whether the summary should be over all variables at the first
 iteration: this can be interpreted as a cross-validated univariate

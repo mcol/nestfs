@@ -4,29 +4,31 @@
 \alias{forward.selection}
 \title{Run forward selection}
 \usage{
-forward.selection(x.all, y.all, init.vars, family,
-  choose.from = seq(ncol(x.all)), test = c("t", "wilcoxon"),
-  sel.crit = c("paired.test", "total.loglik", "both"), num.filter = 0,
-  filter.ignore = init.vars, num.inner.folds = 30, max.iters = 15,
-  max.pval = 0.5, min.llk.diff = 0, seed = 50, init.model = NULL)
+forward.selection(x, y, init.model, family, choose.from = NULL,
+  test = c("t", "wilcoxon"), sel.crit = c("paired.test", "total.loglik",
+  "both"), num.filter = 0, filter.ignore = NULL, num.inner.folds = 30,
+  max.iters = 15, max.pval = 0.5, min.llk.diff = 0, seed = 50)
 }
 \arguments{
-\item{x.all}{Dataframe of predictors: this should include all variables in
+\item{x}{Dataframe of predictors: this should include all variables in
 the initial set and the variables that are allowed to enter the
 selected panel.}
 
-\item{y.all}{Outcome variable: if \code{family="binomial"}, it is expected
-to only have \code{0-1} entries.}
+\item{y}{Outcome variable. If \code{family=binomial}, it can only contain
+two classes of values that can be coerced to 0-1.}
 
-\item{init.vars}{Initial set of variables (ignored if \code{init.model} is
-not \code{NULL}).}
+\item{init.model}{Either a formula or a vector of names of the initial set
+of variables that define the model from which the forward selection
+should start.}
 
-\item{family}{Type of model fitted: \code{gaussian} for linear regression
-or \code{binomial} for logistic regression. If \code{binomial},
-then the outcome variable is expected to only have \code{0-1} entries.}
+\item{family}{Type of model fitted: either \code{gaussian()} for linear
+regression or \code{binomial()} for logistic regression. This can be
+specified also as a function name (\code{gaussian}) or as a string
+(\code{"gaussian"}).}
 
-\item{choose.from}{Indices of the variables among which the selection should
-be done.}
+\item{choose.from}{Indices or variable names over which the selection should
+be performed. If \code{NULL} (default), all variables in \code{x}
+that are not in \code{init.model} are considered.}
 
 \item{test}{Type of statistical paired test to use (ignored if
 \code{sel.crit="total.loglik"}).}
@@ -39,38 +41,41 @@ combine both previous criteria, choosing the variable that produces
 the largest increase in log-likelihood only among the best 5
 variables ranked according to the paired-test p-value.}
 
-\item{num.filter}{Number of variables to be retained by the filter (0 to use
-all).}
+\item{num.filter}{Number of variables to be retained by the univariate
+association filter (see \strong{Details}), which can only be enabled
+if \code{family=binomial()}. Variables listed in \code{init.model}
+are never filtered. If set to 0 (default), the filter is disabled.}
 
-\item{filter.ignore}{Regular expression for variables that should be ignored
-by the filter (so that they are always retained).}
+\item{filter.ignore}{Vector of variable names that should not be pruned by
+the univariate association filter so that they are always allowed to
+be selected (ignored if \code{num.filter=0}).}
 
-\item{num.inner.folds}{Number of folds in the inner cross-validation.}
+\item{num.inner.folds}{Number of folds in the inner cross-validation. It
+must be at least 10 (default: 30).}
 
-\item{max.iters}{Maximum number of iterations.}
+\item{max.iters}{Maximum number of iterations (default: 15).}
 
 \item{max.pval}{Interrupt the selection when the best achievable p-value
-exceeds this threshold.}
+exceeds this threshold (default: 0.5).}
 
 \item{min.llk.diff}{Interrupt the selection when the best achievable
-improvement in log-likelihood is smaller than this threshold.}
+improvement in log-likelihood is smaller than this threshold
+(default: 0).}
 
 \item{seed}{Seed of the random number generator for the inner folds.}
-
-\item{init.model}{Formula that describes the initial model, where the
-outcome variable should be called \code{y}: if specified, this
-overrides \code{init.vars}.}
 }
 \value{
-An object of class \code{"fs"} containing the following fields:
+An object of class \code{fs} containing the following fields:
 \describe{
 \item{fs:}{A dataframe containing the forward selection summary.}
-\item{init:}{The set of variables used in the initialization.}
+\item{init:}{The set of variables used in the initial model.}
 \item{panel:}{ Names of variables selected (in order).}
+\item{init.model:}{Right-hand side of the formula corresponding to the
+      initial model.}
 \item{final.model:}{Right-hand side of the formula corresponding to the
       final model.}
 \item{family:}{Type of model fitted.}
-\item{call:}{The call that created this object.}
+\item{params:}{List of parameters used.}
 \item{iter1:}{Summary statistics for all variables at the first iteration.}
 \item{all.iter:}{Validation log-likelihoods for all inner folds at all
       iterations.}
@@ -81,35 +86,32 @@ Run forward selection starting from a set of variables or a model.
 }
 \details{
 At each iteration, this function runs cross-validation to choose which
-variable enters the final panel by fitting the current model (defined either
-by \code{init.vars} or \code{init.model} at the first iteration) augmented
-by one of the remaining variables at a time.
+variable enters the final panel by fitting the current model (defined in
+\code{init.model} as a list of variables or a formula for the first
+iteration) augmented by one of the remaining variables at a time.
 
 This function is used to choose a panel of variables on the data. As it uses
-all observations in the \code{x.all} dataframe, it is not possible to
+all observations in the \code{x} dataframe, it is not possible to
 produce unbiased estimates of the predictive performance of the panel
 selected (use \code{\link{nested.forward.selection}} for that purpose).
 
-If \code{num.filter} is positive, then all available predictors (excluding
-those whose name is matched by \code{filter.ignore}) are tested for
-univariate association with the outcome. This is done on the training part
-of all inner folds, and the top \code{num.filter} are retained for
-selection, while the others are filtered out. Filtering can enhance the
-performance of forward selection when the number of available variables
-exceeds about 30--40.
+In the case of a binary outcome when very large number of predictors is
+available, it may be convenient to apply a univariate association filter.
+If \code{num.filter} is set to a positive value, then all available
+predictors (excluding those whose name is matched by \code{filter.ignore})
+are tested for univariate association with the outcome, and only the first
+\code{num.filter} enter the selection phase, while the others are filtered
+out. This is done on the training part of all inner folds. Filtering can
+enhance the performance of forward selection when the number of available
+variables exceeds about 30-40.
 }
 \examples{
 \dontrun{
 data(diabetes)
-fs.res <- forward.selection(diabetes[, -1], diabetes$Y,
-                            c("age", "sex"), family=gaussian(),
-                            max.iters=5)
+doParallel::registerDoParallel(10)
+fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex,
+                            family=gaussian(), max.iters=5)
 summary(fs.res)
-
-# using a formula for the initial model
-fs.res.0 <- forward.selection(diabetes[, -1], diabetes$Y,
-                              init.model="y ~ 1", family=gaussian(),
-                              max.iters=5)
 }
 }
 \seealso{
