@@ -20,9 +20,12 @@
 #' iteration, with the aim of guiding the selection towards variables that
 #' have better generalization properties.
 #'
-#' The code is parallelized over the inner folds, thanks to \pkg{doParallel},
-#' therefore user time depends on the number of available cores. This can can
-#' be set through the "cores" options, e.g. \command{options(cores=8)}.
+#' The code is parallelized over the inner folds, thanks to the \pkg{foreach}
+#' package. User time therefore depends on the number of available cores, but
+#' there is no advantage in using more cores than inner folds. A parallel
+#' backend must be registered before starting, otherwise operations will run
+#' sequentially with a warning reported. This can be done through a call to
+#' \code{\link[doParallel]{registerDoParallel}}, for example.
 #'
 #' The main advantage of forward selection is that it provides an immediately
 #' interpretable model, and the panel of variables obtained is in some sense
@@ -42,11 +45,11 @@
 #' @docType package
 "_PACKAGE"
 
-## Register the parallel backend
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach getDoParWorkers
+#' @importFrom foreach getDoParWorkers getDoParRegistered
 .onAttach <- function(libname, pkgname) {
-  registerDoParallel()
-  packageStartupMessage("nestfs: currently using ", getDoParWorkers(),
-                        " cores, set 'options(cores=<n.cores>)' to change.")
+  if (getDoParRegistered())
+    packageStartupMessage("nestfs: currently using ", getDoParWorkers(),
+                          " cores.")
+  else
+    packageStartupMessage("nestfs: register a parallel backend before starting.")
 }

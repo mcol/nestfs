@@ -74,6 +74,7 @@
 #' @examples
 #' \dontrun{
 #' data(diabetes)
+#' doParallel::registerDoParallel(10)
 #' fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex,
 #'                             family=gaussian(), max.iters=5)
 #' summary(fs.res)
@@ -356,6 +357,7 @@ forward.selection <- function(x, y, init.model, family,
 #' @examples
 #' \dontrun{
 #' data(diabetes)
+#' doParallel::registerDoParallel(10)
 #' folds <- create.folds(10, nrow(X.diab), seed=1)
 #' nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
 #'                                        gaussian(), folds)
@@ -426,6 +428,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' @examples
 #' \dontrun{
 #' data(diabetes)
+#' doParallel::registerDoParallel(10)
 #' folds <- create.folds(10, nrow(X.diab), seed=1)
 #' base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
 #'                                   "ldl", "hdl", "ltg", "glu")],

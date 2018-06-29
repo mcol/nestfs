@@ -1,5 +1,4 @@
 context("forward selection")
-options(cores=10)
 
 data(diabetes)
 X <- X.diab[, 1:9]
