@@ -46,7 +46,7 @@
 #'        be selected (ignored if \code{num.filter=0}).
 #' @param num.inner.folds Number of folds in the inner cross-validation. It
 #'        must be at least 10 (default: 30).
-#' @param max.iters Maximum number of iterations.
+#' @param max.iters Maximum number of iterations (default: 15).
 #' @param max.pval Interrupt the selection when the best achievable p-value
 #'        exceeds this threshold (default: 0.5).
 #' @param min.llk.diff Interrupt the selection when the best achievable
@@ -122,7 +122,7 @@ forward.selection <- function(x, y, init.model, family,
               "num.inner.folds", "max.iters", "max.pval", "min.llk.diff", "seed")
     args <- as.list(parent.env(environment()))[args]
 
-    ## for arguments with multiple default valuess keep only the first, which
+    ## for arguments with multiple default values keep only the first, which
     ## is the one that is used
     lapply(args, head, n=1)
   }
@@ -435,6 +435,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'                        Y.diab, folds, gaussian())
 #' }
 #' @importFrom stats as.formula glm predict
+#' @keywords multivariate
 #' @export
 nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
