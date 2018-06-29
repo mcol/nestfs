@@ -81,6 +81,8 @@
 #' @seealso \code{\link{nested.forward.selection}}
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
+#' @importFrom stats coefficients glm predict t.test update wilcox.test
+#' @importFrom utils head tail
 #' @export
 forward.selection <- function(x, y, init.model, family,
                               choose.from=NULL, test=c("t", "wilcoxon"),
@@ -429,6 +431,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'                                   "ldl", "hdl", "ltg", "glu")],
 #'                        Y.diab, folds, gaussian())
 #' }
+#' @importFrom stats as.formula glm predict
 #' @export
 nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
@@ -505,6 +508,8 @@ validate.outcome <- function(y) {
 #' A formula describing the initial model. The function throws an error if the
 #' model parameter cannot be used.
 #'
+#' @importFrom methods is
+#' @importFrom stats as.formula update
 #' @noRd
 validate.init.model <- function(model) {
   if (is.null(model) || length(model) == 0) {
@@ -536,6 +541,7 @@ validate.init.model <- function(model) {
 #' A valid family. The function throws an error if the family argument cannot
 #' be used.
 #'
+#' @importFrom methods is
 #' @noRd
 validate.family <- function(family) {
   if (missing(family))

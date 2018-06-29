@@ -58,6 +58,7 @@ summary.fs <- function(object, ...) {
 #' names is searched on the current workspace, and if found full names are
 #' included in the summary dataframe.
 #'
+#' @importFrom stats median quantile
 #' @export
 summary.nestfs <- function(object, iter1=FALSE, ...) {
   iqr <- function(x) quantile(x, c(0.25, 0.75), na.rm=TRUE)
