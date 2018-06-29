@@ -89,7 +89,7 @@ forward.selection <- function(x, y, init.model, family,
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
                               min.llk.diff=0, seed=50) {
   univ.glm <- function(model, xy.train, xy.test) {
-    regr <- glm(as.formula(model), data=xy.train, family=family)
+    regr <- glm(model, data=xy.train, family=family)
     y.pred <- predict(regr, newdata=xy.test, type="response")
     y.test <- xy.test$nestfs_y_
     loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
