@@ -45,7 +45,7 @@
 #'        the univariate association filter so that they are always allowed to
 #'        be selected (ignored if \code{num.filter=0}).
 #' @param num.inner.folds Number of folds in the inner cross-validation. It
-#'        must be at least 10 (default: 30).
+#'        must be at least 5 (default: 30).
 #' @param max.iters Maximum number of iterations (default: 15).
 #' @param max.pval Interrupt the selection when the best achievable p-value
 #'        exceeds this threshold (default: 0.5).
@@ -155,8 +155,8 @@ forward.selection <- function(x, y, init.model, family,
   }
   pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[match.arg(test)]]
   sel.crit <- match.arg(sel.crit)
-  if (num.inner.folds < 10)
-    stop("num.inner.folds should be at least 10.")
+  if (num.inner.folds < 5)
+    stop("num.inner.folds should be at least 5.")
   if (max.iters < 1)
     stop("max.iters should be at least 1.")
   if (max.pval <= 0 || max.pval >= 1)
