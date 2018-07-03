@@ -51,7 +51,7 @@ the univariate association filter so that they are always allowed to
 be selected (ignored if \code{num.filter=0}).}
 
 \item{num.inner.folds}{Number of folds in the inner cross-validation. It
-must be at least 10 (default: 30).}
+must be at least 5 (default: 30).}
 
 \item{max.iters}{Maximum number of iterations (default: 15).}
 
@@ -106,13 +106,12 @@ enhance the performance of forward selection when the number of available
 variables exceeds about 30-40.
 }
 \examples{
-\dontrun{
+library(doParallel)
+registerDoParallel(2)
 data(diabetes)
-doParallel::registerDoParallel(10)
-fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex,
-                            family=gaussian(), max.iters=5)
+fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex, family=gaussian(),
+                            choose.from=1:10, num.inner.folds=5, max.iters=3)
 summary(fs.res)
-}
 }
 \seealso{
 \code{\link{nested.forward.selection}}

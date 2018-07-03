@@ -45,13 +45,12 @@ initial set of covariates (those that would be passed through the
 \code{init.model} argument to \code{forward.selection}).
 }
 \examples{
-\dontrun{
+library(doParallel)
+registerDoParallel(2)
 data(diabetes)
-doParallel::registerDoParallel(10)
 folds <- create.folds(10, nrow(X.diab), seed=1)
 base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
                                   "ldl", "hdl", "ltg", "glu")],
                        Y.diab, folds, gaussian())
-}
 }
 \keyword{multivariate}
