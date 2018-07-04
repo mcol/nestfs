@@ -287,14 +287,14 @@ forward.selection <- function(x, y, init.model, family,
     chosen.var <- rownames(inner.stats)[idx.sel]
     chosen.llk <- inner.stats$total.llk[idx.sel]
     chosen.pval <- inner.stats$p.value[idx.sel]
+
     if (iter == 1) {
       ## compute the log-likelihood for the initialization model
       model.llks[num.init.vars] <- sum(all.llk["Base", ])
 
       ## differences in validation log-likelihoods
-      univ.diffs <- all.llk[-1, , drop=FALSE]
-      for (i in 1:nrow(univ.diffs))
-        univ.diffs[i, ] <- univ.diffs[i, ] - all.llk["Base", ]
+      univ.diffs <- all.llk[-1, , drop=FALSE] - rep(all.llk["Base", ],
+                                                    each=length(other.vars))
       iter1 <- data.frame(median.diff.llk=apply(univ.diffs, 1, median),
                           total.diff.llk=apply(univ.diffs, 1, sum),
                           p.value=inner.stats$p.value)
