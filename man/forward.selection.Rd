@@ -106,12 +106,17 @@ enhance the performance of forward selection when the number of available
 variables exceeds about 30-40.
 }
 \examples{
+# register a parallel cluster with two cores
 library(doParallel)
 registerDoParallel(2)
+
 data(diabetes)
 fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex, family=gaussian(),
                             choose.from=1:10, num.inner.folds=5, max.iters=3)
 summary(fs.res)
+
+# close the parallel cluster
+stopImplicitCluster()
 }
 \seealso{
 \code{\link{nested.forward.selection}}

@@ -45,12 +45,17 @@ initial set of covariates (those that would be passed through the
 \code{init.model} argument to \code{forward.selection}).
 }
 \examples{
+# register a parallel cluster with two cores
 library(doParallel)
 registerDoParallel(2)
+
 data(diabetes)
 folds <- create.folds(10, nrow(X.diab), seed=1)
 base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
                                   "ldl", "hdl", "ltg", "glu")],
                        Y.diab, folds, gaussian())
+
+# close the parallel cluster
+stopImplicitCluster()
 }
 \keyword{multivariate}
