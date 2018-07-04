@@ -72,12 +72,17 @@
 #' }
 #'
 #' @examples
+#' # register a parallel cluster with two cores
 #' library(doParallel)
 #' registerDoParallel(2)
+#'
 #' data(diabetes)
 #' fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex, family=gaussian(),
 #'                             choose.from=1:10, num.inner.folds=5, max.iters=3)
 #' summary(fs.res)
+#'
+#' # close the parallel cluster
+#' stopImplicitCluster()
 #' @seealso \code{\link{nested.forward.selection}}
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
@@ -354,14 +359,19 @@ forward.selection <- function(x, y, init.model, family,
 #' }
 #'
 #' @examples
+#' # register a parallel cluster with two cores
 #' library(doParallel)
 #' registerDoParallel(2)
+#'
 #' data(diabetes)
 #' folds <- create.folds(2, nrow(X.diab), seed=1)
 #' nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
 #'                                        gaussian(), folds, choose.from=1:10,
 #'                                        num.inner.folds=5, max.iters=3)
 #' summary(nestfs.res)
+#'
+#' # close the parallel cluster
+#' stopImplicitCluster()
 #' @seealso \code{\link{forward.selection}}
 #' @keywords multivariate
 #' @export
@@ -425,13 +435,18 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' }
 #'
 #' @examples
+#' # register a parallel cluster with two cores
 #' library(doParallel)
 #' registerDoParallel(2)
+#'
 #' data(diabetes)
 #' folds <- create.folds(10, nrow(X.diab), seed=1)
 #' base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
 #'                                   "ldl", "hdl", "ltg", "glu")],
 #'                        Y.diab, folds, gaussian())
+#'
+#' # close the parallel cluster
+#' stopImplicitCluster()
 #' @importFrom stats as.formula glm predict
 #' @keywords multivariate
 #' @export
