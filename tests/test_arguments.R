@@ -30,6 +30,8 @@ test_that("argument checks",
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  choose.from=120))
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 choose.from=12.5))
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  choose.from="nonexisting"))
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  choose.from=NA))

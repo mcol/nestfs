@@ -138,9 +138,11 @@ forward.selection <- function(x, y, init.model, family,
   if (is.null(choose.from))
     choose.from <- seq(ncol(x))
   else {
-    if (is.integer(choose.from)) {
+    if (is.numeric(choose.from)) {
       if (min(choose.from) < 1 || max(choose.from) > ncol(x))
         stop("choose.from contains out of bound indices.")
+      if (any(choose.from != as.integer(choose.from)))
+        stop("choose.from contains floating point values.")
     }
     else if (is.character(choose.from)) {
       choose.from <- match(choose.from, colnames(x))
