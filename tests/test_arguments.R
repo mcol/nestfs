@@ -8,59 +8,85 @@ y.short <- y.binom[1:10]
 
 test_that("argument checks",
 {
-  expect_error(forward.selection(diabetes, y.binom, family=binomial()))
-  expect_error(forward.selection(diabetes, y.short, "age", binomial()))
-  expect_error(forward.selection(diabetes, y.binom, "nonexisting", binomial()))
+  expect_error(forward.selection(diabetes, y.binom, family=binomial()),
+               "is missing, with no default")
+  expect_error(forward.selection(diabetes, y.short, "age", binomial()),
+               "Mismatched dimensions")
+  expect_error(forward.selection(diabetes, y.binom, "nonexisting", binomial()),
+               "not present in x")
   expect_error(forward.selection(within(diabetes, sex[20] <- NA),
-                                 y.binom, ~ age + sex, binomial()))
+                                 y.binom, ~ age + sex, binomial()),
+               "Missing values in the variables")
 
   ## tests for formulas in init.model
-  expect_error(forward.selection(diabetes, y.binom, y ~ nonexisting, binomial))
-  expect_error(forward.selection(diabetes, y.binom, y ~ NA, binomial))
-  expect_error(forward.selection(diabetes, y.binom, "~ age _ lll", binomial))
+  expect_error(forward.selection(diabetes, y.binom, y ~ nonexisting, binomial),
+               "not present in x")
+  expect_error(forward.selection(diabetes, y.binom, y ~ NA, binomial),
+               "invalid model formula in ExtractVars")
+  expect_error(forward.selection(diabetes, y.binom, "~ age _ lll", binomial),
+               "unexpected input")
 
   ## tests for family
-  expect_error(forward.selection(diabetes, y.binom, "age"))
-  expect_error(forward.selection(diabetes, y.gauss, "age", binomial()))
-  expect_error(forward.selection(diabetes, y.gauss, "age", poisson()))
+  expect_error(forward.selection(diabetes, y.binom, "age"),
+               "Argument of 'family' is missing")
+  expect_error(forward.selection(diabetes, y.gauss, "age", binomial()),
+               "More than two classes in y")
+  expect_error(forward.selection(diabetes, y.gauss, "age", poisson()),
+               "are supported families")
 
   ## tests for choose.from
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=0))
+                                 choose.from=0),
+               "out of bounds indices")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=120))
+                                 choose.from=120),
+               "out of bounds indices")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=12.5))
+                                 choose.from=12.5),
+               "floating point values")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from="nonexisting"))
+                                 choose.from="nonexisting"),
+               "names that cannot be matched")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=NA))
+                                 choose.from=NA),
+               "integer or character vector")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=c(TRUE, FALSE)))
+                                 choose.from=c(TRUE, FALSE)),
+               "integer or character vector")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=diabetes))
+                                 choose.from=diabetes),
+               "integer or character vector")
 
   ## tests for num.filter
   expect_error(forward.selection(diabetes, y.gauss, "age", gaussian(),
-                                 num.filter=10))
+                                 num.filter=10),
+               "only be used with family=binomial()")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 num.filter=ncol(diabetes)))
+                                 num.filter=ncol(diabetes)),
+               "cannot exceed the number of available predictors")
 
   ## tests for other arguments
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 num.inner.folds=1))
+                                 num.inner.folds=1),
+               "should be at least 5")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 max.iters=0))
+                                 max.iters=0),
+               "should be at least 1")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 max.pval=0))
+                                 max.pval=0),
+               "should be between 0 and 1")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 max.pval=1))
+                                 max.pval=1),
+               "should be between 0 and 1")
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 min.llk.diff=-1))
+                                 min.llk.diff=-1),
+               "cannot be negative")
 
   ## tests for nested forward selection
-  expect_error(nested.forward.selection(diabetes, y.binom, "age"))
-  expect_error(nested.forward.selection(diabetes, y.binom, "age", binomial()))
+  expect_error(nested.forward.selection(diabetes, y.binom, "age"),
+               "is missing, with no default")
+  expect_error(nested.forward.selection(diabetes, y.binom, "age", binomial()),
+               "is missing, with no default")
 })
 
 context("outcome validation")
@@ -73,22 +99,33 @@ test_that("invalid family inputs",
   y.inval <- data.frame(matrix(seq(length(y.binom) * 2), nrow=2))
   y.dates <- rep(Sys.Date(), length(y.binom))
 
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial()))
-  expect_error(forward.selection(diabetes, y.large, "age", binomial()))
-  expect_error(forward.selection(diabetes, y.categ, "age", binomial()))
-  expect_error(forward.selection(diabetes, y.strng, "age", gaussian()))
-  expect_error(forward.selection(diabetes, y.inval, "age", gaussian()))
-  expect_error(forward.selection(diabetes, y.dates, "age", gaussian()))
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial()),
+               "contains missing values")
+  expect_error(forward.selection(diabetes, y.large, "age", binomial()),
+               "must be between 0 and 1")
+  expect_error(forward.selection(diabetes, y.categ, "age", binomial()),
+               "can only have two levels")
+  expect_error(forward.selection(diabetes, y.strng, "age", gaussian()),
+               "cannot be a character vector")
+  expect_error(forward.selection(diabetes, y.inval, "age", gaussian()),
+               "invalid type")
+  expect_error(forward.selection(diabetes, y.dates, "age", gaussian()),
+               "invalid type")
 })
 
 context("family validation")
 test_that("invalid family inputs",
 {
-  expect_error(validate.family())
-  expect_error(validate.family(NULL))
-  expect_error(validate.family(diabetes))
-  expect_error(validate.family("nonexisting"))
-  expect_error(validate.family(poisson))
+  expect_error(validate.family(),
+               "Argument of 'family' is missing")
+  expect_error(validate.family(NULL),
+               "is not a valid family")
+  expect_error(validate.family(diabetes),
+               "is not a valid family")
+  expect_error(validate.family("nonexisting"),
+               "is not a valid family")
+  expect_error(validate.family(poisson),
+               "are supported families")
 })
 
 test_that("valid family inputs",
