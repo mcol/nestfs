@@ -140,7 +140,7 @@ forward.selection <- function(x, y, init.model, family,
   else {
     if (is.numeric(choose.from)) {
       if (min(choose.from) < 1 || max(choose.from) > ncol(x))
-        stop("choose.from contains out of bound indices.")
+        stop("choose.from contains out of bounds indices.")
       if (any(choose.from != as.integer(choose.from)))
         stop("choose.from contains floating point values.")
     }
@@ -576,7 +576,7 @@ validate.family <- function(family) {
   if (!is(family, "family"))
     stop("Argument of 'family' is not a valid family.", call.=FALSE)
   if (!family$family %in% c("gaussian", "binomial"))
-    stop("Only supported families are 'gaussian' or 'binomial'.", call.=FALSE)
+    stop("Only 'gaussian' and 'binomial' are supported families.", call.=FALSE)
 
   return(family)
 }
