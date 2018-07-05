@@ -194,16 +194,15 @@ forward.selection <- function(x, y, init.model, family,
       stop("filter.ignore should be a character vector or NULL.")
 
     ## run the filter on the training part of all inner folds
-    all.filt.idx <- NULL
+    fold <- NULL   # silence a note raised by R CMD check
     ignore.vars <- c(init.vars, filter.ignore)
-    for (fold in 1:num.inner.folds) {
+    all.filt.idx <- foreach(fold=1:num.inner.folds, .combine=c) %dopar% {
 
       train.idx <- setdiff(seq(nrow(x)), folds[[fold]])
       x.train <- x[train.idx, ]
       y.train <- y[train.idx]
       filt.idx <- filter.predictors(x.train, y.train, num.filter,
                                     ignore=ignore.vars)
-      all.filt.idx <- c(all.filt.idx, filt.idx)
     }
 
     ## keep the union of the variables retained in the inner folds
