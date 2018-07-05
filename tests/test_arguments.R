@@ -18,13 +18,9 @@ test_that("argument checks",
                                  y.binom, ~ age + sex, binomial()),
                "Missing values in the variables")
 
-  ## tests for formulas in init.model
+  ## tests for init.model
   expect_error(forward.selection(diabetes, y.binom, y ~ nonexisting, binomial),
                "not present in x")
-  expect_error(forward.selection(diabetes, y.binom, y ~ NA, binomial),
-               "invalid model formula in ExtractVars")
-  expect_error(forward.selection(diabetes, y.binom, "~ age _ lll", binomial),
-               "unexpected input")
 
   ## tests for family
   expect_error(forward.selection(diabetes, y.binom, "age"),
@@ -96,6 +92,45 @@ test_that("invalid family inputs",
                "invalid type")
   expect_error(forward.selection(diabetes, y.dates, "age", gaussian()),
                "invalid type")
+})
+
+context("init.model validation")
+test_that("invalid init.model inputs",
+{
+  expect_error(validate.init.model(NA),
+               "specified incorrectly")
+  expect_error(validate.init.model(y ~ NA),
+               "invalid model formula in ExtractVars")
+  expect_error(validate.init.model("~ NA"),
+               "invalid model formula in ExtractVars")
+  expect_error(validate.init.model("~ age _ lll"),
+               "unexpected input")
+  expect_error(validate.init.model(c("age", "*sex")),
+               "unexpected '*'")
+})
+
+test_that("valid init.model inputs",
+{
+  expect_equal(validate.init.model(NULL),
+               nestfs_y_ ~ 1)
+  expect_equal(validate.init.model(character(0)),
+               nestfs_y_ ~ 1)
+  expect_equal(validate.init.model(integer(0)),
+               nestfs_y_ ~ 1)
+  expect_equal(validate.init.model(~ age + sex),
+               nestfs_y_ ~ age + sex)
+  expect_equal(validate.init.model(y ~ age * sex),
+               nestfs_y_ ~ age + sex + age:sex)
+  expect_equal(validate.init.model(c("age", "sex")),
+               nestfs_y_ ~ age + sex)
+  expect_equal(validate.init.model("age*sex"),
+               nestfs_y_ ~ age + sex + age:sex)
+  expect_equal(validate.init.model("age:sex"),
+               nestfs_y_ ~ age:sex)
+  expect_equal(validate.init.model("z ~ age * sex"),
+               nestfs_y_ ~ age + sex + age:sex)
+  expect_equal(validate.init.model(~ notexisting),
+               nestfs_y_ ~ notexisting)
 })
 
 context("family validation")
