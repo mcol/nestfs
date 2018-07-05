@@ -135,13 +135,7 @@ forward.selection <- function(x, y, init.model, family,
     stop("Mismatched dimensions.")
   y <- validate.outcome(y)
   choose.from <- validate.choose.from(choose.from, x)
-  family <- validate.family(family)
-  if (family$family == "binomial") {
-    if (length(table(y)) != 2)
-      stop("More than two classes in y with family=binomial().")
-    if (any(y < 0 | y > 1))
-      stop("Values in y must be between 0 and 1.")
-  }
+  family <- validate.family(family, y)
   test <- match.arg(test)
   pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[test]]
   sel.crit <- match.arg(sel.crit)
@@ -441,7 +435,8 @@ nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
   folds <- validate.folds(folds, x)
   y <- validate.outcome(y)
-  family <- validate.family(family)
+  family <- validate.family(family, y)
+
   res <- list()
   for (fold in 1:length(folds)) {
     idx.test <- folds[[fold]]
@@ -540,6 +535,7 @@ validate.init.model <- function(model) {
 #' This is inspired by code in \code{\link{glm}}.
 #'
 #' @param family Family argument to test.
+#' @param y Outcome variable.
 #'
 #' @return
 #' A valid family. The function throws an error if the family argument cannot
@@ -547,7 +543,7 @@ validate.init.model <- function(model) {
 #'
 #' @importFrom methods is
 #' @noRd
-validate.family <- function(family) {
+validate.family <- function(family, y) {
   if (missing(family))
     stop("Argument of 'family' is missing.", call.=FALSE)
   if (is.character(family))
@@ -562,6 +558,13 @@ validate.family <- function(family) {
     stop("Argument of 'family' is not a valid family.", call.=FALSE)
   if (!family$family %in% c("gaussian", "binomial"))
     stop("Only 'gaussian' and 'binomial' are supported families.", call.=FALSE)
+
+  if (family$family == "binomial") {
+    if (length(table(y)) != 2)
+      stop("y must contain two classes with family=binomial().", call.=FALSE)
+    if (any(y < 0 | y > 1))
+      stop("y must contain 0-1 values with family=binomial().", call.=FALSE)
+  }
 
   return(family)
 }

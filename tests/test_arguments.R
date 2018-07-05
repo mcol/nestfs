@@ -25,10 +25,6 @@ test_that("argument checks",
   ## tests for family
   expect_error(forward.selection(diabetes, y.binom, "age"),
                "Argument of 'family' is missing")
-  expect_error(forward.selection(diabetes, y.gauss, "age", binomial()),
-               "More than two classes in y")
-  expect_error(forward.selection(diabetes, y.gauss, "age", poisson()),
-               "are supported families")
 
   ## tests for num.filter
   expect_error(forward.selection(diabetes, y.gauss, "age", gaussian(),
@@ -82,8 +78,6 @@ test_that("invalid family inputs",
 
   expect_error(forward.selection(diabetes, y.binom, "age", binomial()),
                "contains missing values")
-  expect_error(forward.selection(diabetes, y.large, "age", binomial()),
-               "must be between 0 and 1")
   expect_error(forward.selection(diabetes, y.categ, "age", binomial()),
                "can only have two levels")
   expect_error(forward.selection(diabetes, y.strng, "age", gaussian()),
@@ -148,11 +142,17 @@ test_that("invalid family inputs",
                "is not a valid family")
   expect_error(validate.family(poisson),
                "are supported families")
+  expect_error(validate.family(binomial(), y.gauss),
+               "must contain two classes")
+  expect_error(validate.family(binomial(), y.binom + 1),
+               "must contain 0-1 values")
+  expect_error(validate.family(binomial(), y.binom - 1),
+               "must contain 0-1 values")
 })
 
 test_that("valid family inputs",
 {
-  expect_equal(validate.family("binomial")$family, "binomial")
+  expect_equal(validate.family("binomial", c(1, 0))$family, "binomial")
   expect_equal(validate.family("gaussian")$family, "gaussian")
   expect_equal(validate.family(gaussian())$family, "gaussian")
   expect_equal(validate.family(gaussian)$family,   "gaussian")
