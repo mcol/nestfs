@@ -148,6 +148,8 @@ test_that("valid choose.from inputs",
                1:ncol(diabetes))
   expect_equal(validate.choose.from(character(0), diabetes),
                integer(0))
+  expect_equal(validate.choose.from(integer(0), diabetes),
+               integer(0))
   expect_equal(validate.choose.from(colnames(diabetes)[c(1, 6, 7)], diabetes),
                c(1, 6, 7))
   expect_equal(validate.choose.from(5,  diabetes),

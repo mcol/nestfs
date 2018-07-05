@@ -583,7 +583,8 @@ validate.choose.from <- function(choose.from, x) {
     if (is.numeric(choose.from)) {
       if (any(is.na(choose.from)))
         stop("choose.from contains missing values.", call.=FALSE)
-      if (min(choose.from) < 1 || max(choose.from) > ncol(x))
+      if (length(choose.from) > 0 &&
+          (min(choose.from) < 1 || max(choose.from) > ncol(x)))
         stop("choose.from contains out of bounds indices.", call.=FALSE)
       if (any(choose.from != as.integer(choose.from)))
         stop("choose.from contains floating point values.", call.=FALSE)
