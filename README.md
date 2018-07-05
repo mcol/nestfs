@@ -26,3 +26,6 @@ from is not too large (in our experience, up to about 30-40 variables).
 However, when the number of variables is much larger than that, forward
 selection, besides being unbearably slow, may be more subject to overfitting,
 which is in the nature of its greedy-like design.
+
+A precompiled package is
+[available on CRAN](https://CRAN.R-project.org/package=nestfs).
