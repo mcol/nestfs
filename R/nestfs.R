@@ -490,9 +490,10 @@ validate.outcome <- function(y) {
       stop("A factor outcome variable can only have two levels.", call.=FALSE)
     y <- as.integer(y) - 1
   }
-  if (!(is.numeric(y) || is.integer(y) || is.logical(y)))
+  if (!(is.numeric(y) || is.logical(y)))
     stop("Outcome variable of invalid type.", call.=FALSE)
-  return(y)
+
+  return(as.numeric(y))
 }
 
 #' Validate initial model

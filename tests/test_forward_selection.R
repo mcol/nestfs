@@ -3,6 +3,7 @@ context("forward selection")
 data(diabetes)
 X <- X.diab[, 1:9]
 Y <- Y.diab
+y.binom <- as.integer(Y > 140)
 
 source("dump_forward_selection.R")
 
@@ -24,23 +25,9 @@ test_that("linear regression",
 
 test_that("logistic regression",
 {
-  ## 0-1 outcome variable
-  y.binom <- as.integer(Y > 140)
   fs.binom <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
                                 num.inner.folds=10, max.iters=3, verbose=FALSE)
   expect_equal(fs.binom, fs.binom.ok)
-
-  ## logical outcome variable
-  y.binom <- Y > 140
-  fs.logic <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
-                                num.inner.folds=10, max.iters=3, verbose=FALSE)
-  expect_equal(fs.logic, fs.binom.ok)
-
-  ## factor outcome variable
-  y.binom <- factor(Y > 140)
-  fs.logic <- forward.selection(X, y.binom, c("age", "sex"), family="binomial",
-                                num.inner.folds=10, max.iters=3, verbose=FALSE)
-  expect_equal(fs.logic, fs.binom.ok)
 })
 
 test_that("init.model",
@@ -103,7 +90,6 @@ test_that("choose.from",
 
 test_that("univariate filter",
 {
-  y.binom <- Y > 140
   fs.1 <- forward.selection(X, y.binom, ~ age + sex, binomial(),
                             num.filter=5,
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
