@@ -160,12 +160,12 @@ forward.selection <- function(x, y, init.model, family,
 
   ## check that all variables exist in the dataframe of predictors
   var.match <- match(init.vars, colnames(x))
-  if (any(is.na(var.match)))
+  if (anyNA(var.match))
     stop("'", paste(init.vars[is.na(var.match)], collapse="', '"),
          "' not present in x.")
 
   ## check that there is no missingness in the initial model
-  if (any(is.na(x[, init.vars])))
+  if (anyNA(x[, init.vars]))
     stop("Missing values in the variables of the initial model.")
 
   ## create the inner folds
@@ -485,7 +485,7 @@ loglikelihood <- function(family, obs, fit, disp) {
 #'
 #' @noRd
 validate.outcome <- function(y) {
-  if (any(is.na(y)))
+  if (anyNA(y))
     stop("Outcome variable contains missing values.", call.=FALSE)
   if (is.character(y))
     stop("Outcome variable cannot be a character vector.", call.=FALSE)
@@ -582,7 +582,7 @@ validate.choose.from <- function(choose.from, x) {
     choose.from <- seq(ncol(x))
   else {
     if (is.numeric(choose.from)) {
-      if (any(is.na(choose.from)))
+      if (anyNA(choose.from))
         stop("choose.from contains missing values.", call.=FALSE)
       if (length(choose.from) > 0 &&
           (min(choose.from) < 1 || max(choose.from) > ncol(x)))
@@ -592,7 +592,7 @@ validate.choose.from <- function(choose.from, x) {
     }
     else if (is.character(choose.from)) {
       choose.from <- match(choose.from, colnames(x))
-      if (any(is.na(choose.from)))
+      if (anyNA(choose.from))
         stop("choose.from contains names that cannot be matched.", call.=FALSE)
     }
     else
