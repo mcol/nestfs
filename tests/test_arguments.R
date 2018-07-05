@@ -132,6 +132,8 @@ test_that("invalid choose.from inputs",
                "contains floating point values")
   expect_error(validate.choose.from("nonexisting", diabetes),
                "names that cannot be matched")
+  expect_error(validate.choose.from(c(1:5, NA), diabetes),
+               "contains missing values")
   expect_error(validate.choose.from(NA, diabetes),
                "integer or character vector")
   expect_error(validate.choose.from(c(TRUE, FALSE), diabetes),
