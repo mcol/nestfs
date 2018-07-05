@@ -123,7 +123,7 @@ test_that("num.filter",
                             choose.from=30:40, num.filter=5,
                             num.inner.folds=10, max.iters=3)
   expect_length(fs.2$panel, 0)
-  expect_equal(dim(fs.1$iter1), c(5, 3))
+  expect_equal(dim(fs.2$iter1), c(5, 3))
 })
 
 context("nested forward selection")
