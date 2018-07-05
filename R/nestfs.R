@@ -53,6 +53,8 @@
 #'        improvement in log-likelihood is smaller than this threshold
 #'        (default: 0).
 #' @param seed Seed of the random number generator for the inner folds.
+#' @param verbose Whether the variable chosen at each iteration should be
+#'        printed out (default: \code{TRUE}).
 #'
 #' @return
 #' An object of class \code{fs} containing the following fields:
@@ -94,7 +96,7 @@ forward.selection <- function(x, y, init.model, family,
                               sel.crit=c("paired.test", "total.loglik", "both"),
                               num.filter=0, filter.ignore=NULL,
                               num.inner.folds=30, max.iters=15, max.pval=0.5,
-                              min.llk.diff=0, seed=50) {
+                              min.llk.diff=0, seed=50, verbose=TRUE) {
   univ.glm <- function(model, xy.train, xy.test) {
     regr <- glm(model, data=xy.train, family=family)
     y.pred <- predict(regr, newdata=xy.test, type="response")
@@ -286,7 +288,8 @@ forward.selection <- function(x, y, init.model, family,
 
     ## report iteration summary
     diff.llk <- chosen.llk - max(model.llks, na.rm=TRUE)
-    report.iter(iter, chosen.var, chosen.pval, chosen.llk, diff.llk)
+    if (verbose)
+      report.iter(iter, chosen.var, chosen.pval, chosen.llk, diff.llk)
 
     ## check for early termination
     if (max(chosen.pval) > max.pval)
