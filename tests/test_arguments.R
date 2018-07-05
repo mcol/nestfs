@@ -192,3 +192,24 @@ test_that("valid choose.from inputs",
   expect_equal(validate.choose.from(5,  diabetes),
                validate.choose.from(5L, diabetes))
 })
+
+context("folds validation")
+test_that("invalid folds inputs",
+{
+  expect_error(validate.folds(NULL),
+               "expected to be a list")
+  expect_error(validate.folds(1:100),
+               "expected to be a list")
+  expect_error(validate.folds(list(c(1:5), NA)),
+               "contains missing values")
+  expect_error(validate.folds(list(c(1:5), c("a", "b"))),
+               "contains non-numerical values")
+  expect_error(validate.folds(list(c(1:5), c(3.2, 4.5))),
+               "contains non-integer values")
+  expect_error(validate.folds(list(c(1:5), c(5:10))),
+               "contains repeated indices")
+  expect_error(validate.folds(list(c(1:5), c(6:10, 0)), diabetes),
+               "contains out of bounds indices")
+  expect_error(validate.folds(list(c(1:5), c(6, nrow(diabetes) + 1)), diabetes),
+               "contains out of bounds indices")
+})

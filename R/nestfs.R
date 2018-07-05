@@ -364,6 +364,7 @@ forward.selection <- function(x, y, init.model, family,
 nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 
   all.res <- list()
+  folds <- validate.folds(folds, x)
   num.folds <- length(folds)
   for (fold in 1:num.folds) {
 
@@ -438,7 +439,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' @export
 nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   stopifnot(all.equal(nrow(x), length(y)))
-  stopifnot(max(unlist(folds)) <= nrow(x))
+  folds <- validate.folds(folds, x)
   y <- validate.outcome(y)
   family <- validate.family(family)
   res <- list()
@@ -599,4 +600,32 @@ validate.choose.from <- function(choose.from, x) {
       stop("choose.from should be an integer or character vector.", call.=FALSE)
   }
   return(choose.from)
+}
+
+#' Validate the folds argument
+#'
+#' Ensure that the \code{folds} argument has been specified correctly.
+#'
+#' @param folds Argument to test.
+#'
+#' @return
+#' A valid list of folds. The function throws an error if the argument cannot
+#' be used.
+#'
+#' @noRd
+validate.folds <- function(folds, x) {
+  if (!is.list(folds))
+    stop("folds expected to be a list.", call.=FALSE)
+  all.idx <- unlist(folds)
+  if (anyNA(all.idx))
+    stop("folds contains missing values.", call.=FALSE)
+  if (!is.numeric(all.idx))
+    stop("folds contains non-numerical values.", call.=FALSE)
+  if (any(all.idx != as.integer(all.idx)))
+    stop("folds contains non-integer values", call.=FALSE)
+  if (any(table(all.idx) > 1))
+    stop("folds contains repeated indices.", call.=FALSE)
+  if (any(all.idx <= 0 | all.idx > nrow(x)))
+    stop("folds contains out of bounds indices.", call.=FALSE)
+  return(folds)
 }
