@@ -443,8 +443,6 @@ nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   family <- validate.family(family)
   res <- list()
   for (fold in 1:length(folds)) {
-    if (fold %% 10 == 0)
-      cat("Fold", fold, "\n")
     idx.test <- folds[[fold]]
     idx.train <- setdiff(1:nrow(x), idx.test)
     x.test <- x[idx.test, ]; x.train <- x[idx.train, ]
