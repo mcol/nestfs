@@ -263,9 +263,7 @@ forward.selection <- function(x, y, init.model, family,
     }
 
     ## collect all validation log-likelihoods
-    all.llk <- NULL
-    for (fold in 1:num.inner.folds)
-      all.llk <- cbind(all.llk, res.inner[[fold]][, 3])
+    all.llk <- sapply(res.inner, function(z) z[, "valid.llk"])
     all.iter[[iter]] <- all.llk
     inner.stats <- data.frame(p.value=paired.pvals(all.llk, pval.test),
                               total.llk=rowSums(all.llk[-1, , drop=FALSE]))
