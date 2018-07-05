@@ -526,7 +526,7 @@ validate.init.model <- function(model) {
       model <- as.formula(paste("y ~", paste(model, collapse= " + ")))
   }
   else if (!is(model, "formula"))
-    stop("init.model specified incorrectly.")
+    stop("init.model specified incorrectly.", call.=FALSE)
 
   ## rename the left-hand side or add it if not present
   model <- update(model, "nestfs_y_ ~ .")
