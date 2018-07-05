@@ -93,19 +93,10 @@ test_that("choose.from",
 
   ## choose.from with indices and variable names
   fs.1 <- forward.selection(X, Y, c("age", "sex"), family="gaussian",
-                            choose.from=c(3:6),
+                            choose.from=5,
                             num.inner.folds=10, max.iters=3)
   fs.2 <- forward.selection(X, Y, c("age", "sex"), family="gaussian",
-                            choose.from=c("bmi", "map", "tc", "ldl"),
-                            num.inner.folds=10, max.iters=3)
-  expect_equal(fs.1, fs.2)
-
-  ## only one integer to choose from
-  fs.1 <- forward.selection(X, Y, ~ age + sex, family=gaussian(),
-                            choose.from=5L,
-                            num.inner.folds=10, max.iters=3)
-  fs.2 <- forward.selection(X, Y, ~ age + sex, family=gaussian(),
-                            choose.from=5,
+                            choose.from="tc",
                             num.inner.folds=10, max.iters=3)
   expect_equal(fs.1, fs.2)
 })

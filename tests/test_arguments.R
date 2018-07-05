@@ -141,3 +141,15 @@ test_that("invalid choose.from inputs",
   expect_error(validate.choose.from(diabetes, diabetes),
                "integer or character vector")
 })
+
+test_that("valid choose.from inputs",
+{
+  expect_equal(validate.choose.from(NULL, diabetes),
+               1:ncol(diabetes))
+  expect_equal(validate.choose.from(character(0), diabetes),
+               integer(0))
+  expect_equal(validate.choose.from(colnames(diabetes)[c(1, 6, 7)], diabetes),
+               c(1, 6, 7))
+  expect_equal(validate.choose.from(5,  diabetes),
+               validate.choose.from(5L, diabetes))
+})
