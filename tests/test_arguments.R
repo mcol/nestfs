@@ -34,29 +34,6 @@ test_that("argument checks",
   expect_error(forward.selection(diabetes, y.gauss, "age", poisson()),
                "are supported families")
 
-  ## tests for choose.from
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=0),
-               "out of bounds indices")
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=120),
-               "out of bounds indices")
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=12.5),
-               "floating point values")
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from="nonexisting"),
-               "names that cannot be matched")
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=NA),
-               "integer or character vector")
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=c(TRUE, FALSE)),
-               "integer or character vector")
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
-                                 choose.from=diabetes),
-               "integer or character vector")
-
   ## tests for num.filter
   expect_error(forward.selection(diabetes, y.gauss, "age", gaussian(),
                                  num.filter=10),
@@ -142,4 +119,23 @@ test_that("valid family inputs",
   expect_equal(validate.family("gaussian")$family, "gaussian")
   expect_equal(validate.family(gaussian())$family, "gaussian")
   expect_equal(validate.family(gaussian)$family,   "gaussian")
+})
+
+context("choose.from validation")
+test_that("invalid choose.from inputs",
+{
+  expect_error(validate.choose.from(0, diabetes),
+               "out of bounds indices")
+  expect_error(validate.choose.from(120, diabetes),
+               "out of bounds indices")
+  expect_error(validate.choose.from(12.5, diabetes),
+               "contains floating point values")
+  expect_error(validate.choose.from("nonexisting", diabetes),
+               "names that cannot be matched")
+  expect_error(validate.choose.from(NA, diabetes),
+               "integer or character vector")
+  expect_error(validate.choose.from(c(TRUE, FALSE), diabetes),
+               "integer or character vector")
+  expect_error(validate.choose.from(diabetes, diabetes),
+               "integer or character vector")
 })

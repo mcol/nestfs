@@ -132,23 +132,7 @@ forward.selection <- function(x, y, init.model, family,
   if (nrow(x) != length(y))
     stop("Mismatched dimensions.")
   y <- validate.outcome(y)
-  if (is.null(choose.from))
-    choose.from <- seq(ncol(x))
-  else {
-    if (is.numeric(choose.from)) {
-      if (min(choose.from) < 1 || max(choose.from) > ncol(x))
-        stop("choose.from contains out of bounds indices.")
-      if (any(choose.from != as.integer(choose.from)))
-        stop("choose.from contains floating point values.")
-    }
-    else if (is.character(choose.from)) {
-      choose.from <- match(choose.from, colnames(x))
-      if (any(is.na(choose.from)))
-        stop("choose.from contains names that cannot be matched.")
-    }
-    else
-      stop("choose.from should be an integer or character vector.")
-  }
+  choose.from <- validate.choose.from(choose.from, x)
   family <- validate.family(family)
   if (family$family == "binomial") {
     if (length(table(y)) != 2)
@@ -578,4 +562,37 @@ validate.family <- function(family) {
     stop("Only 'gaussian' and 'binomial' are supported families.", call.=FALSE)
 
   return(family)
+}
+
+#' Validate the choose.from argument
+#'
+#' Ensure that the \code{choose.from} argument has been specified correctly.
+#'
+#' @param choose.from Argument to test.
+#' @param x Dataframe of predictors.
+#'
+#' @return
+#' A valid vector of variable indices. The function throws an error if the
+#' argument cannot be used.
+#'
+#' @noRd
+validate.choose.from <- function(choose.from, x) {
+  if (is.null(choose.from))
+    choose.from <- seq(ncol(x))
+  else {
+    if (is.numeric(choose.from)) {
+      if (min(choose.from) < 1 || max(choose.from) > ncol(x))
+        stop("choose.from contains out of bounds indices.", call.=FALSE)
+      if (any(choose.from != as.integer(choose.from)))
+        stop("choose.from contains floating point values.", call.=FALSE)
+    }
+    else if (is.character(choose.from)) {
+      choose.from <- match(choose.from, colnames(x))
+      if (any(is.na(choose.from)))
+        stop("choose.from contains names that cannot be matched.", call.=FALSE)
+    }
+    else
+      stop("choose.from should be an integer or character vector.", call.=FALSE)
+  }
+  return(choose.from)
 }
