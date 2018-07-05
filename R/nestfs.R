@@ -125,10 +125,7 @@ forward.selection <- function(x, y, init.model, family,
     args <- c("test", "sel.crit", "num.filter", "filter.ignore",
               "num.inner.folds", "max.iters", "max.pval", "min.llk.diff", "seed")
     args <- as.list(parent.env(environment()))[args]
-
-    ## for arguments with multiple default values keep only the first, which
-    ## is the one that is used
-    lapply(args, head, n=1)
+    return(args)
   }
 
   ## argument checks
@@ -159,7 +156,8 @@ forward.selection <- function(x, y, init.model, family,
     if (any(y < 0 | y > 1))
       stop("Values in y must be between 0 and 1.")
   }
-  pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[match.arg(test)]]
+  test <- match.arg(test)
+  pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[test]]
   sel.crit <- match.arg(sel.crit)
   if (num.inner.folds < 5)
     stop("num.inner.folds should be at least 5.")
