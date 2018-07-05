@@ -107,6 +107,8 @@ test_that("invalid init.model inputs",
                "unexpected input")
   expect_error(validate.init.model(c("age", "*sex")),
                "unexpected '*'")
+  expect_error(validate.init.model(c("age", "")),
+               "contains an empty string")
 })
 
 test_that("valid init.model inputs",

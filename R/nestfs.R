@@ -520,6 +520,8 @@ validate.init.model <- function(model) {
     model <- y ~ 1
   }
   else if (is.character(model)) {
+    if (any(model == ""))
+      stop("init.model contains an empty string.", call.=FALSE)
     if (length(model) == 1 && grepl("~", model))
       model <- as.formula(model)
     else
