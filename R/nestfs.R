@@ -182,7 +182,6 @@ forward.selection <- function(x, y, init.model, family,
 
   ## limit the number of variables to choose from
   keep.vars <- union(choose.from, match(init.vars, colnames(x)))
-  keep.vars <- keep.vars[!is.na(keep.vars)] # remove NAs from interaction terms
   x <- x[, keep.vars]
 
   ## filtering according to association with outcome
