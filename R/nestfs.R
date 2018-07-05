@@ -206,6 +206,8 @@ forward.selection <- function(x, y, init.model, family,
       stop("num.filter can only be used with family=binomial().")
     if (num.filter >= ncol(x))
       stop("num.filter cannot exceed the number of available predictors.")
+    if (!is.null(filter.ignore) && !is.character(filter.ignore))
+      stop("filter.ignore should be a character vector or NULL.")
 
     ## run the filter on the training part of all inner folds
     all.filt.idx <- NULL

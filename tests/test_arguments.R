@@ -65,6 +65,14 @@ test_that("argument checks",
                                  num.filter=ncol(diabetes)),
                "cannot exceed the number of available predictors")
 
+  ## tests for filter.ignore
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 num.filter=5, filter.ignore=NA),
+               "should be a character vector or NULL")
+  expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
+                                 num.filter=5, filter.ignore=1:10),
+               "should be a character vector or NULL")
+
   ## tests for other arguments
   expect_error(forward.selection(diabetes, y.binom, "age", binomial(),
                                  num.inner.folds=1),
