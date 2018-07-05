@@ -110,7 +110,7 @@ test_that("choose.from",
   expect_equal(fs.1, fs.2)
 })
 
-test_that("num.filter",
+test_that("univariate filter",
 {
   y.binom <- Y > 140
   fs.1 <- forward.selection(X, y.binom, ~ age + sex, binomial(),
@@ -124,6 +124,16 @@ test_that("num.filter",
                             num.inner.folds=10, max.iters=3)
   expect_length(fs.2$panel, 0)
   expect_equal(dim(fs.2$iter1), c(5, 3))
+
+  fs.3 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
+                            num.filter=5, filter.ignore="bmi",
+                            num.inner.folds=10, max.iters=3)
+  fs.4 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
+                            num.filter=5, filter.ignore=c("bmi", "nonexisting"),
+                            num.inner.folds=10, max.iters=3)
+  fs.4$params$filter.ignore <- fs.4$params$filter.ignore[1]
+  expect_equal(fs.3, fs.4)
+  expect_equal(fs.3$fs, fs.binom.ok$fs)
 })
 
 context("nested forward selection")

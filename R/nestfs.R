@@ -224,6 +224,7 @@ forward.selection <- function(x, y, init.model, family,
     filt.idx <- sort(table(all.filt.idx), decreasing=TRUE)
     filt.idx <- as.integer(names(filt.idx))[1:num.filter]
     keep.idx <- union(match(ignore.vars, colnames(x)), filt.idx)
+    keep.idx <- keep.idx[!is.na(keep.idx)]
     x <- x[, keep.idx]
   }
 
