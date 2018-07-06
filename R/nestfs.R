@@ -357,7 +357,7 @@ forward.selection <- function(x, y, init.model, family,
 #' @export
 nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 
-  all.res <- list()
+  res <- list()
   folds <- validate.folds(folds, x)
   num.folds <- length(folds)
   for (fold in 1:num.folds) {
@@ -381,10 +381,10 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
     fs$obs <- model$obs
     fs$test.idx <- test.idx
     fs$model <- model$summary
-    all.res[[fold]] <- fs
+    res[[fold]] <- fs
   }
-  class(all.res) <- "nestfs"
-  return(all.res)
+  class(res) <- "nestfs"
+  return(res)
 }
 
 #' Cross-validated generalized linear models
