@@ -62,7 +62,7 @@ test_that("argument checks",
 
   ## tests for nested forward selection
   expect_error(nested.forward.selection(diabetes, y.binom, "age"),
-               "is missing, with no default")
+               "Argument of 'family' is missing")
   expect_error(nested.forward.selection(diabetes, y.binom, "age", binomial()),
                "is missing, with no default")
 

@@ -358,6 +358,7 @@ forward.selection <- function(x, y, init.model, family,
 nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 
   res <- list()
+  family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
   num.folds <- length(folds)
   for (fold in 1:num.folds) {
@@ -370,9 +371,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
     x.train <- x[train.idx, ]; y.train <- y[train.idx]
 
     fs <- forward.selection(x.train, y.train, init.model, family, ...)
-    this.fold <- list(test.idx)
-    model <- nested.glm(x[, fs$fs$vars], y, this.fold,
-                        family=family)[[1]]
+    model <- glm.inner(x[, fs$fs$vars], y, test.idx, family)
     stopifnot(all.equal(model$obs, y[test.idx]))
     panel <- fs$panel
     fs$fs$coef <- NA
@@ -428,7 +427,6 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'
 #' # close the parallel cluster
 #' stopImplicitCluster()
-#' @importFrom stats as.formula glm predict
 #' @keywords multivariate
 #' @export
 nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
@@ -440,21 +438,39 @@ nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
   y <- validate.outcome(y)
   family <- validate.family(family, y)
 
-  res <- list()
-  for (fold in 1:length(folds)) {
-    idx.test <- folds[[fold]]
-    idx.train <- setdiff(1:nrow(x), idx.test)
-    x.test <- x[idx.test, ]; x.train <- x[idx.train, ]
-    y.test <- y[idx.test];   y.train <- y[idx.train]
-    model <- paste("y.train ~", paste(colnames(x.train), collapse=" + "))
-    regr <- glm(as.formula(model), data=x.train, family=family)
-    y.pred <- predict(regr, newdata=x.test, type="response")
-    loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
-    res[[fold]] <- list(summary=coefficients(summary(regr)),
-                        fit=y.pred, obs=y.test,
-                        test.llk=loglik, test.idx=idx.test)
-    if (store.glm) res[[fold]]$regr <- regr
-  }
+  res <- lapply(folds, function(z) glm.inner(x, y, z, family, store.glm))
+  return(res)
+}
+
+
+#' Fit a linear or logistic regression model on a given cross-validation fold
+#'
+#' Fit a model using all predictors provided on the training observations, then
+#' test it on the withdrawn observations.
+#'
+#' @param x Dataframe of predictors containing all and only the variables to be
+#'        used in the model.
+#' @template args-outcome
+#' @param idx.test Indices of observations to withdraw.
+#' @template args-family
+#' @param store.glm Whether the object produced by \code{glm} should be
+#'        stored (default: \code{FALSE}).
+#'
+#' @return
+#' A list of length equal to \code{length(folds)}.
+#'
+#' @importFrom stats as.formula glm predict
+#' @noRd
+glm.inner <- function(x, y, idx.test, family, store.glm=FALSE) {
+  idx.train <- setdiff(1:nrow(x), idx.test)
+  model <- paste("y ~", paste(colnames(x), collapse=" + "))
+  regr <- glm(as.formula(model), data=x, family=family, subset=idx.train)
+  y.pred <- predict(regr, newdata=x[idx.test, ], type="response")
+  y.test <- y[idx.test]
+  loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
+  res <- list(summary=coefficients(summary(regr)),
+              fit=y.pred, obs=y.test, test.llk=loglik, test.idx=idx.test)
+  if (store.glm) res$regr <- regr
   return(res)
 }
 
