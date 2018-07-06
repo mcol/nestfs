@@ -360,11 +360,14 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
   res <- list()
   family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
+  verbose <- isTRUE(list(...)$verbose)
+
   num.folds <- length(folds)
   for (fold in 1:num.folds) {
 
-    cat("* Outer Fold", fold, "of", num.folds,
-        "-", format(Sys.time(), "%H:%M"), "\n")
+    if (verbose)
+      cat("* Outer Fold", fold, "of", num.folds,
+          "-", format(Sys.time(), "%H:%M"), "\n")
 
     test.idx <- folds[[fold]]
     train.idx <- setdiff(seq(nrow(x)), test.idx)
