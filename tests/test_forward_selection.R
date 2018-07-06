@@ -88,18 +88,3 @@ test_that("univariate filter",
   expect_equal(fs.3$fs, fs.binom.ok$fs)
   expect_equal(dim(fs.3$iter1), c(6, 3))
 })
-
-context("nested forward selection")
-
-folds <- create.folds(3, nrow(X))
-
-test_that("nested forward selection",
-{
-  nest.1 <- nested.forward.selection(X, Y, ~ age + sex, gaussian(), folds,
-                                     num.inner.folds=10, max.iters=3,
-                                     verbose=FALSE)
-  nest.2 <- nested.forward.selection(X, Y, ~ age + sex, gaussian(), folds[1],
-                                     num.inner.folds=10, max.iters=3,
-                                     verbose=FALSE)
-  expect_equal(nest.1[[1]], nest.2[[1]])
-})
