@@ -376,7 +376,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
     stopifnot(all.equal(model$obs, y[test.idx]))
     panel <- fs$panel
     fs$fs$coef <- NA
-    fs$fs$coef[match(panel, fs$fs$vars)] <- model$coef[panel]
+    fs$fs$coef[match(panel, fs$fs$vars)] <- model$summary[panel, "Estimate"]
     fs$fit <- model$fit
     fs$obs <- model$obs
     fs$test.idx <- test.idx
@@ -406,8 +406,8 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' A list of length equal to \code{length(folds)}, where each entry contains
 #' the following fields:
 #' \describe{
-#' \item{summary:}{Summary of the fitted model.}
-#' \item{coef:}{Coefficients of the fitted model.}
+#' \item{summary:}{Summary of the coefficients of the model fitted on the
+#'       training observations.}
 #' \item{fit:}{Predicted values for the withdrawn observations.}
 #' \item{obs:}{Observed values for the withdrawn observations.}
 #' \item{test.llk:}{Test log-likelihood.}
@@ -450,7 +450,7 @@ nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
     regr <- glm(as.formula(model), data=x.train, family=family)
     y.pred <- predict(regr, newdata=x.test, type="response")
     loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
-    res[[fold]] <- list(summary=summary(regr), coef=regr$coef,
+    res[[fold]] <- list(summary=coefficients(summary(regr)),
                         fit=y.pred, obs=y.test,
                         test.llk=loglik, test.idx=idx.test)
     if (store.glm) res[[fold]]$regr <- regr
