@@ -20,3 +20,16 @@ test_that("nested forward selection",
                                          verbose=FALSE)
   expect_equal(nest.binom, nest.binom.ok)
 })
+
+context("nested.glm")
+
+test_that("nested.glm",
+{
+  glm.gauss <- nested.glm(X[, c("age", "sex", "bmi", "map")], Y,
+                          folds, gaussian())
+  expect_equal(glm.gauss, glm.gauss.ok)
+
+  glm.binom <- nested.glm(X[, c("age", "sex", "bmi", "map")], y.bin,
+                          folds, binomial())
+  expect_equal(glm.binom, glm.binom.ok)
+})

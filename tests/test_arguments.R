@@ -5,6 +5,7 @@ diabetes <- X.diab
 y.gauss <- Y.diab
 y.binom <- as.integer(Y.diab > 140)
 y.short <- y.binom[1:10]
+folds <- create.folds(2, nrow(diabetes), 0)
 
 test_that("argument checks",
 {
@@ -64,6 +65,12 @@ test_that("argument checks",
                "is missing, with no default")
   expect_error(nested.forward.selection(diabetes, y.binom, "age", binomial()),
                "is missing, with no default")
+
+  ## tests for nested.glm
+  expect_error(nested.glm(diabetes, y.binom),
+               "is missing, with no default")
+  expect_error(nested.glm(diabetes, y.short, folds, gaussian()),
+               "Mismatched dimensions")
 })
 
 context("outcome validation")
