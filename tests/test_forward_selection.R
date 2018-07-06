@@ -35,38 +35,18 @@ test_that("init.model",
   ## empty init.model
   fs.1 <- forward.selection(X, Y, c(), family="gaussian",
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
-  fs.2 <- forward.selection(X, Y, y ~ 1, family="gaussian",
-                            num.inner.folds=10, max.iters=3, verbose=FALSE)
-  expect_equal(fs.1, fs.2)
+  expect_equal(fs.1$init, character(0))
   expect_equal(fs.1$panel, c("bmi", "ltg", "map"))
-
-  ## formula as a character string
-  fs.1 <- forward.selection(X, Y, c("age", "sex"), family="gaussian",
-                            num.inner.folds=10, max.iters=1, verbose=FALSE)
-  fs.2 <- forward.selection(X, Y, "y ~ age + sex", family="gaussian",
-                            num.inner.folds=10, max.iters=1, verbose=FALSE)
-  expect_equal(fs.1, fs.2)
-
-  ## formula with misspecified or no left-hand side
-  fs.3 <- forward.selection(X, Y, Z ~ age + sex, family="gaussian",
-                            num.inner.folds=10, max.iters=1, verbose=FALSE)
-  fs.4 <- forward.selection(X, Y, ~ age + sex, family="gaussian",
-                            num.inner.folds=10, max.iters=1, verbose=FALSE)
-  fs.5 <- forward.selection(X, Y, "~ age + sex", family="gaussian",
-                            num.inner.folds=10, max.iters=1, verbose=FALSE)
-  expect_equal(fs.1, fs.3)
-  expect_equal(fs.1, fs.4)
-  expect_equal(fs.1, fs.5)
+  expect_equal(fs.1$init.model, "1")
+  expect_equal(fs.1$final.model, "bmi + ltg + map")
 
   ## models with interaction terms
   fs.1 <- forward.selection(X, Y, y ~ age*sex, family="gaussian",
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
-  fs.2 <- forward.selection(X, Y, "age*sex", family="gaussian",
-                            num.inner.folds=10, max.iters=3, verbose=FALSE)
-  fs.3 <- forward.selection(X, Y, c("age", "sex", "age:sex"), family="gaussian",
-                            num.inner.folds=10, max.iters=3, verbose=FALSE)
-  expect_equal(fs.1, fs.2)
-  expect_equal(fs.1, fs.3)
+  expect_equal(fs.1$init, c("age", "sex"))
+  expect_equal(fs.1$panel, c("bmi", "ltg", "map"))
+  expect_equal(fs.1$init.model, "age + sex + age:sex")
+  expect_equal(fs.1$final.model, "age + sex + bmi + ltg + map + age:sex")
 })
 
 test_that("choose.from",
@@ -103,14 +83,10 @@ test_that("univariate filter",
   expect_equal(dim(fs.2$iter1), c(5, 3))
 
   fs.3 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
-                            num.filter=5, filter.ignore="bmi",
-                            num.inner.folds=10, max.iters=3, verbose=FALSE)
-  fs.4 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
                             num.filter=5, filter.ignore=c("bmi", "nonexisting"),
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
-  fs.4$params$filter.ignore <- fs.4$params$filter.ignore[1]
-  expect_equal(fs.3, fs.4)
   expect_equal(fs.3$fs, fs.binom.ok$fs)
+  expect_equal(dim(fs.3$iter1), c(6, 3))
 })
 
 context("nested forward selection")
