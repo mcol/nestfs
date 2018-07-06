@@ -432,7 +432,10 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' @keywords multivariate
 #' @export
 nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
-  stopifnot(all.equal(nrow(x), length(y)))
+
+  ## argument checks
+  if (nrow(x) != length(y))
+    stop("Mismatched dimensions.")
   folds <- validate.folds(folds, x)
   y <- validate.outcome(y)
   family <- validate.family(family, y)
