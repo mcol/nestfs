@@ -4,7 +4,7 @@
 \alias{nested.glm}
 \title{Cross-validated generalized linear models}
 \usage{
-nested.glm(x, y, folds, family, store.glm = FALSE)
+nested.glm(x, y, family, folds, store.glm = FALSE)
 }
 \arguments{
 \item{x}{Dataframe of predictors.}
@@ -12,13 +12,13 @@ nested.glm(x, y, folds, family, store.glm = FALSE)
 \item{y}{Outcome variable. If \code{family=binomial}, it can only contain
 two classes of values that can be coerced to 0-1.}
 
-\item{folds}{List of cross-validation folds, where each element contains
-the indices of the observations to be withdrawn in that fold.}
-
 \item{family}{Type of model fitted: either \code{gaussian()} for linear
 regression or \code{binomial()} for logistic regression. This can be
 specified also as a function name (\code{gaussian}) or as a string
 (\code{"gaussian"}).}
+
+\item{folds}{List of cross-validation folds, where each element contains
+the indices of the observations to be withdrawn in that fold.}
 
 \item{store.glm}{Whether the object produced by \code{glm} should be
 stored (default: \code{FALSE}).}
@@ -27,8 +27,8 @@ stored (default: \code{FALSE}).}
 A list of length equal to \code{length(folds)}, where each entry contains
 the following fields:
 \describe{
-\item{summary:}{Summary of the fitted model.}
-\item{coef:}{Coefficients of the fitted model.}
+\item{summary:}{Summary of the coefficients of the model fitted on the
+      training observations.}
 \item{fit:}{Predicted values for the withdrawn observations.}
 \item{obs:}{Observed values for the withdrawn observations.}
 \item{test.llk:}{Test log-likelihood.}
@@ -53,7 +53,7 @@ data(diabetes)
 folds <- create.folds(10, nrow(X.diab), seed=1)
 base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
                                   "ldl", "hdl", "ltg", "glu")],
-                       Y.diab, folds, gaussian())
+                       Y.diab, gaussian(), folds)
 
 # close the parallel cluster
 stopImplicitCluster()

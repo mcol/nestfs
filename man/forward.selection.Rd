@@ -7,7 +7,8 @@
 forward.selection(x, y, init.model, family, choose.from = NULL,
   test = c("t", "wilcoxon"), sel.crit = c("paired.test", "total.loglik",
   "both"), num.filter = 0, filter.ignore = NULL, num.inner.folds = 30,
-  max.iters = 15, max.pval = 0.5, min.llk.diff = 0, seed = 50)
+  max.iters = 15, max.pval = 0.5, min.llk.diff = 0, seed = 50,
+  verbose = TRUE)
 }
 \arguments{
 \item{x}{Dataframe of predictors: this should include all variables in
@@ -63,6 +64,9 @@ improvement in log-likelihood is smaller than this threshold
 (default: 0).}
 
 \item{seed}{Seed of the random number generator for the inner folds.}
+
+\item{verbose}{Whether the variable chosen at each iteration should be
+printed out (default: \code{TRUE}).}
 }
 \value{
 An object of class \code{fs} containing the following fields:
