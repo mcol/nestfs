@@ -26,10 +26,10 @@ context("nested.glm")
 test_that("nested.glm",
 {
   glm.gauss <- nested.glm(X[, c("age", "sex", "bmi", "map")], Y,
-                          folds, gaussian())
+                          gaussian(), folds)
   expect_equal(glm.gauss, glm.gauss.ok)
 
   glm.binom <- nested.glm(X[, c("age", "sex", "bmi", "map")], y.bin,
-                          folds, binomial())
+                          binomial(), folds)
   expect_equal(glm.binom, glm.binom.ok)
 })

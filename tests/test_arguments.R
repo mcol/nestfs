@@ -68,8 +68,10 @@ test_that("argument checks",
 
   ## tests for nested.glm
   expect_error(nested.glm(diabetes, y.binom),
+               "Argument of 'family' is missing")
+  expect_error(nested.glm(diabetes, y.binom, gaussian()),
                "is missing, with no default")
-  expect_error(nested.glm(diabetes, y.short, folds, gaussian()),
+  expect_error(nested.glm(diabetes, y.short, gaussian(), folds),
                "Mismatched dimensions")
 })
 

@@ -399,8 +399,8 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'
 #' @param x Dataframe of predictors.
 #' @template args-outcome
-#' @template args-folds
 #' @template args-family
+#' @template args-folds
 #' @param store.glm Whether the object produced by \code{glm} should be
 #'        stored (default: \code{FALSE}).
 #'
@@ -426,20 +426,20 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' folds <- create.folds(10, nrow(X.diab), seed=1)
 #' base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
 #'                                   "ldl", "hdl", "ltg", "glu")],
-#'                        Y.diab, folds, gaussian())
+#'                        Y.diab, gaussian(), folds)
 #'
 #' # close the parallel cluster
 #' stopImplicitCluster()
 #' @keywords multivariate
 #' @export
-nested.glm <- function(x, y, folds, family, store.glm=FALSE) {
+nested.glm <- function(x, y, family, folds, store.glm=FALSE) {
 
   ## argument checks
   if (nrow(x) != length(y))
     stop("Mismatched dimensions.")
-  folds <- validate.folds(folds, x)
   y <- validate.outcome(y)
   family <- validate.family(family, y)
+  folds <- validate.folds(folds, x)
 
   res <- lapply(folds, function(z) glm.inner(x, y, z, family, store.glm))
   return(res)
