@@ -76,7 +76,7 @@ test_that("argument checks",
 })
 
 context("outcome validation")
-test_that("invalid family inputs",
+test_that("invalid outcome inputs",
 {
   y.binom[50] <- NA
   y.large <- sample(1:2, length(y.binom), replace=TRUE)
