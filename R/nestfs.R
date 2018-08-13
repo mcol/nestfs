@@ -372,7 +372,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
   res <- list()
   family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
-  verbose <- isTRUE(list(...)$verbose)
+  verbose <- isTRUE(list(...)$verbose) || is.null(list(...)$verbose)
 
   num.folds <- length(folds)
   for (fold in 1:num.folds) {
