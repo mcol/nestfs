@@ -35,8 +35,9 @@ that are not in \code{init.model} are considered.}
 \code{sel.crit="total.loglik"}).}
 
 \item{sel.crit}{Selection criterion: \code{"paired.test"} chooses the
-variable with best p-value on the paired test indicated by
-\code{test}; \code{"total.loglik"} chooses the variable that provides
+variable with smallest p-value using the paired test specified by
+\code{test} (see \strong{Details}), as long as this is smaller than
+\code{max.pval}; \code{"total.loglik"} picks the variable that gives
 the largest increase in log-likelihood; \code{"both"} attempts to
 combine both previous criteria, choosing the variable that produces
 the largest increase in log-likelihood only among the best 5
@@ -108,6 +109,17 @@ are tested for univariate association with the outcome, and only the first
 out. This is done on the training part of all inner folds. Filtering can
 enhance the performance of forward selection when the number of available
 variables exceeds about 30-40.
+
+By default variables are selected according to the \code{paired.test}
+criterion. At each iteration, the sampling distribution of differences in
+validation log-likelihood obtained across all inner cross-validation folds
+of the models with and without each additional variable are tested against
+the null hypothesis of zero mean (with the alternative hypothesis being
+that the model with the additional variable is better). The test is paired
+according to the inner folds. Although the training folds are not
+independent, the p-value from this test approximates the probability that
+including the marker will not decrease the validation log-likelihood
+(approximate false discovery rate).
 }
 \examples{
 # register a parallel cluster with two cores
