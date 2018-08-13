@@ -19,6 +19,16 @@ test_that("nested forward selection",
                                          num.inner.folds=10, max.iters=3,
                                          verbose=FALSE)
   expect_equal(nest.binom, nest.binom.ok)
+
+  ## test the selection of categorical variables
+  X$sex.cat <- factor(X$sex)
+  X$bmi.cat <- factor(cut(X$bmi, c(-Inf, -1, 1, Inf)))
+  nest.cat <- nested.forward.selection(X, Y, ~ age, gaussian, folds,
+                                       choose.from=c("sex.cat", "bmi.cat"),
+                                       num.inner.folds=10, max.iters=3,
+                                       verbose=FALSE)
+  expect_equal(nest.cat[[1]]$panel, c("bmi.cat", "sex.cat"))
+  expect_equal(is.na(nest.cat[[1]]$fs$coef), c(TRUE, TRUE, FALSE))
 })
 
 context("nested.glm")

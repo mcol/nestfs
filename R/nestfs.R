@@ -388,9 +388,20 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
     fs <- forward.selection(x.train, y.train, init.model, family, ...)
     model <- glm.inner(x[, fs$fs$vars], y, test.idx, family)
     stopifnot(all.equal(model$obs, y[test.idx]))
+
+    ## extract the model coefficients and report them in the forward selection
+    ## object.
+    ## note that factor variables will have names in model$summary that now
+    ## include the level labels: by using pmatch(), we attempt a partial match
+    ## for variable names. this works well if the factor had only two levels;
+    ## however, if the factor had more than two levels, names cannot be matched
+    ## even partially and their coefficient is set to NA (this is better than
+    ## reporting for the whole variable a coefficient that corresponds only to
+    ## one of the available levels).
     panel <- fs$panel
     fs$fs$coef <- NA
-    fs$fs$coef[match(panel, fs$fs$vars)] <- model$summary[panel, "Estimate"]
+    idx.coefs <- pmatch(panel, rownames(model$summary))
+    fs$fs$coef[match(panel, fs$fs$vars)] <- model$summary[idx.coefs, "Estimate"]
     fs$fit <- model$fit
     fs$obs <- model$obs
     fs$test.idx <- test.idx
