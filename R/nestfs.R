@@ -97,7 +97,7 @@
 #'
 #' # close the parallel cluster
 #' stopImplicitCluster()
-#' @seealso \code{\link{nested.forward.selection}}
+#' @seealso \code{\link{nested.forward.selection}}, \code{\link{summary.fs}}.
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
 #' @importFrom stats coefficients glm predict t.test update wilcox.test
@@ -364,7 +364,7 @@ forward.selection <- function(x, y, init.model, family,
 #'
 #' # close the parallel cluster
 #' stopImplicitCluster()
-#' @seealso \code{\link{forward.selection}}
+#' @seealso \code{\link{forward.selection}}, \code{\link{summary.nestfs}}.
 #' @keywords multivariate
 #' @export
 nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
