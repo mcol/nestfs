@@ -24,7 +24,12 @@
 #'
 #' @export
 summary.fs <- function(object, ...) {
-  return(object$fs)
+  res <- object$fs
+  vars <- res$vars
+  fullname <- tryCatch(get("getfullname")(vars), error=function(e) NULL)
+  if (!is.null(fullname))
+    res <- cbind(vars, fullname, res[, -1], stringsAsFactors=FALSE)
+  return(res)
 }
 
 #' Results summary for nested forward selection
