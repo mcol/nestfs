@@ -469,6 +469,13 @@ nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
   family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
 
+  ## check that all variables exist in the dataframe of predictors
+  vars <- setdiff(all.vars(model), "nestfs_y_")
+  var.match <- match(vars, colnames(x))
+  if (anyNA(var.match))
+    stop("'", paste(vars[is.na(var.match)], collapse="', '"),
+         "' not present in x.")
+
   res <- lapply(folds, function(z) glm.inner(x, y, model, z, family, store.glm))
   return(res)
 }

@@ -75,6 +75,8 @@ test_that("argument checks",
                "Argument of 'family' is missing")
   expect_error(nested.glm(diabetes, y.short, "age", gaussian(), folds),
                "Mismatched dimensions")
+  expect_error(nested.glm(diabetes, y.gauss, "nonexisting", gaussian(), folds),
+               "not present in x")
 })
 
 context("outcome validation")
