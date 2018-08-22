@@ -81,23 +81,30 @@ test_that("argument checks",
 context("outcome validation")
 test_that("invalid outcome inputs",
 {
-  y.binom[50] <- NA
-  y.large <- sample(1:2, length(y.binom), replace=TRUE)
-  y.categ <- as.factor(y.gauss)
-  y.strng <- as.character(y.categ)
-  y.inval <- data.frame(matrix(seq(length(y.binom) * 2), nrow=2))
-  y.dates <- rep(Sys.Date(), length(y.binom))
-
-  expect_error(forward.selection(diabetes, y.binom, "age", binomial()),
+  expect_error(validate.outcome(c(1:5, NA, 6:10)),
                "contains missing values")
-  expect_error(forward.selection(diabetes, y.categ, "age", binomial()),
+  expect_error(validate.outcome(as.factor(y.gauss)),
                "can only have two levels")
-  expect_error(forward.selection(diabetes, y.strng, "age", gaussian()),
+  expect_error(validate.outcome(as.character(y.gauss)),
                "cannot be a character vector")
-  expect_error(forward.selection(diabetes, y.inval, "age", gaussian()),
+  expect_error(validate.outcome(data.frame(matrix(1:40, nrow=2))),
                "invalid type")
-  expect_error(forward.selection(diabetes, y.dates, "age", gaussian()),
+  expect_error(validate.outcome(rep(Sys.Date(), 10)),
                "invalid type")
+  expect_error(validate.outcome(NULL),
+               "invalid type")
+})
+
+test_that("valid outcome inputs",
+{
+  expect_equal(validate.outcome(c(1.1, 2.2, 3.3, 4.4)),
+               c(1.1, 2.2, 3.3, 4.4))
+  expect_equal(validate.outcome(c(1L, 0L, 0L, 1L)),
+               c(1, 0, 0, 1))
+  expect_equal(validate.outcome(factor(c("Yes", "No", "No", "Yes"))),
+               c(1, 0, 0, 1))
+  expect_equal(validate.outcome(c(TRUE, FALSE, FALSE, TRUE)),
+               c(1, 0, 0, 1))
 })
 
 context("init.model validation")
