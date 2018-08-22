@@ -386,7 +386,10 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
     x.train <- x[train.idx, ]; y.train <- y[train.idx]
 
     fs <- forward.selection(x.train, y.train, init.model, family, ...)
-    model <- glm.inner(x[, fs$fs$vars], y, test.idx, family)
+
+    ## fit the final model on the training set and evaluate it on the test set
+    model <- validate.init.model(fs$final.model)
+    model <- glm.inner(x, y, model, test.idx, family)
     stopifnot(all.equal(model$obs, y[test.idx]))
 
     ## extract the model coefficients and report them in the forward selection
@@ -422,6 +425,8 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'
 #' @param x Dataframe of predictors.
 #' @template args-outcome
+#' @param model Either a formula or a vector of names for the set of variables
+#'        that define the model to be fitted.
 #' @template args-family
 #' @template args-folds
 #' @param store.glm Whether the object produced by \code{glm} should be
@@ -447,24 +452,24 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'
 #' data(diabetes)
 #' folds <- create.folds(10, nrow(X.diab), seed=1)
-#' base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
-#'                                   "ldl", "hdl", "ltg", "glu")],
-#'                        Y.diab, gaussian(), folds)
+#' base.res <- nested.glm(X.diab, Y.diab, c("age", "sex", "bmi", "map"),
+#'                        gaussian(), folds)
 #'
 #' # close the parallel cluster
 #' stopImplicitCluster()
 #' @keywords multivariate
 #' @export
-nested.glm <- function(x, y, family, folds, store.glm=FALSE) {
+nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
 
   ## argument checks
   if (nrow(x) != length(y))
     stop("Mismatched dimensions.")
   y <- validate.outcome(y)
+  model <- validate.init.model(model)
   family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
 
-  res <- lapply(folds, function(z) glm.inner(x, y, z, family, store.glm))
+  res <- lapply(folds, function(z) glm.inner(x, y, model, z, family, store.glm))
   return(res)
 }
 
@@ -474,9 +479,9 @@ nested.glm <- function(x, y, family, folds, store.glm=FALSE) {
 #' Fit a model using all predictors provided on the training observations, then
 #' test it on the withdrawn observations.
 #'
-#' @param x Dataframe of predictors containing all and only the variables to be
-#'        used in the model.
+#' @param x Dataframe of predictors.
 #' @template args-outcome
+#' @param model Formula for the model to be fitted.
 #' @param idx.test Indices of observations to withdraw.
 #' @template args-family
 #' @param store.glm Whether the object produced by \code{glm} should be
@@ -487,10 +492,9 @@ nested.glm <- function(x, y, family, folds, store.glm=FALSE) {
 #'
 #' @importFrom stats as.formula glm predict
 #' @noRd
-glm.inner <- function(x, y, idx.test, family, store.glm=FALSE) {
+glm.inner <- function(x, y, model, idx.test, family, store.glm=FALSE) {
   idx.train <- setdiff(1:nrow(x), idx.test)
-  model <- paste("y ~", paste(colnames(x), collapse=" + "))
-  regr <- glm(as.formula(model), data=x, family=family, subset=idx.train)
+  regr <- glm(model, data=cbind(nestfs_y_=y, x)[idx.train, ], family=family)
   y.pred <- predict(regr, newdata=x[idx.test, ], type="response")
   y.test <- y[idx.test]
   loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)

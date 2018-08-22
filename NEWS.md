@@ -1,6 +1,9 @@
 # nestfs 0.8.6.9000
 
 - Use getfullname() if available also in summary.fs().
+- Make nested.glm() accept a formula argument so that models with interaction
+  terms can be specified. This also ensures that such models are fitted
+  correctly in nested.forward.selection() after selection has been performed.
 
 
 # nestfs 0.8.6 (2018-08-13)

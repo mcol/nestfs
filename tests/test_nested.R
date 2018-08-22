@@ -20,6 +20,12 @@ test_that("nested forward selection",
                                          verbose=FALSE)
   expect_equal(nest.binom, nest.binom.ok)
 
+  ## interaction terms present in the initial model
+  nest.int <- nested.forward.selection(X, Y, ~ age * sex, gaussian, folds,
+                                       num.inner.folds=10, max.iters=3,
+                                       verbose=FALSE)
+  expect_true("age:sex" %in% rownames(nest.int[[1]]$model))
+
   ## test the selection of categorical variables
   X$sex.cat <- factor(X$sex)
   X$bmi.cat <- factor(cut(X$bmi, c(-Inf, -1, 1, Inf)))
@@ -35,11 +41,11 @@ context("nested.glm")
 
 test_that("nested.glm",
 {
-  glm.gauss <- nested.glm(X[, c("age", "sex", "bmi", "map")], Y,
+  glm.gauss <- nested.glm(X, Y, c("age", "sex", "bmi", "map"),
                           gaussian(), folds)
   expect_equal(glm.gauss, glm.gauss.ok)
 
-  glm.binom <- nested.glm(X[, c("age", "sex", "bmi", "map")], y.bin,
+  glm.binom <- nested.glm(X, y.bin, ~ age + sex + bmi + map,
                           binomial(), folds)
   expect_equal(glm.binom, glm.binom.ok)
 })
