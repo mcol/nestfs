@@ -1,6 +1,8 @@
 nestfs: an R package for cross-validated (nested) forward selection.
 ======
 
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/nestfs)](https://cran.r-project.org/package=nestfs)
+
 This package provides an implementation of forward selection based on linear
 and logistic regression which adopts cross-validation as a core component of
 the selection procedure.
