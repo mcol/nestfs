@@ -1,5 +1,3 @@
-context("arguments")
-
 data(diabetes)
 diabetes <- X.diab
 y.gauss <- Y.diab
@@ -7,6 +5,7 @@ y.binom <- as.integer(Y.diab > 140)
 y.short <- y.binom[1:10]
 folds <- create.folds(2, nrow(diabetes), 0)
 
+context("arguments")
 test_that("argument checks",
 {
   expect_error(forward.selection(diabetes, y.binom, family=binomial()),
