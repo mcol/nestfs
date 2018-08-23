@@ -47,6 +47,12 @@ test_that("init.model",
   expect_equal(fs.1$panel, c("bmi", "ltg", "map"))
   expect_equal(fs.1$init.model, "age + sex + age:sex")
   expect_equal(fs.1$final.model, "age + sex + bmi + ltg + map + age:sex")
+
+  ## summary
+  summ <- summary(fs.1)
+  expect_named(summ, c("vars", "fdr", "llks", "diffs", "iter"))
+  expect_equal(summ$llks[1:4], c(NA, -2136.283195, -2047.874234, -2004.104712))
+  expect_equal(summ$iter, c(NA, NA, 1:3))
 })
 
 test_that("choose.from",
