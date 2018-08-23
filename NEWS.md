@@ -4,6 +4,8 @@
 - Make nested.glm() accept a formula argument so that models with interaction
   terms can be specified. This also ensures that such models are fitted
   correctly in nested.forward.selection() after selection has been performed.
+- Add the family field and assign a class to the object created by
+  nested.glm().
 
 
 # nestfs 0.8.6 (2018-08-13)

@@ -433,11 +433,12 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'        stored (default: \code{FALSE}).
 #'
 #' @return
-#' A list of length equal to \code{length(folds)}, where each entry contains
-#' the following fields:
+#' An object of class \code{nestglm} of length equal to \code{length(folds)},
+#' where each entry contains the following fields:
 #' \describe{
 #' \item{summary:}{Summary of the coefficients of the model fitted on the
 #'       training observations.}
+#' \item{family:}{Type of model fitted.}
 #' \item{fit:}{Predicted values for the withdrawn observations.}
 #' \item{obs:}{Observed values for the withdrawn observations.}
 #' \item{test.llk:}{Test log-likelihood.}
@@ -477,6 +478,7 @@ nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
          "' not present in x.")
 
   res <- lapply(folds, function(z) glm.inner(x, y, model, z, family, store.glm))
+  class(res) <- c("nestglm")
   return(res)
 }
 
@@ -505,7 +507,7 @@ glm.inner <- function(x, y, model, idx.test, family, store.glm=FALSE) {
   y.pred <- predict(regr, newdata=x[idx.test, ], type="response")
   y.test <- y[idx.test]
   loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
-  res <- list(summary=coefficients(summary(regr)),
+  res <- list(summary=coefficients(summary(regr)), family=family$family,
               fit=y.pred, obs=y.test, test.llk=loglik, test.idx=idx.test)
   if (store.glm) res$regr <- regr
   return(res)
