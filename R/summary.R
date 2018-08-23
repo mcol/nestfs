@@ -66,8 +66,10 @@ summary.fs <- function(object, ...) {
 #' @importFrom stats median quantile
 #' @export
 summary.nestfs <- function(object, iter1=FALSE, ...) {
-  iqr <- function(x) quantile(x, c(0.25, 0.75), na.rm=TRUE)
-  format.iqr <- function(x, n=2) sprintf("(%.*f, %.*f)", n, x[1], n, x[2])
+  format.iqr <- function(x, n=2) {
+    x <- quantile(x, c(0.25, 0.75), na.rm=TRUE)
+    sprintf("(%.*f, %.*f)", n, x[1], n, x[2])
+  }
   num.folds <- length(object)
   if (iter1) {
     ## with filtering, outer folds may contain different variables
@@ -80,17 +82,18 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
 
     ## summarise all variables at the first iteration
     all.vars <- all.iter1$vars
-    med.diffs <- round(tapply(all.iter1$total.diff.llk, all.vars, median), 2)
-    iqr.diffs <- tapply(all.iter1$total.diff.llk, all.vars,
-                        function(z) format.iqr(iqr(z), 2))
-    med.pvals <- round(tapply(all.iter1$p.value, all.vars, median), 3)
+    med.diffs <- tapply(all.iter1$total.diff.llk, all.vars, median)
+    iqr.diffs <- tapply(all.iter1$total.diff.llk, all.vars, format.iqr)
+    med.pvals <- tapply(all.iter1$p.value, all.vars, median)
     iqr.pvals <- tapply(all.iter1$p.value, all.vars,
-                        function(z) format.iqr(iqr(z), 3))
+                        function(z) format.iqr(z, 3))
     vars <- names(med.diffs)
     fullname <- tryCatch(get("getfullname")(vars), error=function(e) NULL)
     res <- data.frame(row.names=vars,
-                      med.diff.llk=med.diffs, iqr.diff.llk=iqr.diffs,
-                      med.pvalue=med.pvals, iqr.pvalue=iqr.pvals)
+                      med.diff.llk=round(med.diffs, 2),
+                      iqr.diff.llk=iqr.diffs,
+                      med.pvalue=round(med.pvals, 3),
+                      iqr.pvalue=iqr.pvals)
     if (!is.null(fullname)) res <- cbind(fullname, res, stringsAsFactors=FALSE)
     res <- res[order(res$med.diff.llk, decreasing=TRUE), ]
     return(res)
@@ -101,18 +104,18 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
     sel <- rbind(sel, fs[!is.na(fs$iter), ]) # exclude init model
   }
   props <- tapply(sel$vars, sel$vars, length)
-  coefs <- round(tapply(sel$coef, sel$vars, median), 3)
-  coefs.iqr <- tapply(sel$coef, sel$vars, function(z) format.iqr(iqr(z)))
-  ranks <- round(tapply(sel$iter, sel$vars, median))
-  ranks.iqr <- tapply(sel$iter, sel$vars, function(z) format.iqr(round(iqr(z))))
+  coefs <- tapply(sel$coef, sel$vars, median)
+  ranks <- tapply(sel$iter, sel$vars, median)
   diffs <- tapply(sel$diff, sel$vars, median)
-  diffs.iqr <- tapply(sel$diff, sel$vars, function(z) format.iqr(iqr(z)))
+  coefs.iqr <- tapply(sel$coef, sel$vars, format.iqr)
+  ranks.iqr <- tapply(sel$iter, sel$vars, function(z) format.iqr(round(z)))
+  diffs.iqr <- tapply(sel$diff, sel$vars, format.iqr)
   vars <- names(props)
   fullname <- tryCatch(get("getfullname")(vars), error=function(e) NULL)
   res <- data.frame(percent=round(props/num.folds * 100, 2),
-                    coef=coefs, coefIQR=coefs.iqr,
-                    rank=ranks, rankIQR=ranks.iqr,
-                    diffLogLik=sprintf("%.3f", diffs), diffLogLikIQR=diffs.iqr)
+                    coef=round(coefs, 3), coefIQR=coefs.iqr,
+                    rank=round(ranks, 0), rankIQR=ranks.iqr,
+                    diffLogLik=round(diffs, 3), diffLogLikIQR=diffs.iqr)
   if (!is.null(fullname)) res <- cbind(fullname, res, stringsAsFactors=FALSE)
   res <- cbind(vars, res, stringsAsFactors=FALSE)
   res <- res[order(-res$percent, res$rank), ]

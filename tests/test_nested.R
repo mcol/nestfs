@@ -18,6 +18,7 @@ test_that("nested forward selection",
   summ.gauss <- summary(nest.gauss)
   expect_named(summ.gauss, c("vars", "percent", "coef", "coefIQR",
                              "rank", "rankIQR", "diffLogLik", "diffLogLikIQR"))
+  expect_equivalent(summ.gauss$rank, c(2, 2, 2, 3))
   expect_equivalent(summ.gauss$coefIQR[1], "(25.50, 33.48)")
   expect_equivalent(summ.gauss$diffLogLikIQR[1], "(30.75, 37.11)")
 
@@ -52,6 +53,7 @@ test_that("nested forward selection",
 
   summ.cat <- summary(nest.cat)
   expect_equivalent(summ.cat$coef, c(NA, -13.469))
+  expect_equivalent(summ.cat$diffLogLik, c(27.366, 0.128))
 })
 
 context("nested.glm")
