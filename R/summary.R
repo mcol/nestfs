@@ -2,7 +2,7 @@
 #'
 #' Report summary statistics from a single run of forward selection.
 #'
-#' @param object An object of class \code{fs}.
+#' @param object,x An object of class \code{fs}.
 #' @param ... Further arguments passed to or from other methods.
 #'        These are currently ignored.
 #'
@@ -32,12 +32,18 @@ summary.fs <- function(object, ...) {
   return(res)
 }
 
+#' @rdname summary.fs
+#' @export
+print.fs <- function(x, ...) {
+  print(summary(x))
+}
+
 #' Results summary for nested forward selection
 #'
 #' Report summary statistics from a run of nested forward selection across the
 #' outer folds.
 #'
-#' @param object An object of class \code{nestfs}.
+#' @param object,x An object of class \code{nestfs}.
 #' @param iter1 Whether the summary should be over all variables at the first
 #'        iteration: this can be interpreted as a cross-validated univariate
 #'        test for association.
@@ -47,7 +53,7 @@ summary.fs <- function(object, ...) {
 #' @return
 #' A dataframe with the following columns:
 #' \describe{
-#' \item{vars:}{Variables in the initial model followed by variables selected.}
+#' \item{vars:}{Variables selected.}
 #' \item{percent:}{Percentage of folds in which the variable was selected.}
 #' \item{coef:}{Median coefficient for the variable.}
 #' \item{coefIQR:}{Inter-quartile range for the variable coefficient.}
@@ -55,7 +61,7 @@ summary.fs <- function(object, ...) {
 #' \item{rankIQR:}{Inter-quartile range for rank of the variable.}
 #' \item{diffLogLik:}{Median difference in log-likelihoods.}
 #' \item{diffLogLikIQR:}{Inter-quartile range for the difference in
-#' log-likelihoods.}
+#'       log-likelihoods.}
 #' }
 #'
 #' @note
@@ -123,26 +129,8 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
   return(res)
 }
 
-#' Display the contents of (nested) forward selection object
-#'
-#' Report summary statistics from a run of (nested) forward selection.
-#'
-#' @param x An object of class \code{nestfs} or \code{fs}.
-#' @param ... Further arguments passed to or from other methods.
-#'        These are currently ignored.
-#'
-#' @return
-#' The function returns \code{summary} invisibly.
-#'
-#' @seealso
-#' \code{\link{forward.selection}} and \code{\link{nested.forward.selection}}.
+#' @rdname summary.nestfs
 #' @export
 print.nestfs <- function(x, ...) {
-  print(summary(x))
-}
-
-#' @rdname print.nestfs
-#' @export
-print.fs <- function(x, ...) {
   print(summary(x))
 }
