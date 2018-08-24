@@ -103,6 +103,7 @@ test_that("invalid outcome inputs",
 
 test_that("valid outcome inputs",
 {
+  expect_is(validate.outcome(c(1.1, 2.2, 3.3, 4.4)), "numeric")
   expect_equal(validate.outcome(c(1.1, 2.2, 3.3, 4.4)),
                c(1.1, 2.2, 3.3, 4.4))
   expect_equal(validate.outcome(c(1L, 0L, 0L, 1L)),
@@ -132,6 +133,7 @@ test_that("invalid init.model inputs",
 
 test_that("valid init.model inputs",
 {
+  expect_is(validate.init.model(NULL), "formula")
   expect_equal(validate.init.model(NULL),
                nestfs_y_ ~ 1)
   expect_equal(validate.init.model(character(0)),
@@ -167,6 +169,8 @@ test_that("invalid family inputs",
                "is not a valid family")
   expect_error(validate.family(poisson),
                "are supported families")
+  expect_error(validate.family(binomial(),
+               "is missing, with no default"))
   expect_error(validate.family(binomial(), y.gauss),
                "must contain two classes")
   expect_error(validate.family(binomial(), y.binom + 1),
@@ -177,6 +181,7 @@ test_that("invalid family inputs",
 
 test_that("valid family inputs",
 {
+  expect_is(validate.family(gaussian()), "family")
   expect_equal(validate.family("binomial", c(1, 0))$family, "binomial")
   expect_equal(validate.family("gaussian")$family, "gaussian")
   expect_equal(validate.family(gaussian())$family, "gaussian")
@@ -238,4 +243,9 @@ test_that("invalid folds inputs",
                "contains out of bounds indices")
   expect_error(validate.folds(list(c(1:5), c(6, nrow(diabetes) + 1)), diabetes),
                "contains out of bounds indices")
+})
+
+test_that("valid folds inputs",
+{
+  expect_is(validate.folds(list(1:221, 222:nrow(diabetes)), diabetes), "list")
 })
