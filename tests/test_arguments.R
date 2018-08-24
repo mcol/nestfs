@@ -206,6 +206,7 @@ test_that("invalid choose.from inputs",
 
 test_that("valid choose.from inputs",
 {
+  expect_is(validate.choose.from(5, diabetes), "integer")
   expect_equal(validate.choose.from(NULL, diabetes),
                1:ncol(diabetes))
   expect_equal(validate.choose.from(character(0), diabetes),

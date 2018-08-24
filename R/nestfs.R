@@ -666,7 +666,7 @@ validate.choose.from <- function(choose.from, x) {
     else
       stop("choose.from should be an integer or character vector.", call.=FALSE)
   }
-  return(choose.from)
+  return(as.integer(choose.from))
 }
 
 #' Validate the folds argument
