@@ -6,6 +6,8 @@
   correctly in nested.forward.selection() after selection has been performed.
 - Add the family field and assign a class to the object created by
   nested.glm().
+- Add nested.performance() to compute the performance of cross-validated
+  models as the area under the curve or the correlation coefficient.
 
 
 # nestfs 0.8.6 (2018-08-13)

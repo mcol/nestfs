@@ -364,7 +364,10 @@ forward.selection <- function(x, y, init.model, family,
 #'
 #' # close the parallel cluster
 #' stopImplicitCluster()
-#' @seealso \code{\link{forward.selection}}, \code{\link{summary.nestfs}}.
+#'
+#' @seealso
+#' \code{\link{forward.selection}}, \code{\link{summary.nestfs}} and
+#' \code{\link{nested.performance}}.
 #' @keywords multivariate
 #' @export
 nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
@@ -458,6 +461,8 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'
 #' # close the parallel cluster
 #' stopImplicitCluster()
+#'
+#' @seealso \code{\link{nested.performance}}.
 #' @keywords multivariate
 #' @export
 nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {

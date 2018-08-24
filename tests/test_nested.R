@@ -67,4 +67,17 @@ test_that("nested.glm",
   glm.binom <- nested.glm(X, y.bin, ~ age + sex + bmi + map,
                           binomial(), folds)
   expect_equal(glm.binom, glm.binom.ok)
+
+  ## performance
+  perf.gauss <- nested.performance(glm.gauss)
+  expect_named(perf.gauss, c("observed", "predicted", "performance"))
+  expect_named(attributes(perf.gauss), c("names", "measure", "class"))
+  expect_s3_class(perf.gauss, "nestperf")
+  expect_equal(perf.gauss$performance, 0.604743669)
+  expect_length(perf.gauss$observed, length(Y))
+  expect_output(print(perf.gauss), "Correlation coefficient:")
+
+  perf.binom <- nested.performance(glm.binom)
+  expect_equal(perf.binom$performance, 0.776294507)
+  expect_output(print(perf.binom), "Area under the curve:")
 })

@@ -76,6 +76,12 @@ test_that("argument checks",
                "Mismatched dimensions")
   expect_error(nested.glm(diabetes, y.gauss, "nonexisting", gaussian(), folds),
                "not present in x")
+
+  ## tests for nested.performance
+  expect_error(nested.performance(),
+               "is missing, with no default")
+  expect_error(nested.performance(NULL),
+               "Object is not of nestfs or nestglm class")
 })
 
 context("outcome validation")

@@ -134,3 +134,60 @@ summary.nestfs <- function(object, iter1=FALSE, ...) {
 print.nestfs <- function(x, ...) {
   print(summary(x))
 }
+
+#' Compute cross-validated performance
+#'
+#' Compute an unbiased estimate of the performance of a given model or
+#' forward selected panel using the results obtained on the cross-validation
+#' folds.
+#'
+#' @param x An object of class \code{nestfs} or \code{nestglm}.
+#'
+#' @return
+#' An object of class \code{nestperf} containing the following fields:
+#' \describe{
+#' \item{observed:}{Vector of observed values from all folds.}
+#' \item{predicted:}{Vector of predicted values from all folds.}
+#' \item{performance:}{A performance measure: the area under the curve (AUC) if
+#'       \code{family="binomial"}, or the correlation coefficient if
+#'       \code{family="gaussian"}.}
+#' }
+#'
+#' @seealso \code{\link{nested.forward.selection}} and \code{\link{nested.glm}}.
+#' @importFrom pROC auc
+#' @export
+nested.performance <- function(x) {
+  if (!class(x) %in% c("nestfs", "nestglm"))
+    stop("Object is not of nestfs or nestglm class.")
+
+  ## summarise observed and predicted values
+  num.folds <- length(x)
+  obs <- fit <- NULL
+  for (fold in 1:num.folds) {
+    res <- x[[fold]]
+    obs <- c(obs, res$obs)
+    fit <- c(fit, res$fit)
+  }
+
+  ## compute auc or correlation coefficient
+  is.auc <- x[[1]]$family == "binomial"
+  per <- ifelse(is.auc, as.numeric(auc(obs, fit, direction="<")), cor(obs, fit))
+  res <- list(observed=obs, predicted=fit, performance=per)
+  attr(res, "measure") <- ifelse(is.auc, "auc", "correlation")
+  class(res) <- "nestperf"
+  return(res)
+}
+
+#' @rdname nested.performance
+#'
+#' @param digits Number of significant figures to print.
+#' @param ... Further arguments passed to or from other methods.
+#'        These are currently ignored.
+#'
+#' @export
+print.nestperf <- function(x, digits=max(3, getOption("digits") - 3), ...) {
+  msg <- ifelse(attr(x, "measure") == "auc",
+                "Area under the curve: ", "Correlation coefficient: ")
+  cat(msg, signif(x$performance, digits=digits), "\n", sep="")
+  invisible(x)
+}
