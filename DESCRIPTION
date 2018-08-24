@@ -10,7 +10,7 @@ Authors@R: c(person("Marco", "Colombo",
                     email="felixa@aivalley.com", role="ctb"))
 Description: Implementation of forward selection based on cross-validated
              linear and logistic regression.
-License: GPL-2
+License: GPL-2 | file LICENSE
 URL: https://github.com/mcol/nestfs
 BugReports: https://github.com/mcol/nestfs/issues
 Imports: dgof, foreach, methods, stats, utils
