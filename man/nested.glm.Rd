@@ -4,13 +4,16 @@
 \alias{nested.glm}
 \title{Cross-validated generalized linear models}
 \usage{
-nested.glm(x, y, family, folds, store.glm = FALSE)
+nested.glm(x, y, model, family, folds, store.glm = FALSE)
 }
 \arguments{
 \item{x}{Dataframe of predictors.}
 
 \item{y}{Outcome variable. If \code{family=binomial}, it can only contain
 two classes of values that can be coerced to 0-1.}
+
+\item{model}{Either a formula or a vector of names for the set of variables
+that define the model to be fitted.}
 
 \item{family}{Type of model fitted: either \code{gaussian()} for linear
 regression or \code{binomial()} for logistic regression. This can be
@@ -24,11 +27,12 @@ the indices of the observations to be withdrawn in that fold.}
 stored (default: \code{FALSE}).}
 }
 \value{
-A list of length equal to \code{length(folds)}, where each entry contains
-the following fields:
+An object of class \code{nestglm} of length equal to \code{length(folds)},
+where each entry contains the following fields:
 \describe{
 \item{summary:}{Summary of the coefficients of the model fitted on the
       training observations.}
+\item{family:}{Type of model fitted.}
 \item{fit:}{Predicted values for the withdrawn observations.}
 \item{obs:}{Observed values for the withdrawn observations.}
 \item{test.llk:}{Test log-likelihood.}
@@ -51,11 +55,14 @@ registerDoParallel(2)
 
 data(diabetes)
 folds <- create.folds(10, nrow(X.diab), seed=1)
-base.res <- nested.glm(X.diab[, c("age", "sex", "bmi", "tc",
-                                  "ldl", "hdl", "ltg", "glu")],
-                       Y.diab, gaussian(), folds)
+base.res <- nested.glm(X.diab, Y.diab, c("age", "sex", "bmi", "map"),
+                       gaussian(), folds)
 
 # close the parallel cluster
 stopImplicitCluster()
+
+}
+\seealso{
+\code{\link{nested.performance}}.
 }
 \keyword{multivariate}

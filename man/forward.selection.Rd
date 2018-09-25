@@ -78,7 +78,7 @@ An object of class \code{fs} containing the following fields:
 \item{init.model:}{Right-hand side of the formula corresponding to the
       initial model.}
 \item{final.model:}{Right-hand side of the formula corresponding to the
-      final model.}
+      final model after forward selection.}
 \item{family:}{Type of model fitted.}
 \item{params:}{List of parameters used.}
 \item{iter1:}{Summary statistics for all variables at the first iteration.}
@@ -133,8 +133,9 @@ summary(fs.res)
 
 # close the parallel cluster
 stopImplicitCluster()
+
 }
 \seealso{
-\code{\link{nested.forward.selection}}
+\code{\link{nested.forward.selection}} and \code{\link{summary.fs}}.
 }
 \keyword{multivariate}

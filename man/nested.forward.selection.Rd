@@ -61,8 +61,10 @@ summary(nestfs.res)
 
 # close the parallel cluster
 stopImplicitCluster()
+
 }
 \seealso{
-\code{\link{forward.selection}}
+\code{\link{forward.selection}}, \code{\link{summary.nestfs}} and
+\code{\link{nested.performance}}.
 }
 \keyword{multivariate}

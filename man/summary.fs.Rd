@@ -2,12 +2,15 @@
 % Please edit documentation in R/summary.R
 \name{summary.fs}
 \alias{summary.fs}
+\alias{print.fs}
 \title{Results summary for forward selection}
 \usage{
 \method{summary}{fs}(object, ...)
+
+\method{print}{fs}(x, ...)
 }
 \arguments{
-\item{object}{An object of class \code{fs}.}
+\item{object, x}{An object of class \code{fs}.}
 
 \item{...}{Further arguments passed to or from other methods.
 These are currently ignored.}

@@ -1,4 +1,4 @@
-# nestfs 0.8.6.9000
+# nestfs 0.9 (2018-09-25)
 
 - Use getfullname() if available also in summary.fs().
 - Make nested.glm() accept a formula argument so that models with interaction

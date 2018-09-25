@@ -2,12 +2,15 @@
 % Please edit documentation in R/summary.R
 \name{summary.nestfs}
 \alias{summary.nestfs}
+\alias{print.nestfs}
 \title{Results summary for nested forward selection}
 \usage{
 \method{summary}{nestfs}(object, iter1 = FALSE, ...)
+
+\method{print}{nestfs}(x, ...)
 }
 \arguments{
-\item{object}{An object of class \code{nestfs}.}
+\item{object, x}{An object of class \code{nestfs}.}
 
 \item{iter1}{Whether the summary should be over all variables at the first
 iteration: this can be interpreted as a cross-validated univariate
@@ -19,7 +22,7 @@ These are currently ignored.}
 \value{
 A dataframe with the following columns:
 \describe{
-\item{vars:}{Variables in the initial model followed by variables selected.}
+\item{vars:}{Variables selected.}
 \item{percent:}{Percentage of folds in which the variable was selected.}
 \item{coef:}{Median coefficient for the variable.}
 \item{coefIQR:}{Inter-quartile range for the variable coefficient.}
@@ -27,7 +30,7 @@ A dataframe with the following columns:
 \item{rankIQR:}{Inter-quartile range for rank of the variable.}
 \item{diffLogLik:}{Median difference in log-likelihoods.}
 \item{diffLogLikIQR:}{Inter-quartile range for the difference in
-log-likelihoods.}
+      log-likelihoods.}
 }
 }
 \description{
