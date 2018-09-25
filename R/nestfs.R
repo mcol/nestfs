@@ -627,7 +627,7 @@ validate.family <- function(family, y) {
   if (family$family == "binomial") {
     if (length(table(y)) != 2)
       stop("y must contain two classes with family=binomial().", call.=FALSE)
-    if (any(y < 0 | y > 1))
+    if (!is.factor(y) && any(y < 0 | y > 1))
       stop("y must contain 0-1 values with family=binomial().", call.=FALSE)
   }
 
