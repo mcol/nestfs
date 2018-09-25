@@ -154,6 +154,7 @@ print.nestfs <- function(x, ...) {
 #' }
 #'
 #' @seealso \code{\link{nested.forward.selection}} and \code{\link{nested.glm}}.
+#' @importFrom stats cor
 #' @importFrom pROC auc
 #' @export
 nested.performance <- function(x) {
