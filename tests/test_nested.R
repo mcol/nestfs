@@ -1,7 +1,7 @@
 data(diabetes)
 X <- X.diab[, 1:9]
 Y <- Y.diab
-y.bin <- as.integer(Y > 140)
+y.bin <- factor(Y > 140)
 folds <- create.folds(2, nrow(X), 0)
 
 source("dump_nested.R")
