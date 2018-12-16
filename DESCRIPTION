@@ -4,7 +4,7 @@ Title: Cross-Validated (Nested) Forward Selection
 Version: 0.9.0.9000
 Date: 2018-09-25
 Authors@R: c(person("Marco", "Colombo",
-                    email="m.colombo@ed.ac.uk", role=c("aut", "cre"),
+                    email="mar.colombo13@gmail.com", role=c("aut", "cre"),
                     comment=c(ORCID="0000-0001-6672-0623")),
              person("Felix", "Agakov",
                     email="felixa@aivalley.com", role="ctb"))
