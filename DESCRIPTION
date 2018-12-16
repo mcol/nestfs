@@ -1,8 +1,8 @@
 Package: nestfs
 Type: Package
 Title: Cross-Validated (Nested) Forward Selection
-Version: 0.9.0.9000
-Date: 2018-09-25
+Version: 0.9.1
+Date: 2018-12-16
 Authors@R: c(person("Marco", "Colombo",
                     email="mar.colombo13@gmail.com", role=c("aut", "cre"),
                     comment=c(ORCID="0000-0001-6672-0623")),
@@ -18,4 +18,4 @@ Suggests:
   doParallel,
   testthat (>= 2.0.0)
 Encoding: UTF-8
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1

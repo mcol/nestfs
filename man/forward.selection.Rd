@@ -5,10 +5,10 @@
 \title{Run forward selection}
 \usage{
 forward.selection(x, y, init.model, family, choose.from = NULL,
-  test = c("t", "wilcoxon"), sel.crit = c("paired.test", "total.loglik",
-  "both"), num.filter = 0, filter.ignore = NULL, num.inner.folds = 30,
-  max.iters = 15, max.pval = 0.5, min.llk.diff = 0, seed = 50,
-  verbose = TRUE)
+  test = c("t", "wilcoxon"), sel.crit = c("paired.test",
+  "total.loglik", "both"), num.filter = 0, filter.ignore = NULL,
+  num.inner.folds = 30, max.iters = 15, max.pval = 0.5,
+  min.llk.diff = 0, seed = 50, verbose = TRUE)
 }
 \arguments{
 \item{x}{Dataframe of predictors: this should include all variables in
