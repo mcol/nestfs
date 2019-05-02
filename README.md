@@ -30,4 +30,45 @@ selection, besides being unbearably slow, may be more subject to overfitting,
 which is in the nature of its greedy-like design.
 
 A precompiled package is
-[available on CRAN](https://CRAN.R-project.org/package=nestfs).
+[available on CRAN](https://cran.r-project.org/package=nestfs).
+
+## Usage
+
+First load the package and register a parallel cluster, setting the number of
+cores to use. If you are lucky enough to work on a large multicore machine,
+best performance is achieved by registering as many cores as the number of inner
+folds being used (the default is 30).
+
+```r
+library(nestfs)
+library(doParallel)
+registerDoParallel(10)
+```
+
+To run forward selection from a baseline model that contains only age and sex,
+the following is enough:
+
+```r
+data(diabetes)
+fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex, family=gaussian())
+summary(fs.res)
+```
+
+By default, selection happens over all variables present in the data.frame
+that are not part of the initial model. This can be controlled through the
+`choose.from` option.
+
+It is possible to promote sparser selection by requesting a larger improvement
+in log-likelihood (option `min.llk.diff`, by default set to 0), or reducing the
+number of iterations (option `max.iters`, by default set to 15).
+
+To obtain a cross-validated measure of performance of the selection process,
+nested forward selection should be run:
+
+```r
+cv.folds <- create.folds(10, nrow(X.diab), seed=1)
+nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
+                                       family=gaussian(), folds=cv.folds)
+summary(nestfs.res)
+nested.performance(nestfs.res)
+```
