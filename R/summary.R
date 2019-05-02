@@ -172,7 +172,8 @@ nested.performance <- function(x) {
 
   ## compute auc or correlation coefficient
   is.auc <- x[[1]]$family == "binomial"
-  per <- ifelse(is.auc, as.numeric(auc(obs, fit, direction="<")), cor(obs, fit))
+  per <- ifelse(is.auc, as.numeric(auc(obs, fit, direction="<", quiet=TRUE)),
+                        cor(obs, fit))
   res <- list(observed=obs, predicted=fit, performance=per)
   attr(res, "measure") <- ifelse(is.auc, "auc", "correlation")
   class(res) <- "nestperf"
