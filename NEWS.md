@@ -1,3 +1,8 @@
+# nestfs 0.9.2 (2019-05-02)
+
+- Silence messages output by newer versions of the pROC package.
+
+
 # nestfs 0.9.1 (2018-12-16)
 
 - Changed maintainer email address.
