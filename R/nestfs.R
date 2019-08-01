@@ -551,7 +551,7 @@ validate.outcome <- function(y) {
   if (is.character(y))
     stop("Outcome variable cannot be a character vector.", call.=FALSE)
   if (is.factor(y)) {
-    if (length(levels(y)) != 2)
+    if (nlevels(y) != 2)
       stop("A factor outcome variable can only have two levels.", call.=FALSE)
     y <- as.integer(y) - 1
   }
