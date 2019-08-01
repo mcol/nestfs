@@ -246,7 +246,7 @@ forward.selection <- function(x, y, init.model, family,
 
       ## models augmented with one additional variable at a time
       for (var in other.vars) {
-        model.augm <- update(model, paste(". ~ .", var, sep=" + "))
+        model.augm <- update(model, reformulate(c(".", var)))
         augm <- univ.glm(model.augm, xy.train, xy.test)
         all.stats <- rbind(all.stats, tail(augm, n=1))
       }
@@ -308,7 +308,7 @@ forward.selection <- function(x, y, init.model, family,
     model.pvals <- c(model.pvals, chosen.pval)
     model.llks <- c(model.llks, chosen.llk)
     model.iter <- c(model.iter, rep(iter, length(chosen.var)))
-    model <- update(model, paste(". ~ .", chosen.var, sep=" + "))
+    model <- update(model, reformulate(c(".", chosen.var)))
   }
 
   res <- list(fs=data.frame(vars=model.vars, fdr=model.pvals, llks=model.llks,
@@ -584,7 +584,7 @@ validate.init.model <- function(model) {
     if (length(model) == 1 && grepl("~", model))
       model <- as.formula(model)
     else
-      model <- as.formula(paste("y ~", paste(model, collapse= " + ")))
+      model <- reformulate(model, "y")
   }
   else if (!is(model, "formula"))
     stop("init.model specified incorrectly.", call.=FALSE)
