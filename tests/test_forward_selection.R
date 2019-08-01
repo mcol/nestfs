@@ -36,22 +36,22 @@ test_that("init.model",
   fs.1 <- forward.selection(X, Y, c(), family="gaussian",
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
   expect_equal(fs.1$init, character(0))
-  expect_equal(fs.1$panel, c("bmi", "ltg", "map"))
+  expect_equal(fs.1$panel, c("ltg", "bmi", "map"))
   expect_equal(fs.1$init.model, "1")
-  expect_equal(fs.1$final.model, "bmi + ltg + map")
+  expect_equal(fs.1$final.model, "ltg + bmi + map")
 
   ## models with interaction terms
   fs.1 <- forward.selection(X, Y, y ~ age*sex, family="gaussian",
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
   expect_equal(fs.1$init, c("age", "sex"))
-  expect_equal(fs.1$panel, c("bmi", "ltg", "map"))
+  expect_equal(fs.1$panel, c("ltg", "bmi", "map"))
   expect_equal(fs.1$init.model, "age + sex + age:sex")
-  expect_equal(fs.1$final.model, "age + sex + bmi + ltg + map + age:sex")
+  expect_equal(fs.1$final.model, "age + sex + ltg + bmi + map + age:sex")
 
   ## summary
   summ <- summary(fs.1)
   expect_named(summ, c("vars", "fdr", "llks", "diffs", "iter"))
-  expect_equal(summ$llks[1:4], c(NA, -2136.283195, -2047.874234, -2004.104712))
+  expect_equal(summ$llks[1:4], c(NA, -2137.599696, -2056.442947, -2004.431740))
   expect_equal(summ$iter, c(NA, NA, 1:3))
 })
 
@@ -85,7 +85,7 @@ test_that("univariate filter",
   fs.2 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
                             choose.from=30:40, num.filter=5,
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
-  expect_length(fs.2$panel, 0)
+  expect_length(fs.2$panel, 3)
   expect_equal(dim(fs.2$iter1), c(5, 3))
 
   fs.3 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),

@@ -18,17 +18,17 @@ test_that("nested forward selection",
   summ.gauss <- summary(nest.gauss)
   expect_named(summ.gauss, c("vars", "percent", "coef", "coefIQR",
                              "rank", "rankIQR", "diffLogLik", "diffLogLikIQR"))
-  expect_equivalent(summ.gauss$rank, c(2, 2, 2, 3))
-  expect_equivalent(summ.gauss$coefIQR[1], "(25.50, 33.48)")
-  expect_equivalent(summ.gauss$diffLogLikIQR[1], "(30.75, 37.11)")
+  expect_equivalent(summ.gauss$rank, c(2, 1, 2, 3, 3))
+  expect_equivalent(summ.gauss$coefIQR[1], "(28.74, 30.17)")
+  expect_equivalent(summ.gauss$diffLogLikIQR[1], "(24.38, 40.36)")
 
   summ.gauss.iter1 <- summary(nest.gauss, iter1=TRUE)
   expect_named(summ.gauss.iter1,
                c("med.diff.llk", "iqr.diff.llk", "med.pvalue", "iqr.pvalue"))
   expect_equal(rownames(summ.gauss.iter1),
-               c("bmi", "ltg", "tch", "hdl", "map", "tc", "ldl"))
+               c("bmi", "ltg", "tch", "map", "hdl", "tc", "ldl"))
   expect_equivalent(summ.gauss.iter1$med.pvalue,
-                    c(0.000, 0.002, 0.007, 0.003, 0.004, 0.253, 0.337))
+                    c(0.001, 0.001, 0.004, 0.003, 0.013, 0.213, 0.199))
 
   nest.binom <- nested.forward.selection(X, y.bin, ~ age + sex, binomial, folds,
                                          num.inner.folds=10, max.iters=3,
@@ -48,12 +48,12 @@ test_that("nested forward selection",
                                        choose.from=c("sex.cat", "bmi.cat"),
                                        num.inner.folds=10, max.iters=3,
                                        verbose=FALSE)
-  expect_equal(nest.cat[[1]]$panel, c("bmi.cat", "sex.cat"))
-  expect_equal(is.na(nest.cat[[1]]$fs$coef), c(TRUE, TRUE, FALSE))
+  expect_equal(nest.cat[[1]]$panel, c("bmi.cat"))
+  expect_equal(is.na(nest.cat[[1]]$fs$coef), c(TRUE, TRUE))
 
   summ.cat <- summary(nest.cat)
-  expect_equivalent(summ.cat$coef, c(NA, -13.469))
-  expect_equivalent(summ.cat$diffLogLik, c(27.366, 0.128))
+  expect_equivalent(summ.cat$coef, c(NA, -15.711))
+  expect_equivalent(summ.cat$diffLogLik, c(25.599, 0.009))
 })
 
 context("nested.glm")
@@ -73,11 +73,11 @@ test_that("nested.glm",
   expect_named(perf.gauss, c("observed", "predicted", "performance"))
   expect_named(attributes(perf.gauss), c("names", "measure", "class"))
   expect_s3_class(perf.gauss, "nestperf")
-  expect_equal(perf.gauss$performance, 0.604743669)
+  expect_equal(perf.gauss$performance, 0.62174173)
   expect_length(perf.gauss$observed, length(Y))
   expect_output(print(perf.gauss), "Correlation coefficient:")
 
   perf.binom <- nested.performance(glm.binom)
-  expect_equal(perf.binom$performance, 0.776294507)
+  expect_equal(perf.binom$performance, 0.78288733)
   expect_output(print(perf.binom), "Area under the curve:")
 })
