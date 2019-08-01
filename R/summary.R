@@ -158,8 +158,8 @@ print.nestfs <- function(x, ...) {
 #' @importFrom pROC auc
 #' @export
 nested.performance <- function(x) {
-  if (!class(x) %in% c("nestfs", "nestglm"))
-    stop("Object is not of nestfs or nestglm class.")
+  if (!inherits(x, c("nestfs", "nestglm")))
+    stop("Object is not of 'nestfs' or 'nestglm' class.", call.=FALSE)
 
   ## summarise observed and predicted values
   num.folds <- length(x)

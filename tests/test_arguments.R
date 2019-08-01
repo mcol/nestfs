@@ -81,7 +81,7 @@ test_that("argument checks",
   expect_error(nested.performance(),
                "is missing, with no default")
   expect_error(nested.performance(NULL),
-               "Object is not of nestfs or nestglm class")
+               "Object is not of 'nestfs' or 'nestglm' class")
 })
 
 context("outcome validation")
