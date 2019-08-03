@@ -89,7 +89,6 @@ print.fs <- function(x, ...) {
 #' names is searched on the current workspace, and if found full names are
 #' included in the summary dataframe.
 #'
-#' @importFrom stats median quantile
 #' @export
 summary.nestfs <- function(object, iter1=FALSE, ...) {
   format.iqr <- function(x, n=2) {
@@ -174,7 +173,6 @@ print.nestfs <- function(x, ...) {
 #' }
 #'
 #' @seealso \code{\link{nested.forward.selection}} and \code{\link{nested.glm}}.
-#' @importFrom stats cor
 #' @importFrom pROC auc
 #' @export
 nested.performance <- function(x) {

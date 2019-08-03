@@ -121,8 +121,6 @@
 #' @seealso \code{\link{nested.forward.selection}} and \code{\link{summary.fs}}.
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
-#' @importFrom stats coefficients glm predict reformulate t.test update wilcox.test
-#' @importFrom utils head tail
 #' @export
 forward.selection <- function(x, y, init.model, family,
                               choose.from=NULL, test=c("t", "wilcoxon"),
@@ -262,13 +260,13 @@ forward.selection <- function(x, y, init.model, family,
 
       ## current model
       curr <- univ.glm(model, xy.train, xy.test)
-      all.stats <- tail(curr, n=1)
+      all.stats <- utils::tail(curr, n=1)
 
       ## models augmented with one additional variable at a time
       for (var in other.vars) {
         model.augm <- update(model, reformulate(c(".", var)))
         augm <- univ.glm(model.augm, xy.train, xy.test)
-        all.stats <- rbind(all.stats, tail(augm, n=1))
+        all.stats <- rbind(all.stats, utils::tail(augm, n=1))
       }
       rownames(all.stats) <- c("Base", other.vars)
       return(all.stats)
@@ -526,7 +524,6 @@ nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
 #' @return
 #' A list of length equal to \code{length(folds)}.
 #'
-#' @importFrom stats as.formula glm predict
 #' @noRd
 glm.inner <- function(x, y, model, idx.test, family, store.glm=FALSE) {
   idx.train <- setdiff(1:nrow(x), idx.test)
@@ -592,7 +589,6 @@ validate.outcome <- function(y) {
 #' model parameter cannot be used.
 #'
 #' @importFrom methods is
-#' @importFrom stats as.formula update
 #' @noRd
 validate.init.model <- function(model) {
   if (is.null(model) || length(model) == 0) {

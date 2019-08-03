@@ -62,13 +62,13 @@
 #' @author
 #' Marco Colombo \email{m.colombo@@ed.ac.uk}
 #'
+#' @import stats
 #' @docType package
 "_PACKAGE"
 
-#' @importFrom foreach getDoParWorkers getDoParRegistered
 .onAttach <- function(libname, pkgname) {
-  if (getDoParRegistered())
-    packageStartupMessage("nestfs: currently using ", getDoParWorkers(),
+  if (foreach::getDoParRegistered())
+    packageStartupMessage("nestfs: currently using ", foreach::getDoParWorkers(),
                           " cores.")
   else
     packageStartupMessage("nestfs: register a parallel backend before starting.")
