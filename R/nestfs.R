@@ -121,7 +121,7 @@
 #' @seealso \code{\link{nested.forward.selection}} and \code{\link{summary.fs}}.
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
-#' @importFrom stats coefficients glm predict t.test update wilcox.test
+#' @importFrom stats coefficients glm predict reformulate t.test update wilcox.test
 #' @importFrom utils head tail
 #' @export
 forward.selection <- function(x, y, init.model, family,
