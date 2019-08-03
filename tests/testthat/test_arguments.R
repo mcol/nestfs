@@ -169,8 +169,8 @@ test_that("invalid family inputs",
                "is not a valid family")
   expect_error(validate.family(poisson),
                "are supported families")
-  expect_error(validate.family(binomial(),
-               "is missing, with no default"))
+  expect_error(validate.family(binomial()),
+               "is missing, with no default")
   expect_error(validate.family(binomial(), y.gauss),
                "must contain two classes")
   expect_error(validate.family(binomial(), y.binom + 1),
