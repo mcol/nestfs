@@ -1,7 +1,8 @@
-nestfs: an R package for cross-validated (nested) forward selection.
+nestfs: Cross-validated (nested) forward selection
 ======
 
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/nestfs)](https://cran.r-project.org/package=nestfs)
+[![CRAN\_Downloads\_Badge](https://cranlogs.r-pkg.org/badges/nestfs)](https://cran.r-project.org/package=nestfs)
 
 This package provides an implementation of forward selection based on linear
 and logistic regression which adopts cross-validation as a core component of
@@ -72,3 +73,21 @@ nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
 summary(nestfs.res)
 nested.performance(nestfs.res)
 ```
+
+## References
+
+* M. Colombo, H.C. Looker, B. Farran et al.,
+  Serum kidney injury molecule 1 and beta-2-microglobulin perform as well as
+  larger panels for prediction of rapid decline in renal function in type 2
+  diabetes, Diabetologia (2019) 62 (1): 156-168.
+  https://doi.org/10.1007/s00125-018-4741-9
+
+* H.C. Looker, M. Colombo, S. Hess et al.,
+  Biomarkers of rapid chronic kidney disease progression in type 2 diabetes,
+  Kidney International (2015), 88 (4): 888-896.
+  https://doi.org/10.1038/ki.2015.199
+
+* H.C. Looker, M. Colombo, F. Agakov et al.,
+  Protein biomarkers for the prediction of cardiovascular disease in type 2
+  diabetes, Diabetologia (2015) 58 (6): 1363-1371.
+  https://doi.org/10.1007/s00125-015-3535-6
