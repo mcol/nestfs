@@ -21,8 +21,8 @@
 #' Diabetes data with interaction terms
 #'
 #' The dataset consists of 442 patients for which a quantitative measure of
-#' disease progression is recorded in the outcome variable \code{Y.diab}. The
-#' dataframe of predictors \code{X.diab} includes 10 baseline measurements, in
+#' disease progression is recorded in the outcome variable `Y.diab`. The
+#' dataframe of predictors `X.diab` includes 10 baseline measurements, in
 #' addition to 45 interactions and 9 quadratic terms, for a total of 64
 #' variables for each patient.
 #'
@@ -31,17 +31,17 @@
 #' @aliases X.diab Y.diab
 #'
 #' @format The dataset consists of the following two variables:
-#' \itemize{
-#'   \item X.diab: A dataframe of predictors transformed to have zero mean and
-#'         unit variance.
-#'   \item Y.diab: The outcome variable.
+#' \describe{
+#' \item{X.diab:}{A dataframe of predictors transformed to have zero mean and
+#'       unit variance.}
+#' \item{Y.diab:}{The outcome variable.}
 #' }
 #'
 #' @source
-#' B. Efron, T. Hastie, I. Johnstone and R. Tibshirani,
-#' "Least angle regression (with discussion)",
-#' \emph{Ann. Statist.}, 32 (2), 407-499, 2004.
-#' \url{http://www.stanford.edu/~hastie/Papers/LARS/data64.txt}
+#' B. Efron, T. Hastie, I. Johnstone and R. Tibshirani (2004),
+#' Least angle regression, _The Annals of Statistics_, 32 (2), 407-499.
+#' \url{https://doi.org/10.1214/009053604000000067}
+#' \url{https://www.stanford.edu/~hastie/Papers/LARS/data64.txt}
 #'
 #' @examples data(diabetes, package="nestfs")
 #' @keywords datasets

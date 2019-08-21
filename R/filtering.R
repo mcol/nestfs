@@ -43,10 +43,10 @@ ks.pval <- function(x, y) {
 
 #' Filtering of predictors
 #'
-#' Filter the predictors, retaining only the top \code{n}.
+#' Filter the predictors, retaining only the top `n`.
 #'
 #' This performs a univariate test of association of each predictor (not listed
-#' in \code{ignore}) with the outcome, and retains the top \code{n} variables
+#' in `ignore`) with the outcome, and retains the top `n` variables
 #' with smallest p-value according to a Kolmogorov-Smirnov test.
 #'
 #' @param x Design matrix.

@@ -18,31 +18,31 @@
 ##=============================================================================
 
 
-#' Run forward selection
+#' Cross-validated forward selection
 #'
 #' Run forward selection starting from a set of variables or a model.
 #'
 #' At each iteration, this function runs cross-validation to choose which
 #' variable enters the final panel by fitting the current model (defined in
-#' \code{init.model} as a list of variables or a formula for the first
+#' `init.model` as a list of variables or a formula for the first
 #' iteration) augmented by one of the remaining variables at a time.
 #'
 #' This function is used to choose a panel of variables on the data. As it uses
-#' all observations in the \code{x} dataframe, it is not possible to
+#' all observations in the `x` dataframe, it is not possible to
 #' produce unbiased estimates of the predictive performance of the panel
-#' selected (use \code{\link{nested.forward.selection}} for that purpose).
+#' selected (use [nested.forward.selection()] for that purpose).
 #'
 #' In the case of a binary outcome when very large number of predictors is
 #' available, it may be convenient to apply a univariate association filter.
-#' If \code{num.filter} is set to a positive value, then all available
-#' predictors (excluding those whose name is matched by \code{filter.ignore})
+#' If `num.filter` is set to a positive value, then all available
+#' predictors (excluding those whose name is matched by `filter.ignore`)
 #' are tested for univariate association with the outcome, and only the first
-#' \code{num.filter} enter the selection phase, while the others are filtered
+#' `num.filter` enter the selection phase, while the others are filtered
 #' out. This is done on the training part of all inner folds. Filtering can
 #' enhance the performance of forward selection when the number of available
 #' variables exceeds about 30-40.
 #'
-#' By default variables are selected according to the \code{paired.test}
+#' By default variables are selected according to the `paired.test`
 #' criterion. At each iteration, the sampling distribution of differences in
 #' validation log-likelihood obtained across all inner cross-validation folds
 #' of the models with and without each additional variable are tested against
@@ -57,25 +57,25 @@
 #' @template args-outcome
 #' @template args-family
 #' @param choose.from Indices or variable names over which the selection should
-#'        be performed. If \code{NULL} (default), all variables in \code{x}
-#'        that are not in \code{init.model} are considered.
+#'        be performed. If `NULL` (default), all variables in `x` that are not
+#'        in `init.model` are considered.
 #' @param test Type of statistical paired test to use (ignored if
-#'        \code{sel.crit="total.loglik"}).
-#' @param sel.crit Selection criterion: \code{"paired.test"} chooses the
+#'        `sel.crit="total.loglik"`).
+#' @param sel.crit Selection criterion: `"paired.test"` chooses the
 #'        variable with smallest p-value using the paired test specified by
-#'        \code{test} (see \strong{Details}), as long as this is smaller than
-#'        \code{max.pval}; \code{"total.loglik"} picks the variable that gives
-#'        the largest increase in log-likelihood; \code{"both"} attempts to
+#'        `test` (see **Details**), as long as this is smaller than
+#'        `max.pval`; `"total.loglik"` picks the variable that gives
+#'        the largest increase in log-likelihood; `"both"` attempts to
 #'        combine both previous criteria, choosing the variable that produces
 #'        the largest increase in log-likelihood only among the best 5
 #'        variables ranked according to the paired-test p-value.
 #' @param num.filter Number of variables to be retained by the univariate
-#'        association filter (see \strong{Details}), which can only be enabled
-#'        if \code{family=binomial()}. Variables listed in \code{init.model}
+#'        association filter (see **Details**), which can only be enabled
+#'        if `family=binomial()`. Variables listed in `init.model`
 #'        are never filtered. If set to 0 (default), the filter is disabled.
 #' @param filter.ignore Vector of variable names that should not be pruned by
 #'        the univariate association filter so that they are always allowed to
-#'        be selected (ignored if \code{num.filter=0}).
+#'        be selected (ignored if `num.filter=0`).
 #' @param num.inner.folds Number of folds in the inner cross-validation. It
 #'        must be at least 5 (default: 30).
 #' @param max.iters Maximum number of iterations (default: 15).
@@ -86,24 +86,22 @@
 #'        (default: 0).
 #' @param seed Seed of the random number generator for the inner folds.
 #' @param verbose Whether the variable chosen at each iteration should be
-#'        printed out (default: \code{TRUE}).
+#'        printed out (default: `TRUE`).
 #'
 #' @return
-#' An object of class \code{fs} containing the following fields:
-#' \describe{
-#' \item{fs:}{A dataframe containing the forward selection summary.}
-#' \item{init:}{The set of variables used in the initial model.}
-#' \item{panel:}{ Names of variables selected (in order).}
-#' \item{init.model:}{Right-hand side of the formula corresponding to the
+#' An object of class `fs` containing the following fields:
+#' \item{fs}{A dataframe containing the forward selection summary.}
+#' \item{init}{The set of variables used in the initial model.}
+#' \item{panel}{Names of variables selected (in order).}
+#' \item{init.model}{Right-hand side of the formula corresponding to the
 #'       initial model.}
-#' \item{final.model:}{Right-hand side of the formula corresponding to the
+#' \item{final.model}{Right-hand side of the formula corresponding to the
 #'       final model after forward selection.}
-#' \item{family:}{Type of model fitted.}
-#' \item{params:}{List of parameters used.}
-#' \item{iter1:}{Summary statistics for all variables at the first iteration.}
-#' \item{all.iter:}{Validation log-likelihoods for all inner folds at all
+#' \item{family}{Type of model fitted.}
+#' \item{params}{List of parameters used.}
+#' \item{iter1}{Summary statistics for all variables at the first iteration.}
+#' \item{all.iter}{Validation log-likelihoods for all inner folds at all
 #'       iterations.}
-#' }
 #'
 #' @examples
 #' # register a parallel cluster with two cores
@@ -118,7 +116,7 @@
 #' # close the parallel cluster
 #' stopImplicitCluster()
 #'
-#' @seealso \code{\link{nested.forward.selection}} and \code{\link{summary.fs}}.
+#' @seealso [nested.forward.selection()] and [summary.fs()].
 #' @keywords multivariate
 #' @importFrom foreach foreach %dopar%
 #' @export
@@ -344,7 +342,7 @@ forward.selection <- function(x, y, init.model, family,
   return(res)
 }
 
-#' Run nested forward selection
+#' Nested cross-validated forward selection
 #'
 #' Run nested forward selection starting from a set of variables or a model.
 #'
@@ -356,18 +354,15 @@ forward.selection <- function(x, y, init.model, family,
 #' @template args-outcome
 #' @template args-family
 #' @template args-folds
-#' @param ... Arguments to \code{forward.selection}.
+#' @param ... Arguments to [forward.selection()].
 #'
 #' @return
-#' An object of class \code{nestfs} of length equal to
-#' \code{length(folds)}, where each element is an object of class
-#' \code{fs} containing the following additional fields:
-#' \describe{
-#' \item{fit:}{Predicted values for the withdrawn observations.}
-#' \item{obs:}{Observed values for the withdrawn observations.}
-#' \item{test.idx:}{Indices of the the withdrawn observations for this fold.}
-#' \item{model:}{Summary of the model built using the selected panel.}
-#' }
+#' An object of class `nestfs` of length equal to `length(folds)`, where each
+#' element is an object of class `fs` containing the following additional fields:
+#' \item{fit}{Predicted values for the withdrawn observations.}
+#' \item{obs}{Observed values for the withdrawn observations.}
+#' \item{test.idx}{Indices of the the withdrawn observations for this fold.}
+#' \item{model}{Summary of the model built using the selected panel.}
 #'
 #' @examples
 #' # register a parallel cluster with two cores
@@ -385,8 +380,7 @@ forward.selection <- function(x, y, init.model, family,
 #' stopImplicitCluster()
 #'
 #' @seealso
-#' \code{\link{forward.selection}}, \code{\link{summary.nestfs}} and
-#' \code{\link{nested.performance}}.
+#' [forward.selection()], [summary.nestfs()] and [nested.performance()].
 #' @keywords multivariate
 #' @export
 nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
@@ -444,7 +438,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'
 #' This can be used to establish a baseline model, often built only on the
 #' initial set of covariates (those that would be passed through the
-#' \code{init.model} argument to \code{forward.selection}).
+#' `init.model` argument to [forward.selection()]).
 #'
 #' @param x Dataframe of predictors.
 #' @template args-outcome
@@ -452,22 +446,20 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #'        that define the model to be fitted.
 #' @template args-family
 #' @template args-folds
-#' @param store.glm Whether the object produced by \code{glm} should be
-#'        stored (default: \code{FALSE}).
+#' @param store.glm Whether the object produced by `glm` should be
+#'        stored (default: `FALSE`).
 #'
 #' @return
-#' An object of class \code{nestglm} of length equal to \code{length(folds)},
+#' An object of class `nestglm` of length equal to `length(folds)`,
 #' where each entry contains the following fields:
-#' \describe{
-#' \item{summary:}{Summary of the coefficients of the model fitted on the
+#' \item{summary}{Summary of the coefficients of the model fitted on the
 #'       training observations.}
-#' \item{family:}{Type of model fitted.}
-#' \item{fit:}{Predicted values for the withdrawn observations.}
-#' \item{obs:}{Observed values for the withdrawn observations.}
-#' \item{test.llk:}{Test log-likelihood.}
-#' \item{test.idx:}{Indices of the the withdrawn observations for this fold.}
-#' \item{regr:}{Object created by glm (only if \code{store.glm=TRUE}).}
-#' }
+#' \item{family}{Type of model fitted.}
+#' \item{fit}{Predicted values for the withdrawn observations.}
+#' \item{obs}{Observed values for the withdrawn observations.}
+#' \item{test.llk}{Test log-likelihood.}
+#' \item{test.idx}{Indices of the the withdrawn observations for this fold.}
+#' \item{regr}{Object created by `glm` (only if `store.glm=TRUE`).}
 #'
 #' @examples
 #' # register a parallel cluster with two cores
@@ -482,7 +474,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' # close the parallel cluster
 #' stopImplicitCluster()
 #'
-#' @seealso \code{\link{nested.performance}}.
+#' @seealso [nested.performance()].
 #' @keywords multivariate
 #' @export
 nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
@@ -518,11 +510,11 @@ nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
 #' @param model Formula for the model to be fitted.
 #' @param idx.test Indices of observations to withdraw.
 #' @template args-family
-#' @param store.glm Whether the object produced by \code{glm} should be
-#'        stored (default: \code{FALSE}).
+#' @param store.glm Whether the object produced by `glm` should be
+#'        stored (default: `FALSE`).
 #'
 #' @return
-#' A list of length equal to \code{length(folds)}.
+#' A list with the results of fitting a model on a specific fold.
 #'
 #' @noRd
 glm.inner <- function(x, y, model, idx.test, family, store.glm=FALSE) {
@@ -614,7 +606,7 @@ validate.init.model <- function(model) {
 #' Validate the family argument
 #'
 #' Ensure that the family argument has been specified correctly.
-#' This is inspired by code in \code{\link{glm}}.
+#' This is inspired by code in `glm`.
 #'
 #' @param family Family argument to test.
 #' @param y Outcome variable.
@@ -653,7 +645,7 @@ validate.family <- function(family, y) {
 
 #' Validate the choose.from argument
 #'
-#' Ensure that the \code{choose.from} argument has been specified correctly.
+#' Ensure that the `choose.from` argument has been specified correctly.
 #'
 #' @param choose.from Argument to test.
 #' @param x Dataframe of predictors.
@@ -689,7 +681,7 @@ validate.choose.from <- function(choose.from, x) {
 
 #' Validate the folds argument
 #'
-#' Ensure that the \code{folds} argument has been specified correctly.
+#' Ensure that the `folds` argument has been specified correctly.
 #'
 #' @param folds Argument to test.
 #'
