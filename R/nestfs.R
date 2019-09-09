@@ -104,21 +104,14 @@
 #'       iterations.}
 #'
 #' @examples
-#' # register a parallel cluster with two cores
-#' library(doParallel)
-#' registerDoParallel(2)
-#'
+#' \dontshow{options(mc.cores=2)}
 #' data(diabetes)
 #' fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex, family=gaussian(),
 #'                             choose.from=1:10, num.inner.folds=5, max.iters=3)
 #' summary(fs.res)
 #'
-#' # close the parallel cluster
-#' stopImplicitCluster()
-#'
 #' @seealso [nested.forward.selection()] and [summary.fs()].
 #' @keywords multivariate
-#' @importFrom foreach foreach %dopar%
 #' @export
 forward.selection <- function(x, y, init.model, family,
                               choose.from=NULL, test=c("t", "wilcoxon"),
@@ -218,10 +211,8 @@ forward.selection <- function(x, y, init.model, family,
       stop("filter.ignore should be a character vector or NULL.")
 
     ## run the filter on the training part of all inner folds
-    fold <- NULL   # silence a note raised by R CMD check
     ignore.vars <- c(init.vars, filter.ignore)
-    all.filt.idx <- foreach(fold=1:num.inner.folds, .combine=c) %dopar% {
-
+    par.fun <- function(fold) {
       train.idx <- setdiff(seq(nrow(x)), folds[[fold]])
       x.train <- x[train.idx, ]
       y.train <- y[train.idx]
@@ -229,8 +220,18 @@ forward.selection <- function(x, y, init.model, family,
                                     ignore=ignore.vars)
     }
 
+    if (.Platform$OS.type != "windows") {
+      all.filt.idx <- parallel::mclapply(X=1:num.inner.folds, FUN=par.fun,
+                                         mc.preschedule=FALSE)
+    } else { # windows
+      cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+      on.exit(parallel::stopCluster(cl))
+      all.filt.idx <- parallel::parLapply(X=1:num.inner.folds, cl=cl,
+                                          fun=par.fun)
+    }
+
     ## keep the union of the variables retained in the inner folds
-    filt.idx <- sort(table(all.filt.idx), decreasing=TRUE)
+    filt.idx <- sort(table(unlist(all.filt.idx)), decreasing=TRUE)
     filt.idx <- as.integer(names(filt.idx))[1:num.filter]
     keep.idx <- union(match(ignore.vars, colnames(x)), filt.idx)
     keep.idx <- keep.idx[!is.na(keep.idx)]
@@ -249,8 +250,7 @@ forward.selection <- function(x, y, init.model, family,
       break
 
     ## loop over the folds
-    res.inner <- foreach(fold=1:num.inner.folds) %dopar% {
-
+    par.fun <- function(fold) {
       test.idx <- folds[[fold]]
       train.idx <- setdiff(seq(nrow(x)), test.idx)
       xy.train <- cbind(nestfs_y_=y[train.idx], x[train.idx, ])
@@ -268,6 +268,16 @@ forward.selection <- function(x, y, init.model, family,
       }
       rownames(all.stats) <- c("Base", other.vars)
       return(all.stats)
+    }
+
+    if (.Platform$OS.type != "windows") {
+      res.inner <- parallel::mclapply(X=1:num.inner.folds, FUN=par.fun,
+                                      mc.preschedule=FALSE)
+    } else { # windows
+      cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+      on.exit(parallel::stopCluster(cl))
+      res.inner <- parallel::parLapply(X=1:num.inner.folds, cl=cl,
+                                       fun=par.fun)
     }
 
     ## collect all validation log-likelihoods
@@ -365,19 +375,13 @@ forward.selection <- function(x, y, init.model, family,
 #' \item{model}{Summary of the model built using the selected panel.}
 #'
 #' @examples
-#' # register a parallel cluster with two cores
-#' library(doParallel)
-#' registerDoParallel(2)
-#'
+#' \dontshow{options(mc.cores=2)}
 #' data(diabetes)
 #' folds <- create.folds(2, nrow(X.diab), seed=1)
 #' nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
 #'                                        gaussian(), folds, choose.from=1:10,
 #'                                        num.inner.folds=5, max.iters=3)
 #' summary(nestfs.res)
-#'
-#' # close the parallel cluster
-#' stopImplicitCluster()
 #'
 #' @seealso
 #' [forward.selection()], [summary.nestfs()] and [nested.performance()].
@@ -462,17 +466,11 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' \item{regr}{Object created by `glm` (only if `store.glm=TRUE`).}
 #'
 #' @examples
-#' # register a parallel cluster with two cores
-#' library(doParallel)
-#' registerDoParallel(2)
-#'
+#' \dontshow{options(mc.cores=2)}
 #' data(diabetes)
 #' folds <- create.folds(10, nrow(X.diab), seed=1)
 #' base.res <- nested.glm(X.diab, Y.diab, c("age", "sex", "bmi", "map"),
 #'                        gaussian(), folds)
-#'
-#' # close the parallel cluster
-#' stopImplicitCluster()
 #'
 #' @seealso [nested.performance()].
 #' @keywords multivariate

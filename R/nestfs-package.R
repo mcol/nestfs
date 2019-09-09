@@ -40,12 +40,11 @@
 #' iteration, with the aim of guiding the selection towards variables that
 #' have better generalization properties.
 #'
-#' The code is parallelized over the inner folds, thanks to the **foreach**
+#' The code is parallelized over the inner folds, thanks to the **parallel**
 #' package. User time therefore depends on the number of available cores, but
-#' there is no advantage in using more cores than inner folds. A parallel
-#' backend must be registered before starting, otherwise operations will run
-#' sequentially with a warning reported. This can be done through a call to
-#' \code{\link[doParallel]{registerDoParallel}}, for example.
+#' there is no advantage in using more cores than inner folds. The number of
+#' cores assigned to computations must be registered before starting by setting
+#' the `"mc.cores"` option.
 #'
 #' The main advantage of forward selection is that it provides an immediately
 #' interpretable model, and the panel of variables obtained is in some sense
@@ -67,9 +66,12 @@
 "_PACKAGE"
 
 .onAttach <- function(libname, pkgname) {
-  if (foreach::getDoParRegistered())
-    packageStartupMessage("nestfs: currently using ", foreach::getDoParWorkers(),
-                          " cores.")
-  else
-    packageStartupMessage("nestfs: register a parallel backend before starting.")
+
+  ## number of cores used by default if not already set
+  if (is.null(options()$mc.cores))
+    options(mc.cores=min(ceiling(parallel::detectCores() / 2), 10)) # nocov
+
+  packageStartupMessage("nestfs ", utils::packageVersion("nestfs"),
+                        ": using ", options("mc.cores"),
+                        " cores, set 'options(mc.cores)' to change.")
 }

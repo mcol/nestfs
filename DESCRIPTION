@@ -13,9 +13,8 @@ Description: Implementation of forward selection based on cross-validated
 License: GPL-2 | file LICENSE
 URL: https://github.com/mcol/nestfs
 BugReports: https://github.com/mcol/nestfs/issues
-Imports: dgof, foreach, pROC (>= 1.9), methods, stats, utils
+Imports: dgof, parallel, pROC (>= 1.9), methods, stats, utils
 Suggests:
-  doParallel,
   testthat (>= 2.0.0)
 Encoding: UTF-8
 RoxygenNote: 6.1.1

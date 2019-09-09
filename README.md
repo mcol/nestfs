@@ -14,12 +14,11 @@ aggravated by the fact that an inner cross-validation happens at each
 iteration, with the aim of guiding the selection towards variables that
 have better generalization properties.
 
-The code is parallelized over the inner folds, thanks to the `foreach`
+The code is parallelized over the inner folds, thanks to the **parallel**
 package. User time therefore depends on the number of available cores, but
-there is no advantage in using more cores than inner folds. A parallel
-backend must be registered before starting, otherwise operations will run
-sequentially with a warning reported. This can be done through a call to
-`registerDoParallel()`, for example.
+there is no advantage in using more cores than inner folds. The number of
+cores assigned to computations must be registerd before starting by setting
+the "mc.cores" option.
 
 The main advantage of forward selection is that it provides an immediately
 interpretable model, and the panel of variables obtained is in some sense
@@ -35,15 +34,14 @@ A precompiled package is
 
 ## Usage
 
-First load the package and register a parallel cluster, setting the number of
-cores to use. If you are lucky enough to work on a large multicore machine,
+First load the package and register the number of cores to use by setting the
+`mc.cores` option. If you are lucky enough to work on a large multicore machine,
 best performance is achieved by registering as many cores as the number of inner
 folds being used (the default is 30).
 
 ```r
 library(nestfs)
-library(doParallel)
-registerDoParallel(10)
+options(mc.cores=10)
 ```
 
 To run forward selection from a baseline model that contains only age and sex,
