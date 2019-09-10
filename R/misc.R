@@ -108,6 +108,8 @@ validate.family <- function(family, y) {
   if (!family$family %in% c("gaussian", "binomial"))
     stop("Only 'gaussian' and 'binomial' are supported families.", call.=FALSE)
 
+  if (family$family == "gaussian" && is.factor(y))
+    stop("Factor outcome variable not valid with family=gaussian().", call.=FALSE)
   if (family$family == "binomial") {
     if (length(table(y)) != 2)
       stop("y must contain two classes with family=binomial().", call.=FALSE)

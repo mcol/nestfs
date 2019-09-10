@@ -176,16 +176,18 @@ test_that("invalid family inputs",
                "must contain 0-1 values")
   expect_error(validate.family(binomial(), y.binom - 1),
                "must contain 0-1 values")
+  expect_error(validate.family(gaussian(), as.factor(y.binom)),
+               "Factor outcome variable not valid with family=gaussian()")
 })
 
 test_that("valid family inputs",
 {
-  expect_is(validate.family(gaussian()), "family")
+  expect_is(validate.family(gaussian(), y.gauss), "family")
   expect_equal(validate.family("binomial", c(1, 0))$family, "binomial")
   expect_equal(validate.family("binomial", factor(c(1, 0)))$family, "binomial")
-  expect_equal(validate.family("gaussian")$family, "gaussian")
-  expect_equal(validate.family(gaussian())$family, "gaussian")
-  expect_equal(validate.family(gaussian)$family,   "gaussian")
+  expect_equal(validate.family("gaussian", y.gauss)$family, "gaussian")
+  expect_equal(validate.family(gaussian(), y.gauss)$family, "gaussian")
+  expect_equal(validate.family(gaussian, y.gauss)$family,   "gaussian")
 })
 
 context("choose.from validation")
