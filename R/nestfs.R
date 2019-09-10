@@ -106,7 +106,8 @@
 #' @examples
 #' \dontshow{options(mc.cores=2)}
 #' data(diabetes)
-#' fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex, family=gaussian(),
+#' X <- diabetes[, -match("Y", colnames(diabetes))]
+#' fs.res <- forward.selection(X, diabetes$Y, ~ age + sex, family=gaussian(),
 #'                             choose.from=1:10, num.inner.folds=5, max.iters=3)
 #' summary(fs.res)
 #'
@@ -377,8 +378,9 @@ forward.selection <- function(x, y, init.model, family,
 #' @examples
 #' \dontshow{options(mc.cores=2)}
 #' data(diabetes)
-#' folds <- create.folds(2, nrow(X.diab), seed=1)
-#' nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
+#' X <- diabetes[, -match("Y", colnames(diabetes))]
+#' folds <- create.folds(2, nrow(X), seed=1)
+#' nestfs.res <- nested.forward.selection(X, diabetes$Y, ~ age + sex,
 #'                                        gaussian(), folds, choose.from=1:10,
 #'                                        num.inner.folds=5, max.iters=3)
 #' summary(nestfs.res)
@@ -468,8 +470,8 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' @examples
 #' \dontshow{options(mc.cores=2)}
 #' data(diabetes)
-#' folds <- create.folds(10, nrow(X.diab), seed=1)
-#' base.res <- nested.glm(X.diab, Y.diab, c("age", "sex", "bmi", "map"),
+#' folds <- create.folds(10, nrow(diabetes), seed=1)
+#' base.res <- nested.glm(diabetes, diabetes$Y, c("age", "sex", "bmi", "map"),
 #'                        gaussian(), folds)
 #'
 #' @seealso [nested.performance()].

@@ -1,7 +1,6 @@
 data(diabetes)
-diabetes <- X.diab
-y.gauss <- Y.diab
-y.binom <- as.integer(Y.diab > 140)
+y.gauss <- diabetes$Y
+y.binom <- as.integer(diabetes$Y > 140)
 y.short <- y.binom[1:10]
 folds <- create.folds(2, nrow(diabetes), 0)
 

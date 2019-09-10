@@ -1,6 +1,6 @@
 data(diabetes)
-X <- X.diab[, 1:9]
-Y <- Y.diab
+X <- diabetes[, 1:9]
+Y <- diabetes$Y
 y.bin <- factor(Y > 140)
 folds <- create.folds(2, nrow(X), 0)
 

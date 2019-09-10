@@ -1,9 +1,10 @@
 context("forward selection")
 
 data(diabetes)
-X <- X.diab[, 1:9]
-Y <- Y.diab
+X <- diabetes[, 1:9]
+Y <- diabetes$Y
 y.binom <- as.integer(Y > 140)
+diabetes <- diabetes[, -match("Y", colnames(diabetes))]
 
 source("dump_forward_selection.R")
 
@@ -82,13 +83,13 @@ test_that("univariate filter",
   expect_equal(fs.1$fs, fs.binom.ok$fs)
   expect_equal(dim(fs.1$iter1), c(5, 3))
 
-  fs.2 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
+  fs.2 <- forward.selection(diabetes, y.binom, ~ age + sex, binomial(),
                             choose.from=30:40, num.filter=5,
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
   expect_length(fs.2$panel, 3)
   expect_equal(dim(fs.2$iter1), c(5, 3))
 
-  fs.3 <- forward.selection(X.diab, y.binom, ~ age + sex, binomial(),
+  fs.3 <- forward.selection(diabetes, y.binom, ~ age + sex, binomial(),
                             num.filter=5, filter.ignore=c("bmi", "nonexisting"),
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
   expect_equal(fs.3$fs, fs.binom.ok$fs)

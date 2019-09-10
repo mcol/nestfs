@@ -4,7 +4,7 @@ nestfs: Cross-validated (nested) forward selection
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/nestfs)](https://cran.r-project.org/package=nestfs)
 [![CRAN\_Downloads\_Badge](https://cranlogs.r-pkg.org/badges/nestfs)](https://cran.r-project.org/package=nestfs)
 
-This package provides an implementation of forward selection based on linear
+**nestfs** provides an implementation of forward selection based on linear
 and logistic regression which adopts cross-validation as a core component of
 the selection procedure.
 
@@ -49,7 +49,8 @@ the following is enough:
 
 ```r
 data(diabetes)
-fs.res <- forward.selection(X.diab, Y.diab, ~ age + sex, family=gaussian())
+X <- diabetes[, -match("Y", colnames(diabetes))]
+fs.res <- forward.selection(X, diabetes$Y, ~ age + sex, family=gaussian())
 summary(fs.res)
 ```
 
@@ -65,8 +66,8 @@ To obtain a cross-validated measure of performance of the selection process,
 nested forward selection should be run:
 
 ```r
-cv.folds <- create.folds(10, nrow(X.diab), seed=1)
-nestfs.res <- nested.forward.selection(X.diab, Y.diab, ~ age + sex,
+cv.folds <- create.folds(10, nrow(X), seed=1)
+nestfs.res <- nested.forward.selection(X, diabetes$Y, ~ age + sex,
                                        family=gaussian(), folds=cv.folds)
 summary(nestfs.res)
 nested.performance(nestfs.res)
