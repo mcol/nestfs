@@ -51,7 +51,6 @@ the following is enough:
 data(diabetes)
 fs.res <- fs(Y ~ age + sex, diabetes, family=gaussian())
 summary(fs.res)
-
 ##      vars          fdr      llks     diffs iter
 ## 1     age           NA        NA        NA   NA
 ## 2     sex           NA -2136.854        NA   NA
@@ -82,7 +81,6 @@ process by performing it on each training split of the cross-validation folds:
 folds <- create.folds(10, nrow(diabetes), seed=1)
 nest.res <- nested.fs(Y ~ age + sex, diabetes, family=gaussian(), folds=folds)
 summary(nest.res)
-
 ##       vars percent    coef          coefIQR rank      rankIQR diffLogLik  diffLogLikIQR
 ## 1      bmi     100  24.547   (23.61, 25.48)    2 (1.00, 2.00)     61.021 (44.49, 76.85)
 ## 2      ltg     100  23.729   (22.39, 24.41)    2 (1.00, 2.00)     52.868 (36.09, 69.36)
@@ -107,7 +105,6 @@ of performance of the selection process, which is an unbiased estimate of the
 predictive performance of the selected panels on withdrawn data:
 ```r
 nested.performance(nest.res)
-
 ## Correlation coefficient: 0.7097
 ```
 
@@ -117,7 +114,6 @@ set of cross-validation folds:
 ```r
 base.res <- nested.glm(Y ~ age + sex, diabetes, family=gaussian(), folds=folds)
 nested.performance(base.res)
-
 ## Correlation coefficient: 0.1551
 ```
 
