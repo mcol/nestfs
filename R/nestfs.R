@@ -104,12 +104,13 @@
 #'       iterations.}
 #'
 #' @examples
-#' \dontshow{options(mc.cores=2)}
+#' \dontshow{oldopts <- options(mc.cores=2)}
 #' data(diabetes)
 #' X <- diabetes[, -match("Y", colnames(diabetes))]
 #' fs.res <- forward.selection(X, diabetes$Y, ~ age + sex, family=gaussian(),
 #'                             choose.from=1:10, num.inner.folds=5, max.iters=3)
 #' summary(fs.res)
+#' \dontshow{options(oldopts)}
 #'
 #' @seealso [nested.forward.selection()] and [summary.fs()].
 #' @keywords multivariate
@@ -376,7 +377,7 @@ forward.selection <- function(x, y, init.model, family,
 #' \item{model}{Summary of the model built using the selected panel.}
 #'
 #' @examples
-#' \dontshow{options(mc.cores=2)}
+#' \dontshow{oldopts <- options(mc.cores=2)}
 #' data(diabetes)
 #' X <- diabetes[, -match("Y", colnames(diabetes))]
 #' folds <- create.folds(2, nrow(X), seed=1)
@@ -384,6 +385,7 @@ forward.selection <- function(x, y, init.model, family,
 #'                                        gaussian(), folds, choose.from=1:10,
 #'                                        num.inner.folds=5, max.iters=3)
 #' summary(nestfs.res)
+#' \dontshow{options(oldopts)}
 #'
 #' @seealso
 #' [forward.selection()], [summary.nestfs()] and [nested.performance()].
@@ -468,11 +470,12 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' \item{regr}{Object created by `glm` (only if `store.glm=TRUE`).}
 #'
 #' @examples
-#' \dontshow{options(mc.cores=2)}
+#' \dontshow{oldopts <- options(mc.cores=2)}
 #' data(diabetes)
 #' folds <- create.folds(10, nrow(diabetes), seed=1)
 #' base.res <- nested.glm(diabetes, diabetes$Y, c("age", "sex", "bmi", "map"),
 #'                        gaussian(), folds)
+#' \dontshow{options(oldopts)}
 #'
 #' @seealso [nested.performance()].
 #' @keywords multivariate
