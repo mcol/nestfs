@@ -9,7 +9,7 @@ structure(list(fs = structure(list(vars = c("age", "sex", "ltg",
     final.model = "age + sex + ltg + bmi + map", family = "gaussian",
     params = list(test = "t", sel.crit = "paired.test", num.filter = 0,
         filter.ignore = NULL, num.inner.folds = 10, max.iters = 3,
-        max.pval = 0.5, min.llk.diff = 0, seed = 50), iter1 = structure(list(
+        max.pval = 0.5, min.llk.diff = 2, seed = 50), iter1 = structure(list(
         median.diff.llk = c(7.42822335017712, 4.3839536677425,
         0.458637482580357, 0.315516355313903, 3.61710365564878,
         3.50945113825658, 8.26341734691495), total.diff.llk = c(86.6091204903303,
@@ -106,7 +106,7 @@ structure(list(fs = structure(list(vars = c("age", "sex", "ltg",
     final.model = "age + sex + ltg + bmi + map", family = "binomial",
     params = list(test = "t", sel.crit = "paired.test", num.filter = 0,
         filter.ignore = NULL, num.inner.folds = 10, max.iters = 3,
-        max.pval = 0.5, min.llk.diff = 0, seed = 50), iter1 = structure(list(
+        max.pval = 0.5, min.llk.diff = 2, seed = 50), iter1 = structure(list(
         median.diff.llk = c(4.38111229398526, 2.11556838718411,
         0.138226177273646, -0.0123531319750096, 2.99745552926077,
         3.15501415905757, 5.93880201665371), total.diff.llk = c(47.64415825756,

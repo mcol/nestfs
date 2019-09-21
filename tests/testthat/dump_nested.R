@@ -10,7 +10,7 @@ NA, 1L, 2L, 3L), coef = c(NA, NA, 30.8914286632733, 16.8801087677022,
     final.model = "age + sex + bmi + tch + map", family = "gaussian",
     params = list(test = "t", sel.crit = "paired.test", num.filter = 0,
         filter.ignore = NULL, num.inner.folds = 10, max.iters = 3,
-        max.pval = 0.5, min.llk.diff = 0, seed = 50), iter1 = structure(list(
+        max.pval = 0.5, min.llk.diff = 2, seed = 50), iter1 = structure(list(
         median.diff.llk = c(5.6826337793258, 3.0893928322343,
         0.160617859149013, 0.101756716514863, 1.97101113622323,
         1.44872648589156, 3.53735350024737), total.diff.llk = c(48.3476946005786,
@@ -226,7 +226,7 @@ NA, 1L, 2L, 3L), coef = c(NA, NA, 30.8914286632733, 16.8801087677022,
         final.model = "age + sex + ltg + bmi + tc", family = "gaussian",
         params = list(test = "t", sel.crit = "paired.test", num.filter = 0,
             filter.ignore = NULL, num.inner.folds = 10, max.iters = 3,
-            max.pval = 0.5, min.llk.diff = 0, seed = 50), iter1 = structure(list(
+            max.pval = 0.5, min.llk.diff = 2, seed = 50), iter1 = structure(list(
             median.diff.llk = c(3.72815249971866, 1.39684518104865,
             0.845502829841415, 0.503752646659358, 2.09559598955629,
             2.42232562718162, 5.30940229205402), total.diff.llk = c(34.4233013481472,
@@ -448,7 +448,7 @@ NA, 1L, 2L, 3L), coef = c(NA, NA, 0.938024735219245, -0.792859735248929,
     final.model = "age + sex + map + hdl + bmi", family = "binomial",
     params = list(test = "t", sel.crit = "paired.test", num.filter = 0,
         filter.ignore = NULL, num.inner.folds = 10, max.iters = 3,
-        max.pval = 0.5, min.llk.diff = 0, seed = 50), iter1 = structure(list(
+        max.pval = 0.5, min.llk.diff = 2, seed = 50), iter1 = structure(list(
         median.diff.llk = c(3.28014185900846, 2.14834811052321,
         0.043470700460043, 0.0680454629990042, 1.31087972545775,
         1.32720910375215, 1.92794315265171), total.diff.llk = c(23.5366359096006,
@@ -658,7 +658,7 @@ NA, 1L, 2L, 3L), coef = c(NA, NA, 0.938024735219245, -0.792859735248929,
     final.model = "age + sex + ltg + hdl + bmi", family = "binomial",
     params = list(test = "t", sel.crit = "paired.test", num.filter = 0,
         filter.ignore = NULL, num.inner.folds = 10, max.iters = 3,
-        max.pval = 0.5, min.llk.diff = 0, seed = 50), iter1 = structure(list(
+        max.pval = 0.5, min.llk.diff = 2, seed = 50), iter1 = structure(list(
         median.diff.llk = c(2.66285889703011, 0.86559581241921,
         0.342273217955024, 0.436512158806582, 1.89999372994714,
         1.95145650002263, 2.94350320704933), total.diff.llk = c(21.7288725086974,

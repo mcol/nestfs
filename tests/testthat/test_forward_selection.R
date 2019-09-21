@@ -102,10 +102,10 @@ test_that("univariate filter",
   expect_equal(dim(fs.1$iter1), c(5, 3))
 
   fs.1 <- fs(y.binom ~ age + sex, cbind(diabetes, y.binom), binomial(),
-             choose.from=30:40, num.filter=5,
+             choose.from=30:40, num.filter=5, min.llk.diff=0,
              num.inner.folds=10, max.iters=3, verbose=FALSE)
   fs.2 <- forward.selection(diabetes, y.binom, ~ age + sex, binomial(),
-                            choose.from=30:40, num.filter=5,
+                            choose.from=30:40, num.filter=5, min.llk.diff=0,
                             num.inner.folds=10, max.iters=3, verbose=FALSE)
   expect_equal(fs.1, fs.2)
   expect_length(fs.1$panel, 3)

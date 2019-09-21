@@ -43,7 +43,7 @@ test_that("nested forward selection",
   X$sex.cat <- factor(X$sex)
   X$bmi.cat <- factor(cut(X$bmi, c(-Inf, -1, 1, Inf)))
   nest.cat <- nested.fs(Y ~ age, cbind(X, Y), gaussian, folds,
-                        choose.from=c("sex.cat", "bmi.cat"),
+                        choose.from=c("sex.cat", "bmi.cat"), min.llk.diff=0,
                         num.inner.folds=10, max.iters=3, verbose=FALSE)
   expect_equal(nest.cat[[1]]$panel, c("bmi.cat"))
   expect_equal(is.na(nest.cat[[1]]$fs$coef), c(TRUE, TRUE))
@@ -91,7 +91,7 @@ test_that("nested forward selection old interface",
   X$bmi.cat <- factor(cut(X$bmi, c(-Inf, -1, 1, Inf)))
   nest.cat <- nested.forward.selection(X, Y, ~ age, gaussian, folds,
                                        choose.from=c("sex.cat", "bmi.cat"),
-                                       num.inner.folds=10, max.iters=3,
+                                       num.inner.folds=10, max.iters=3, min.llk.diff=0,
                                        verbose=FALSE)
   expect_equal(nest.cat[[1]]$panel, c("bmi.cat"))
   expect_equal(is.na(nest.cat[[1]]$fs$coef), c(TRUE, TRUE))

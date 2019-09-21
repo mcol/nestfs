@@ -74,12 +74,11 @@
 #'        be selected (ignored if `num.filter=0`).
 #' @param num.inner.folds Number of folds in the inner cross-validation. It
 #'        must be at least 5 (default: 30).
-#' @param max.iters Maximum number of iterations (default: 15).
+#' @param max.iters Maximum number of iterations (default: 10).
+#' @param min.llk.diff Minimum improvement in log-likelihood required before
+#'        selection is terminated (default: 2).
 #' @param max.pval Interrupt the selection when the best achievable p-value
 #'        exceeds this threshold (default: 0.5).
-#' @param min.llk.diff Interrupt the selection when the best achievable
-#'        improvement in log-likelihood is smaller than this threshold
-#'        (default: 0).
 #' @param seed Seed of the random number generator for the inner folds.
 #' @param verbose Whether the variable chosen at each iteration should be
 #'        printed out (default: `TRUE`).
@@ -112,7 +111,7 @@
 #' @keywords multivariate
 #' @export
 fs <- function(formula, data, family, choose.from=NULL, test=c("t", "wilcoxon"),
-               num.inner.folds=30, max.iters=15, min.llk.diff=0, max.pval=0.5,
+               num.inner.folds=30, max.iters=10, min.llk.diff=2, max.pval=0.5,
                sel.crit=c("paired.test", "total.loglik", "both"),
                num.filter=0, filter.ignore=NULL, seed=50, verbose=TRUE) {
   univ.glm <- function(formula, data, idx.test, family) {

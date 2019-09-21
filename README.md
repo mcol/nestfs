@@ -59,8 +59,8 @@ that are not part of the initial model. This can be controlled through the
 `choose.from` option.
 
 It is possible to promote sparser selection by requesting a larger improvement
-in log-likelihood (option `min.llk.diff`, by default set to 0), or reducing the
-number of iterations (option `max.iters`, by default set to 15).
+in log-likelihood (option `min.llk.diff`, by default set to 2), or reducing the
+number of iterations (option `max.iters`, by default set to 10).
 
 To obtain a cross-validated measure of performance of the selection process,
 nested forward selection should be run:
