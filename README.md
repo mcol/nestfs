@@ -49,29 +49,78 @@ the following is enough:
 
 ```r
 data(diabetes)
-X <- diabetes[, -match("Y", colnames(diabetes))]
-fs.res <- forward.selection(X, diabetes$Y, ~ age + sex, family=gaussian())
+fs.res <- fs(Y ~ age + sex, diabetes, family=gaussian())
 summary(fs.res)
+
+##      vars          fdr      llks     diffs iter
+## 1     age           NA        NA        NA   NA
+## 2     sex           NA -2136.854        NA   NA
+## 3     ltg 7.008928e-10 -2058.831 78.022766    1
+## 4     bmi 1.850715e-05 -2009.568 49.263387    2
+## 5     map 2.020038e-03 -1999.253 10.314799    3
+## 6 age.sex 1.508210e-02 -1992.544  6.709064    4
+## 7     hdl 4.039276e-02 -1985.208  7.336623    5
+## 8 bmi.map 7.474167e-02 -1980.913  4.294736    6
 ```
 
 By default, selection happens over all variables present in the data.frame
 that are not part of the initial model. This can be controlled through the
-`choose.from` option.
+`choose.from` option, which accepts variable names or indices.
 
 It is possible to promote sparser selection by requesting a larger improvement
-in log-likelihood (option `min.llk.diff`, by default set to 2), or reducing the
-number of iterations (option `max.iters`, by default set to 10).
+in log-likelihood (option `min.llk.diff`): this is advisable especially when the
+number of variables to choose from exceeds 10-15, as it's our experience that
+even the default setting of 2 (already stricter than what adopted by other
+packages) may lead to some overfitting. In any case, it's possible to set a
+maximum size of the panel selected by reducing the number of iterations (option
+`max.iters`, by default set to 10).
 
-To obtain a cross-validated measure of performance of the selection process,
-nested forward selection should be run:
+Nested forward selection is helpful to assess the stability of the selection
+process by performing it on each training split of the cross-validation folds:
 
 ```r
-cv.folds <- create.folds(10, nrow(X), seed=1)
-nestfs.res <- nested.forward.selection(X, diabetes$Y, ~ age + sex,
-                                       family=gaussian(), folds=cv.folds)
-summary(nestfs.res)
-nested.performance(nestfs.res)
+folds <- create.folds(10, nrow(diabetes), seed=1)
+nest.res <- nested.fs(Y ~ age + sex, diabetes, family=gaussian(), folds=folds)
+summary(nest.res)
+
+##       vars percent    coef          coefIQR rank      rankIQR diffLogLik  diffLogLikIQR
+## 1      bmi     100  24.547   (23.61, 25.48)    2 (1.00, 2.00)     61.021 (44.49, 76.85)
+## 2      ltg     100  23.729   (22.39, 24.41)    2 (1.00, 2.00)     52.868 (36.09, 69.36)
+## 3      map     100  15.147   (14.45, 15.88)    3 (3.00, 3.75)      8.366   (8.04, 9.61)
+## 4      hdl     100 -13.297 (-13.65, -12.55)    4 (4.00, 4.00)      6.728   (6.35, 7.83)
+## 5  age.sex      80   8.825     (8.72, 9.24)    5 (5.00, 6.00)      4.625   (4.45, 5.37)
+## 6  bmi.map      70   8.165     (7.55, 8.27)    6 (5.50, 7.00)      3.604   (2.66, 4.15)
+## 7  bmi.glu      20   4.460     (4.07, 4.85)    5 (5.00, 5.00)      3.535   (3.09, 3.98)
+## 8    glu.2      20   6.477     (6.47, 6.49)    6 (6.25, 6.75)      2.984   (2.56, 3.41)
+## 9  sex.map      20   6.862     (6.71, 7.01)    6 (5.25, 5.75)      2.936   (2.89, 2.98)
+## 10 age.glu      10   7.469     (7.47, 7.47)    3 (3.00, 3.00)      4.826   (4.83, 4.83)
+## 11 age.map      10   7.365     (7.36, 7.36)    6 (6.00, 6.00)      2.679   (2.68, 2.68)
+## 12   bmi.2      10   7.987     (7.99, 7.99)    6 (6.00, 6.00)      2.466   (2.47, 2.47)
 ```
+
+The output above shows that `bmi`, `ltg`, `map` and `hdl` are chosen in all
+folds, and most of the improvement in fit is provided by the first two variables,
+which agrees with what was found when running forward selection on all data.
+
+Most importantly, nested forward selection produces a cross-validated measure
+of performance of the selection process, which is an unbiased estimate of the
+predictive performance of the selected panels on withdrawn data:
+```r
+nested.performance(nest.res)
+
+## Correlation coefficient: 0.7097
+```
+
+This can be compared with what is obtained by the baseline model on the same
+set of cross-validation folds:
+
+```r
+base.res <- nested.glm(Y ~ age + sex, diabetes, family=gaussian(), folds=folds)
+nested.performance(base.res)
+
+## Correlation coefficient: 0.1551
+```
+
 
 ## References
 
