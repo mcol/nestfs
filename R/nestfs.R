@@ -26,18 +26,8 @@
 #' selected (use [nested.fs()] for that purpose).
 #'
 #' At each iteration, this function runs cross-validation to choose which
-#' variable enters the final panel by fitting the current model (defined as
-#' the input formula) augmented by one of the remaining variables at a time.
-#'
-#' In the case of a binary outcome when very large number of predictors is
-#' available, it may be convenient to apply a univariate association filter.
-#' If `num.filter` is set to a positive value, then all available
-#' predictors (excluding those whose name is matched by `filter.ignore`)
-#' are tested for univariate association with the outcome, and only the first
-#' `num.filter` enter the selection phase, while the others are filtered
-#' out. This is done on the training part of all inner folds. Filtering can
-#' enhance the performance of forward selection when the number of available
-#' variables exceeds about 30-40.
+#' variable enters the final panel by fitting the current model augmented by
+#' each remaining variable considered one at a time.
 #'
 #' By default variables are selected according to the `paired.test`
 #' criterion. At each iteration, the sampling distribution of differences in
@@ -49,6 +39,16 @@
 #' independent, the p-value from this test approximates the probability that
 #' including the marker will not decrease the validation log-likelihood
 #' (approximate false discovery rate).
+#'
+#' In the case of a binary outcome when very large number of predictors is
+#' available, it may be convenient to apply a univariate association filter.
+#' If `num.filter` is set to a positive value, then all available
+#' predictors (excluding those whose name is matched by `filter.ignore`)
+#' are tested for univariate association with the outcome, and only the first
+#' `num.filter` enter the selection phase, while the others are filtered
+#' out. This is done on the training part of all inner folds. Filtering can
+#' enhance the performance of forward selection when the number of available
+#' variables exceeds about 30-40.
 #'
 #' @template args-interface
 #' @template args-family
