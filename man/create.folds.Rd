@@ -24,8 +24,7 @@ Create a list of indices corresponding to cross-validation folds.
 }
 \note{
 Note that the number of observations withdrawn in each fold may not be
-exactly the same if \code{num.folds} is not an integer divisor of
-\code{num.rows}.
+exactly the same if \code{num.folds} is not an integer divisor of \code{num.rows}.
 }
 \examples{
 all.folds <- create.folds(50, 307, 0)

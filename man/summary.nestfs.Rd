@@ -21,17 +21,15 @@ These are currently ignored.}
 }
 \value{
 A dataframe with the following columns:
-\describe{
-\item{vars:}{Variables selected.}
-\item{percent:}{Percentage of folds in which the variable was selected.}
-\item{coef:}{Median coefficient for the variable.}
-\item{coefIQR:}{Inter-quartile range for the variable coefficient.}
-\item{rank:}{Median iteration in which the variable was selected.}
-\item{rankIQR:}{Inter-quartile range for rank of the variable.}
-\item{diffLogLik:}{Median difference in log-likelihoods.}
-\item{diffLogLikIQR:}{Inter-quartile range for the difference in
-      log-likelihoods.}
-}
+\item{vars}{Variables selected.}
+\item{percent}{Percentage of folds in which the variable was selected.}
+\item{coef}{Median coefficient for the variable.}
+\item{coefIQR}{Inter-quartile range for the variable coefficient.}
+\item{rank}{Median iteration in which the variable was selected.}
+\item{rankIQR}{Inter-quartile range for rank of the variable.}
+\item{diffLogLik}{Median difference in log-likelihoods.}
+\item{diffLogLikIQR}{Inter-quartile range for the difference in
+log-likelihoods.}
 }
 \description{
 Report summary statistics from a run of nested forward selection across the

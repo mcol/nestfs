@@ -3,27 +3,22 @@
 \docType{data}
 \name{diabetes}
 \alias{diabetes}
-\alias{X.diab}
-\alias{Y.diab}
 \title{Diabetes data with interaction terms}
-\format{The dataset consists of the following two variables:
-\itemize{
-  \item X.diab: A dataframe of predictors transformed to have zero mean and
-        unit variance.
-  \item Y.diab: The outcome variable.
-}}
 \source{
-B. Efron, T. Hastie, I. Johnstone and R. Tibshirani,
-"Least angle regression (with discussion)",
-\emph{Ann. Statist.}, 32 (2), 407-499, 2004.
-\url{http://www.stanford.edu/~hastie/Papers/LARS/data64.txt}
+B. Efron, T. Hastie, I. Johnstone and R. Tibshirani (2004),
+Least angle regression, \emph{The Annals of Statistics}, 32 (2), 407-499.
+\url{https://doi.org/10.1214/009053604000000067}
+
+The original dataset is available from
+\url{https://www.stanford.edu/~hastie/Papers/LARS/data64.txt}
 }
 \description{
-The dataset consists of 442 patients for which a quantitative measure of
-disease progression is recorded in the outcome variable \code{Y.diab}. The
-dataframe of predictors \code{X.diab} includes 10 baseline measurements, in
-addition to 45 interactions and 9 quadratic terms, for a total of 64
-variables for each patient.
+The dataset consists of observations on 442 individuals for which a
+quantitative measure of diabetes progression is recorded in variable \code{Y}.
+Predictors include 10 baseline measurements, 45 interactions and 9 quadratic
+terms, for a total of 64 variables for each individual. All predictors have
+been standardized by subtracting the mean and then dividing by the standard
+deviation.
 }
 \examples{
 data(diabetes, package="nestfs")

@@ -17,14 +17,12 @@ These are currently ignored.}
 }
 \value{
 A dataframe with the following columns:
-\describe{
-\item{vars:}{Variables in the initial model followed by variables selected.}
-\item{fdr:}{False discovery rate, corresponding to the paired test p-values
-      computed when the variable was selected.}
-\item{llks:}{Validation log-likelihoods.}
-\item{diffs:}{Differences in validation log-likelihoods.}
-\item{iter:}{Iteration when the variable was selected.}
-}
+\item{vars}{Variables in the initial model followed by variables selected.}
+\item{fdr}{False discovery rate, corresponding to the paired test p-values
+computed when the variable was selected.}
+\item{llks}{Validation log-likelihoods.}
+\item{diffs}{Differences in validation log-likelihoods.}
+\item{iter}{Iteration when the variable was selected.}
 }
 \description{
 Report summary statistics from a single run of forward selection.

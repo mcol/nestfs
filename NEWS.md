@@ -1,3 +1,18 @@
+# nestfs 1.0 (2019-09-21)
+
+- Introduce the fs() and nested.fs() functions which adopt a new interface based
+  on formulas
+- Change the interface of nested.glm() to align to the new formula interface.
+- Change default values for the max.iters (from 15 to 10) and min.llk.diff
+  (from 0 to 2) options.
+- Replace the parallel computation backend from the doParallel to the
+  parallel package.
+- Restructure the diabetes dataset to be a single data frame.
+- Update and expand the example in the README file.
+- Use markdown in the package documentation.
+- Include tests in the package.
+
+
 # nestfs 0.9.2 (2019-05-02)
 
 - Silence messages output by newer versions of the pROC package.
@@ -5,7 +20,7 @@
 
 # nestfs 0.9.1 (2018-12-16)
 
-- Changed maintainer email address.
+- Change maintainer email address.
 
 
 # nestfs 0.9 (2018-09-25)

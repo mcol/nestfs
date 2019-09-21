@@ -4,21 +4,17 @@
 \alias{nested.glm}
 \title{Cross-validated generalized linear models}
 \usage{
-nested.glm(x, y, model, family, folds, store.glm = FALSE)
+nested.glm(formula, data, family, folds, store.glm = FALSE)
 }
 \arguments{
-\item{x}{Dataframe of predictors.}
+\item{formula}{An object of class \code{formula} (or one that can be coerced to
+that class) that describes the baseline model to be fitted.}
 
-\item{y}{Outcome variable. If \code{family=binomial}, it can only contain
-two classes of values that can be coerced to 0-1.}
+\item{data}{Data frame or matrix containing outcome variable and predictors.}
 
-\item{model}{Either a formula or a vector of names for the set of variables
-that define the model to be fitted.}
-
-\item{family}{Type of model fitted: either \code{gaussian()} for linear
-regression or \code{binomial()} for logistic regression. This can be
-specified also as a function name (\code{gaussian}) or as a string
-(\code{"gaussian"}).}
+\item{family}{Type of model fitted: either \code{gaussian()} for linear regression
+or \code{binomial()} for logistic regression. This can be specified also as
+a function name (\code{gaussian}) or as a string (\code{"gaussian"}).}
 
 \item{folds}{List of cross-validation folds, where each element contains
 the indices of the observations to be withdrawn in that fold.}
@@ -29,40 +25,31 @@ stored (default: \code{FALSE}).}
 \value{
 An object of class \code{nestglm} of length equal to \code{length(folds)},
 where each entry contains the following fields:
-\describe{
-\item{summary:}{Summary of the coefficients of the model fitted on the
-      training observations.}
-\item{family:}{Type of model fitted.}
-\item{fit:}{Predicted values for the withdrawn observations.}
-\item{obs:}{Observed values for the withdrawn observations.}
-\item{test.llk:}{Test log-likelihood.}
-\item{test.idx:}{Indices of the the withdrawn observations for this fold.}
-\item{regr:}{Object created by glm (only if \code{store.glm=TRUE}).}
-}
+\item{summary}{Summary of the coefficients of the model fitted on the
+training observations.}
+\item{family}{Type of model fitted.}
+\item{fit}{Predicted values for the withdrawn observations.}
+\item{obs}{Observed values for the withdrawn observations.}
+\item{test.llk}{Test log-likelihood.}
+\item{test.idx}{Indices of the the withdrawn observations for this fold.}
+\item{regr}{Object created by \code{glm} (only if \code{store.glm=TRUE}).}
 }
 \description{
 Run linear or logistic regression on a set of cross-validation folds.
 }
 \details{
 This can be used to establish a baseline model, often built only on the
-initial set of covariates (those that would be passed through the
-\code{init.model} argument to \code{forward.selection}).
+initial set of covariates.
 }
 \examples{
-# register a parallel cluster with two cores
-library(doParallel)
-registerDoParallel(2)
-
+\dontshow{oldopts <- options(mc.cores=2)}
 data(diabetes)
-folds <- create.folds(10, nrow(X.diab), seed=1)
-base.res <- nested.glm(X.diab, Y.diab, c("age", "sex", "bmi", "map"),
-                       gaussian(), folds)
-
-# close the parallel cluster
-stopImplicitCluster()
+folds <- create.folds(10, nrow(diabetes), seed=1)
+res <- nested.glm(Y ~ age + sex + bmi + map, diabetes, gaussian(), folds)
+\dontshow{options(oldopts)}
 
 }
 \seealso{
-\code{\link{nested.performance}}.
+\code{\link[=nested.performance]{nested.performance()}}.
 }
 \keyword{multivariate}

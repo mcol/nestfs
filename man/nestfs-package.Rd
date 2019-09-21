@@ -11,13 +11,13 @@ and logistic regression which adopts cross-validation as a core component of
 the selection procedure.
 }
 \details{
-The engine of the package is \code{\link{forward.selection}}, whose aim is
+The engine of the package is \code{\link[=fs]{fs()}}, whose aim is
 to select a set of variables out of those available in the dataset. The
 selection of variables can be done according to two main different criteria:
 by paired-test p-value or by largest decrease in validation log-likelihood.
 A combined criteria is also available.
 
-The role of \code{\link{nested.forward.selection}} is to allow the
+The role of \code{\link[=nested.fs]{nested.fs()}} is to allow the
 evaluation of the selection method by providing an unbiased estimate of the
 performance of the selected variables on withdrawn data.
 
@@ -27,12 +27,11 @@ aggravated by the fact that an inner cross-validation happens at each
 iteration, with the aim of guiding the selection towards variables that
 have better generalization properties.
 
-The code is parallelized over the inner folds, thanks to the \pkg{foreach}
+The code is parallelized over the inner folds, thanks to the \strong{parallel}
 package. User time therefore depends on the number of available cores, but
-there is no advantage in using more cores than inner folds. A parallel
-backend must be registered before starting, otherwise operations will run
-sequentially with a warning reported. This can be done through a call to
-\code{\link[doParallel]{registerDoParallel}}, for example.
+there is no advantage in using more cores than inner folds. The number of
+cores assigned to computations must be registered before starting by setting
+the \code{"mc.cores"} option.
 
 The main advantage of forward selection is that it provides an immediately
 interpretable model, and the panel of variables obtained is in some sense
@@ -43,7 +42,7 @@ However, when the number of variables is much larger than that, forward
 selection, besides being unbearably slow, may be more subject to
 overfitting, which is in the nature of its greedy-like design. These
 undesirable effects can be somewhat remedied by applying some filtering
-(see \code{"num.filter"} argument to \code{\link{forward.selection}}, thus
+(see \code{"num.filter"} argument to \code{\link[=fs]{fs()}}, thus
 reducing the number or variables entering the selection phase.
 }
 \seealso{
@@ -55,5 +54,5 @@ Useful links:
 
 }
 \author{
-Marco Colombo \email{m.colombo@ed.ac.uk}
+Marco Colombo \email{mar.colombo13@gmail.com}
 }
