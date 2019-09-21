@@ -202,6 +202,12 @@ forward.selection <- function(x, y, init.model, family,
   keep.vars <- union(choose.from, match(init.vars, colnames(x)))
   x <- x[, keep.vars]
 
+  ## initialize the parallel cluster
+  if (.Platform$OS.type == "windows") {
+    cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+    on.exit(parallel::stopCluster(cl))
+  }
+
   ## filtering according to association with outcome
   if (num.filter > 0) {
 
@@ -226,8 +232,6 @@ forward.selection <- function(x, y, init.model, family,
       all.filt.idx <- parallel::mclapply(X=1:num.inner.folds, FUN=par.fun,
                                          mc.preschedule=FALSE)
     } else { # windows
-      cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
-      on.exit(parallel::stopCluster(cl))
       all.filt.idx <- parallel::parLapply(X=1:num.inner.folds, cl=cl,
                                           fun=par.fun)
     }
@@ -276,8 +280,6 @@ forward.selection <- function(x, y, init.model, family,
       res.inner <- parallel::mclapply(X=1:num.inner.folds, FUN=par.fun,
                                       mc.preschedule=FALSE)
     } else { # windows
-      cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
-      on.exit(parallel::stopCluster(cl))
       res.inner <- parallel::parLapply(X=1:num.inner.folds, cl=cl,
                                        fun=par.fun)
     }
