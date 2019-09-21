@@ -166,7 +166,7 @@ print.nestfs <- function(x, ...) {
 #'       `family="binomial"`, or the correlation coefficient if
 #'       `family="gaussian"`.}
 #'
-#' @seealso [nested.forward.selection()] and [nested.glm()].
+#' @seealso [nested.fs()] and [nested.glm()].
 #' @importFrom pROC auc
 #' @export
 nested.performance <- function(x) {

@@ -24,13 +24,13 @@
 #' and logistic regression which adopts cross-validation as a core component of
 #' the selection procedure.
 #'
-#' The engine of the package is [forward.selection()], whose aim is
+#' The engine of the package is [fs()], whose aim is
 #' to select a set of variables out of those available in the dataset. The
 #' selection of variables can be done according to two main different criteria:
 #' by paired-test p-value or by largest decrease in validation log-likelihood.
 #' A combined criteria is also available.
 #'
-#' The role of [nested.forward.selection()] is to allow the
+#' The role of [nested.fs()] is to allow the
 #' evaluation of the selection method by providing an unbiased estimate of the
 #' performance of the selected variables on withdrawn data.
 #'
@@ -55,11 +55,11 @@
 #' selection, besides being unbearably slow, may be more subject to
 #' overfitting, which is in the nature of its greedy-like design. These
 #' undesirable effects can be somewhat remedied by applying some filtering
-#' (see `"num.filter"` argument to [forward.selection()], thus
+#' (see `"num.filter"` argument to [fs()], thus
 #' reducing the number or variables entering the selection phase.
 #'
 #' @author
-#' Marco Colombo \email{m.colombo@@ed.ac.uk}
+#' Marco Colombo \email{mar.colombo13@@gmail.com}
 #'
 #' @import stats
 #' @docType package

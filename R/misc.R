@@ -18,6 +18,31 @@
 ##=============================================================================
 
 
+#' Validate model formula and dataset and extract the outcome
+#'
+#' @param model Formula to be checked.
+#' @param data Data frame or matrix containing the variables used in the model.
+#'
+#' @return
+#' A numeric vector containing the outcome variable.
+#'
+#' @noRd
+validate.model.outcome <- function(model, data) {
+  if (is.character(model) && length(model) > 1)
+    stop("Model formula specified incorrectly.", call.=FALSE)
+  model <- as.formula(model)
+  tt <- terms(model)
+  if (attr(tt, "response") == 0)
+    stop("No outcome variable specified in the model.", call.=FALSE)
+  if (!inherits(data, c("data.frame", "matrix")))
+    stop("'data' must be a data frame or a matrix.", call.=FALSE)
+  if (any(!all.vars(model) %in% colnames(data)))
+    stop("Not all model variables are in 'data'.", call.=FALSE)
+  mf <- model.frame(model, data)
+  y <- validate.outcome(model.response(mf))
+  return(y)
+}
+
 #' Validate the outcome variable
 #'
 #' Ensure that the outcome variable has been specified correctly.

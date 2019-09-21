@@ -20,17 +20,14 @@
 
 #' Cross-validated forward selection
 #'
-#' Run forward selection starting from a set of variables or a model.
+#' Run forward selection starting from a baseline model. As it uses
+#' all observations in the `data` dataframe, it is not possible to
+#' produce unbiased estimates of the predictive performance of the panel
+#' selected (use [nested.fs()] for that purpose).
 #'
 #' At each iteration, this function runs cross-validation to choose which
-#' variable enters the final panel by fitting the current model (defined in
-#' `init.model` as a list of variables or a formula for the first
-#' iteration) augmented by one of the remaining variables at a time.
-#'
-#' This function is used to choose a panel of variables on the data. As it uses
-#' all observations in the `x` dataframe, it is not possible to
-#' produce unbiased estimates of the predictive performance of the panel
-#' selected (use [nested.forward.selection()] for that purpose).
+#' variable enters the final panel by fitting the current model (defined as
+#' the input formula) augmented by one of the remaining variables at a time.
 #'
 #' In the case of a binary outcome when very large number of predictors is
 #' available, it may be convenient to apply a univariate association filter.
@@ -53,8 +50,7 @@
 #' including the marker will not decrease the validation log-likelihood
 #' (approximate false discovery rate).
 #'
-#' @template args-forward
-#' @template args-outcome
+#' @template args-interface
 #' @template args-family
 #' @param choose.from Indices or variable names over which the selection should
 #'        be performed. If `NULL` (default), all variables in `x` that are not
@@ -106,27 +102,22 @@
 #' @examples
 #' \dontshow{oldopts <- options(mc.cores=2)}
 #' data(diabetes)
-#' X <- diabetes[, -match("Y", colnames(diabetes))]
-#' fs.res <- forward.selection(X, diabetes$Y, ~ age + sex, family=gaussian(),
-#'                             choose.from=1:10, num.inner.folds=5, max.iters=3)
+#' fs.res <- fs(Y ~ age + sex, data=diabetes, family=gaussian(),
+#'              choose.from=1:10, num.inner.folds=5, max.iters=3)
 #' summary(fs.res)
 #' \dontshow{options(oldopts)}
 #'
-#' @seealso [nested.forward.selection()] and [summary.fs()].
+#' @rdname forward.selection
+#' @seealso [nested.fs()] and [summary.fs()].
 #' @keywords multivariate
 #' @export
-forward.selection <- function(x, y, init.model, family,
-                              choose.from=NULL, test=c("t", "wilcoxon"),
-                              sel.crit=c("paired.test", "total.loglik", "both"),
-                              num.filter=0, filter.ignore=NULL,
-                              num.inner.folds=30, max.iters=15, max.pval=0.5,
-                              min.llk.diff=0, seed=50, verbose=TRUE) {
-  univ.glm <- function(model, xy.train, xy.test) {
-    regr <- glm(model, data=xy.train, family=family)
-    y.pred <- predict(regr, newdata=xy.test, type="response")
-    y.test <- xy.test$nestfs_y_
-    loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
-    res <- cbind(coefficients(summary(regr))[, c(1, 4), drop=FALSE], loglik)
+fs <- function(formula, data, family, choose.from=NULL, test=c("t", "wilcoxon"),
+               num.inner.folds=30, max.iters=15, min.llk.diff=0, max.pval=0.5,
+               sel.crit=c("paired.test", "total.loglik", "both"),
+               num.filter=0, filter.ignore=NULL, seed=50, verbose=TRUE) {
+  univ.glm <- function(formula, data, idx.test, family) {
+    res <- glm.inner(formula, data, idx.test, family, store.glm=TRUE)
+    res <- cbind(coef(summary(res$regr))[, c(1, 4), drop=FALSE], res$test.llk)
     colnames(res) <- c("coef", "p.value", "valid.llk")
     return(res)
   }
@@ -155,10 +146,9 @@ forward.selection <- function(x, y, init.model, family,
   }
 
   ## argument checks
-  if (nrow(x) != length(y))
-    stop("Mismatched dimensions.")
-  y <- validate.outcome(y)
-  choose.from <- validate.choose.from(choose.from, x)
+  y <- validate.model.outcome(formula, data)
+  x <- as.data.frame(data)
+  init.model <- as.formula(formula)
   family <- validate.family(family, y)
   test <- match.arg(test)
   pval.test <- list(t=t.test, wilcoxon=wilcox.test)[[test]]
@@ -172,19 +162,17 @@ forward.selection <- function(x, y, init.model, family,
   if (min.llk.diff < 0)
     stop("min.llk.diff cannot be negative.")
 
-  ## set up initial model
-  init.model <- validate.init.model(init.model)
-  init.vars <- setdiff(all.vars(init.model), "nestfs_y_")
-
-  ## check that all variables exist in the dataframe of predictors
-  var.match <- match(init.vars, colnames(x))
-  if (anyNA(var.match))
-    stop("'", paste(init.vars[is.na(var.match)], collapse="', '"),
-         "' not present in x.")
-
   ## check that there is no missingness in the initial model
+  init.vars <- all.vars(init.model)
   if (anyNA(x[, init.vars]))
     stop("Missing values in the variables of the initial model.")
+
+  ## remove variables in the initial model from choose.from
+  choose.from <- validate.choose.from(choose.from, x)
+  choose.from <- setdiff(choose.from, match(init.vars, colnames(x)))
+
+  ## remove outcome from the initial set of variables
+  init.vars <- setdiff(init.vars, as.character(init.model)[2])
 
   ## create the inner folds
   folds <- create.folds(num.inner.folds, nrow(x), seed=seed)
@@ -196,6 +184,9 @@ forward.selection <- function(x, y, init.model, family,
     model.vars <- "<empty>"
   model.llks <- c(rep(NA, num.init.vars - 1), 0)
   model.pvals <- model.iter <- rep(NA, num.init.vars)
+
+  ## expand the interaction terms
+  init.model <- update(init.model, . ~ .)
   model <- init.model
 
   ## limit the number of variables to choose from
@@ -245,7 +236,7 @@ forward.selection <- function(x, y, init.model, family,
   }
 
   ## variable selection
-  all.vars <- colnames(x)
+  all.vars <- setdiff(colnames(x), as.character(init.model)[2])
   all.iter <- list()
   iter1 <- NULL
 
@@ -258,18 +249,15 @@ forward.selection <- function(x, y, init.model, family,
     ## loop over the folds
     par.fun <- function(fold) {
       test.idx <- folds[[fold]]
-      train.idx <- setdiff(seq(nrow(x)), test.idx)
-      xy.train <- cbind(nestfs_y_=y[train.idx], x[train.idx, ])
-      xy.test <- cbind(nestfs_y_=y[test.idx], x[test.idx, ])
 
       ## current model
-      curr <- univ.glm(model, xy.train, xy.test)
+      curr <- univ.glm(model, data, test.idx, family)
       all.stats <- utils::tail(curr, n=1)
 
       ## models augmented with one additional variable at a time
       for (var in other.vars) {
         model.augm <- update(model, reformulate(c(".", var)))
-        augm <- univ.glm(model.augm, xy.train, xy.test)
+        augm <- univ.glm(model.augm, data, test.idx, family)
         all.stats <- rbind(all.stats, utils::tail(augm, n=1))
       }
       rownames(all.stats) <- c("Base", other.vars)
@@ -356,6 +344,32 @@ forward.selection <- function(x, y, init.model, family,
   return(res)
 }
 
+#' @inherit fs
+#' @template args-forward
+#' @template args-outcome
+#' @param ... Further arguments to `fs`.
+#'
+#' @details
+#' `forward.selection` provides the legacy interface used up to version 0.9.2.
+#' It is considered discontinued, and in the future it will be deprecated and
+#' eventually removed.
+#'
+#' @export
+forward.selection <- function(x, y, init.model, family, ...) {
+  if (nrow(x) != length(y))
+    stop("Mismatched dimensions.")
+  init.model <- validate.init.model(init.model)
+
+  ## check that all variables exist in the dataframe of predictors
+  init.vars <- setdiff(all.vars(init.model), "nestfs_y_")
+  var.match <- match(init.vars, colnames(x))
+  if (anyNA(var.match))
+    stop("'", paste(init.vars[is.na(var.match)], collapse="', '"),
+         "' not present in x.")
+
+  fs(init.model, cbind(x, nestfs_y_=y), family, ...)
+}
+
 #' Nested cross-validated forward selection
 #'
 #' Run nested forward selection starting from a set of variables or a model.
@@ -364,11 +378,10 @@ forward.selection <- function(x, y, init.model, family,
 #' of the selected panels on withdrawn data by running forward selection on
 #' a predetermined set of folds.
 #'
-#' @template args-forward
-#' @template args-outcome
+#' @template args-interface
 #' @template args-family
 #' @template args-folds
-#' @param ... Arguments to [forward.selection()].
+#' @param ... Arguments to [fs()].
 #'
 #' @return
 #' An object of class `nestfs` of length equal to `length(folds)`, where each
@@ -381,26 +394,25 @@ forward.selection <- function(x, y, init.model, family,
 #' @examples
 #' \dontshow{oldopts <- options(mc.cores=2)}
 #' data(diabetes)
-#' X <- diabetes[, -match("Y", colnames(diabetes))]
-#' folds <- create.folds(2, nrow(X), seed=1)
-#' nestfs.res <- nested.forward.selection(X, diabetes$Y, ~ age + sex,
-#'                                        gaussian(), folds, choose.from=1:10,
-#'                                        num.inner.folds=5, max.iters=3)
+#' folds <- create.folds(2, nrow(diabetes), seed=1)
+#' nestfs.res <- nested.fs(Y ~ age + sex, diabetes, gaussian(), folds,
+#'                         choose.from=1:10, num.inner.folds=5, max.iters=3)
 #' summary(nestfs.res)
 #' \dontshow{options(oldopts)}
 #'
+#' @rdname nested.forward.selection
 #' @seealso
-#' [forward.selection()], [summary.nestfs()] and [nested.performance()].
+#' [fs()], [summary.nestfs()] and [nested.performance()].
 #' @keywords multivariate
 #' @export
-nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
-
-  res <- list()
-  y <- validate.outcome(y)
+nested.fs <- function(formula, data, family, folds, ...) {
+  y <- validate.model.outcome(formula, data)
+  x <- as.data.frame(data)
   family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
   verbose <- isTRUE(list(...)$verbose) || is.null(list(...)$verbose)
 
+  res <- list()
   num.folds <- length(folds)
   for (fold in 1:num.folds) {
 
@@ -409,15 +421,11 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
           "-", format(Sys.time(), "%H:%M"), "\n")
 
     test.idx <- folds[[fold]]
-    train.idx <- setdiff(seq(nrow(x)), test.idx)
-    x.train <- x[train.idx, ]; y.train <- y[train.idx]
-
-    fs <- forward.selection(x.train, y.train, init.model, family, ...)
+    fs <- fs(formula, x[-test.idx, ], family, ...)
 
     ## fit the final model on the training set and evaluate it on the test set
-    model <- validate.init.model(fs$final.model)
-    model <- glm.inner(x, y, model, test.idx, family)
-    stopifnot(all.equal(model$obs, y[test.idx]))
+    model <- update(formula, reformulate(c(".", fs$final.model)))
+    model <- glm.inner(model, x, test.idx, family)
 
     ## extract the model coefficients and report them in the forward selection
     ## object.
@@ -433,7 +441,7 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
     idx.coefs <- pmatch(panel, rownames(model$summary))
     fs$fs$coef[match(panel, fs$fs$vars)] <- model$summary[idx.coefs, "Estimate"]
     fs$fit <- model$fit
-    fs$obs <- model$obs
+    fs$obs <- unname(model$obs)
     fs$test.idx <- test.idx
     fs$model <- model$summary
     res[[fold]] <- fs
@@ -442,18 +450,31 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
   return(res)
 }
 
+#' @inherit nested.fs
+#' @template args-forward
+#' @template args-outcome
+#'
+#' @details
+#' `nested.forward.selection` provides the legacy interface used up to version
+#' 0.9.2. It is considered discontinued, and in the future it will be deprecated
+#' and eventually removed.
+#'
+#' @export
+nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
+  y <- validate.outcome(y)
+  family <- validate.family(family, y)
+  init.model <- validate.init.model(init.model)
+  nested.fs(init.model, cbind(x, nestfs_y_=y), family, folds, ...)
+}
+
 #' Cross-validated generalized linear models
 #'
 #' Run linear or logistic regression on a set of cross-validation folds.
 #'
 #' This can be used to establish a baseline model, often built only on the
-#' initial set of covariates (those that would be passed through the
-#' `init.model` argument to [forward.selection()]).
+#' initial set of covariates.
 #'
-#' @param x Dataframe of predictors.
-#' @template args-outcome
-#' @param model Either a formula or a vector of names for the set of variables
-#'        that define the model to be fitted.
+#' @template args-interface
 #' @template args-family
 #' @template args-folds
 #' @param store.glm Whether the object produced by `glm` should be
@@ -475,20 +496,18 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' \dontshow{oldopts <- options(mc.cores=2)}
 #' data(diabetes)
 #' folds <- create.folds(10, nrow(diabetes), seed=1)
-#' base.res <- nested.glm(diabetes, diabetes$Y, c("age", "sex", "bmi", "map"),
-#'                        gaussian(), folds)
+#' res <- nested.glm(Y ~ age + sex + bmi + map, diabetes, gaussian(), folds)
 #' \dontshow{options(oldopts)}
 #'
 #' @seealso [nested.performance()].
 #' @keywords multivariate
 #' @export
-nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
+nested.glm <- function(formula, data, family, folds, store.glm=FALSE) {
 
   ## argument checks
-  if (nrow(x) != length(y))
-    stop("Mismatched dimensions.")
-  y <- validate.outcome(y)
-  model <- validate.init.model(model)
+  y <- validate.model.outcome(formula, data)
+  x <- as.data.frame(data)
+  model <- as.formula(formula)
   family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
 
@@ -499,7 +518,7 @@ nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
     stop("'", paste(vars[is.na(var.match)], collapse="', '"),
          "' not present in x.")
 
-  res <- lapply(folds, function(z) glm.inner(x, y, model, z, family, store.glm))
+  res <- lapply(folds, function(z) glm.inner(model, x, z, family, store.glm))
   class(res) <- c("nestglm")
   return(res)
 }
@@ -510,9 +529,8 @@ nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
 #' Fit a model using all predictors provided on the training observations, then
 #' test it on the withdrawn observations.
 #'
-#' @param x Dataframe of predictors.
+#' @template args-interface
 #' @template args-outcome
-#' @param model Formula for the model to be fitted.
 #' @param idx.test Indices of observations to withdraw.
 #' @template args-family
 #' @param store.glm Whether the object produced by `glm` should be
@@ -522,11 +540,10 @@ nested.glm <- function(x, y, model, family, folds, store.glm=FALSE) {
 #' A list with the results of fitting a model on a specific fold.
 #'
 #' @noRd
-glm.inner <- function(x, y, model, idx.test, family, store.glm=FALSE) {
-  idx.train <- setdiff(1:nrow(x), idx.test)
-  regr <- glm(model, data=cbind(nestfs_y_=y, x)[idx.train, ], family=family)
-  y.pred <- predict(regr, newdata=x[idx.test, ], type="response")
-  y.test <- y[idx.test]
+glm.inner <- function(formula, data, idx.test, family, store.glm=FALSE) {
+  regr <- glm(formula, data=data[-idx.test, ], family=family)
+  y.pred <- predict(regr, newdata=data[idx.test, ], type="response")
+  y.test <- validate.model.outcome(formula, data[idx.test, ])
   loglik <- loglikelihood(family, y.test, y.pred, summary(regr)$dispersion)
   res <- list(summary=coefficients(summary(regr)), family=family$family,
               fit=y.pred, obs=y.test, test.llk=loglik, test.idx=idx.test)

@@ -18,14 +18,23 @@ test_that("argument checks",
                "Missing values in the variables")
 
   ## tests for init.model
+  expect_error(fs(Y ~ nonexisting, diabetes, gaussian()),
+               "Not all model variables are in 'data'")
   expect_error(forward.selection(diabetes, y.binom, y ~ nonexisting, binomial),
                "not present in x")
 
   ## tests for family
+  expect_error(fs(Y ~ age, diabetes),
+               "Argument of 'family' is missing")
   expect_error(forward.selection(diabetes, y.binom, "age"),
                "Argument of 'family' is missing")
 
   ## tests for num.filter
+  expect_error(fs(Y ~ age, diabetes, gaussian(), num.filter=10),
+               "only be used with family=binomial()")
+  expect_error(fs(I(Y > 140) ~ age, diabetes, binomial(),
+                  num.filter=ncol(diabetes)),
+               "cannot exceed the number of available predictors")
   expect_error(forward.selection(diabetes, y.gauss, "age", gaussian(),
                                  num.filter=10),
                "only be used with family=binomial()")
@@ -65,16 +74,12 @@ test_that("argument checks",
                "is missing, with no default")
 
   ## tests for nested.glm
-  expect_error(nested.glm(diabetes, y.binom),
+  expect_error(nested.glm(Y ~ age),
                "is missing, with no default")
-  expect_error(nested.glm(diabetes, y.binom, gaussian()),
-               "init.model specified incorrectly")
-  expect_error(nested.glm(diabetes, y.binom, "age"),
+  expect_error(nested.glm(Y ~ age, diabetes),
                "Argument of 'family' is missing")
-  expect_error(nested.glm(diabetes, y.short, "age", gaussian(), folds),
-               "Mismatched dimensions")
-  expect_error(nested.glm(diabetes, y.gauss, "nonexisting", gaussian(), folds),
-               "not present in x")
+  expect_error(nested.glm(Y ~ nonexisting, diabetes, gaussian(), folds),
+               "Not all model variables are in 'data'")
 
   ## tests for nested.performance
   expect_error(nested.performance(),
