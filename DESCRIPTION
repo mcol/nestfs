@@ -17,5 +17,5 @@ Imports: dgof, parallel, pROC (>= 1.9), methods, stats, utils
 Suggests:
   testthat (>= 2.0.0)
 Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Roxygen: list(markdown=TRUE)

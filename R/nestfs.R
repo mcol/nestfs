@@ -21,7 +21,7 @@
 #' Cross-validated forward selection
 #'
 #' Run forward selection starting from a baseline model. As it uses
-#' all observations in the `data` dataframe, it is not possible to
+#' all observations in the input data frame, it is not possible to
 #' produce unbiased estimates of the predictive performance of the panel
 #' selected (use [nested.fs()] for that purpose).
 #'
@@ -85,7 +85,7 @@
 #'
 #' @return
 #' An object of class `fs` containing the following fields:
-#' \item{fs}{A dataframe containing the forward selection summary.}
+#' \item{fs}{A data frame containing the forward selection summary.}
 #' \item{init}{The set of variables used in the initial model.}
 #' \item{panel}{Names of variables selected (in order).}
 #' \item{init.model}{Right-hand side of the formula corresponding to the
@@ -343,7 +343,6 @@ fs <- function(formula, data, family, choose.from=NULL, test=c("t", "wilcoxon"),
   return(res)
 }
 
-#' @inherit fs
 #' @template args-forward
 #' @template args-outcome
 #' @param ... Further arguments to `fs`.
@@ -359,7 +358,7 @@ forward.selection <- function(x, y, init.model, family, ...) {
     stop("Mismatched dimensions.")
   init.model <- validate.init.model(init.model)
 
-  ## check that all variables exist in the dataframe of predictors
+  ## check that all variables exist in the data frame of predictors
   init.vars <- setdiff(all.vars(init.model), "nestfs_y_")
   var.match <- match(init.vars, colnames(x))
   if (anyNA(var.match))
@@ -449,7 +448,6 @@ nested.fs <- function(formula, data, family, folds, ...) {
   return(res)
 }
 
-#' @inherit nested.fs
 #' @template args-forward
 #' @template args-outcome
 #'
@@ -469,7 +467,6 @@ nested.forward.selection <- function(x, y, init.model, family, folds, ...) {
 #' Cross-validated generalized linear models
 #'
 #' Run linear or logistic regression on a set of cross-validation folds.
-#'
 #' This can be used to establish a baseline model, often built only on the
 #' initial set of covariates.
 #'
@@ -510,7 +507,7 @@ nested.glm <- function(formula, data, family, folds, store.glm=FALSE) {
   family <- validate.family(family, y)
   folds <- validate.folds(folds, x)
 
-  ## check that all variables exist in the dataframe of predictors
+  ## check that all variables exist in the data frame of predictors
   vars <- setdiff(all.vars(model), "nestfs_y_")
   var.match <- match(vars, colnames(x))
   if (anyNA(var.match))

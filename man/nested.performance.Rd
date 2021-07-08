@@ -7,8 +7,7 @@
 \usage{
 nested.performance(x)
 
-\method{print}{nestperf}(x, digits = max(3, getOption("digits") - 3),
-  ...)
+\method{print}{nestperf}(x, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
 \item{x}{An object of class \code{nestfs} or \code{nestglm}.}

@@ -5,11 +5,22 @@
 \alias{forward.selection}
 \title{Cross-validated forward selection}
 \usage{
-fs(formula, data, family, choose.from = NULL, test = c("t",
-  "wilcoxon"), num.inner.folds = 30, max.iters = 10,
-  min.llk.diff = 2, max.pval = 0.5, sel.crit = c("paired.test",
-  "total.loglik", "both"), num.filter = 0, filter.ignore = NULL,
-  seed = 50, verbose = TRUE)
+fs(
+  formula,
+  data,
+  family,
+  choose.from = NULL,
+  test = c("t", "wilcoxon"),
+  num.inner.folds = 30,
+  max.iters = 10,
+  min.llk.diff = 2,
+  max.pval = 0.5,
+  sel.crit = c("paired.test", "total.loglik", "both"),
+  num.filter = 0,
+  filter.ignore = NULL,
+  seed = 50,
+  verbose = TRUE
+)
 
 forward.selection(x, y, init.model, family, ...)
 }
@@ -79,7 +90,7 @@ should start.}
 }
 \value{
 An object of class \code{fs} containing the following fields:
-\item{fs}{A dataframe containing the forward selection summary.}
+\item{fs}{A data frame containing the forward selection summary.}
 \item{init}{The set of variables used in the initial model.}
 \item{panel}{Names of variables selected (in order).}
 \item{init.model}{Right-hand side of the formula corresponding to the
@@ -94,7 +105,7 @@ iterations.}
 }
 \description{
 Run forward selection starting from a baseline model. As it uses
-all observations in the \code{data} dataframe, it is not possible to
+all observations in the input data frame, it is not possible to
 produce unbiased estimates of the predictive performance of the panel
 selected (use \code{\link[=nested.fs]{nested.fs()}} for that purpose).
 }

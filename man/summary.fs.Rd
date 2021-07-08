@@ -16,7 +16,7 @@
 These are currently ignored.}
 }
 \value{
-A dataframe with the following columns:
+A data frame with the following columns:
 \item{vars}{Variables in the initial model followed by variables selected.}
 \item{fdr}{False discovery rate, corresponding to the paired test p-values
 computed when the variable was selected.}
@@ -30,5 +30,5 @@ Report summary statistics from a single run of forward selection.
 \note{
 A function of name \code{"getfullname"} to match variable names to full
 names is searched on the current workspace, and if found full names are
-included in the summary dataframe.
+included in the summary data frame.
 }

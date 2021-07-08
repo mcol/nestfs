@@ -55,7 +55,7 @@
 #' selection, besides being unbearably slow, may be more subject to
 #' overfitting, which is in the nature of its greedy-like design. These
 #' undesirable effects can be somewhat remedied by applying some filtering
-#' (see `"num.filter"` argument to [fs()], thus
+#' (see the `num.filter` argument to [fs()], thus
 #' reducing the number or variables entering the selection phase.
 #'
 #' @author

@@ -36,8 +36,6 @@ training observations.}
 }
 \description{
 Run linear or logistic regression on a set of cross-validation folds.
-}
-\details{
 This can be used to establish a baseline model, often built only on the
 initial set of covariates.
 }

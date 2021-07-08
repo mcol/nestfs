@@ -42,7 +42,7 @@ However, when the number of variables is much larger than that, forward
 selection, besides being unbearably slow, may be more subject to
 overfitting, which is in the nature of its greedy-like design. These
 undesirable effects can be somewhat remedied by applying some filtering
-(see \code{"num.filter"} argument to \code{\link[=fs]{fs()}}, thus
+(see the \code{num.filter} argument to \code{\link[=fs]{fs()}}, thus
 reducing the number or variables entering the selection phase.
 }
 \seealso{

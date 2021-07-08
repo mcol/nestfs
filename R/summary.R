@@ -27,7 +27,7 @@
 #'        These are currently ignored.
 #'
 #' @return
-#' A dataframe with the following columns:
+#' A data frame with the following columns:
 #' \item{vars}{Variables in the initial model followed by variables selected.}
 #' \item{fdr}{False discovery rate, corresponding to the paired test p-values
 #'       computed when the variable was selected.}
@@ -38,7 +38,7 @@
 #' @note
 #' A function of name `"getfullname"` to match variable names to full
 #' names is searched on the current workspace, and if found full names are
-#' included in the summary dataframe.
+#' included in the summary data frame.
 #'
 #' @export
 summary.fs <- function(object, ...) {
@@ -69,7 +69,7 @@ print.fs <- function(x, ...) {
 #'        These are currently ignored.
 #'
 #' @return
-#' A dataframe with the following columns:
+#' A data frame with the following columns:
 #' \item{vars}{Variables selected.}
 #' \item{percent}{Percentage of folds in which the variable was selected.}
 #' \item{coef}{Median coefficient for the variable.}
@@ -83,7 +83,7 @@ print.fs <- function(x, ...) {
 #' @note
 #' A function of name `"getfullname"` to match variable names to full
 #' names is searched on the current workspace, and if found full names are
-#' included in the summary dataframe.
+#' included in the summary data frame.
 #'
 #' @export
 summary.nestfs <- function(object, iter1=FALSE, ...) {

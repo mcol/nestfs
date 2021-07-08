@@ -20,7 +20,7 @@ test for association.}
 These are currently ignored.}
 }
 \value{
-A dataframe with the following columns:
+A data frame with the following columns:
 \item{vars}{Variables selected.}
 \item{percent}{Percentage of folds in which the variable was selected.}
 \item{coef}{Median coefficient for the variable.}
@@ -38,5 +38,5 @@ outer folds.
 \note{
 A function of name \code{"getfullname"} to match variable names to full
 names is searched on the current workspace, and if found full names are
-included in the summary dataframe.
+included in the summary data frame.
 }
