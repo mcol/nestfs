@@ -127,8 +127,6 @@ test_that("invalid init.model inputs",
                "invalid model formula in ExtractVars")
   expect_error(validate.init.model("~ NA"),
                "invalid model formula in ExtractVars")
-  expect_error(validate.init.model("~ age _ lll"),
-               "unexpected input")
   expect_error(validate.init.model(c("age", "*sex")),
                "unexpected '*'")
   expect_error(validate.init.model(c("age", "")),
