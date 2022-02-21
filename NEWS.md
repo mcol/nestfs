@@ -1,3 +1,8 @@
+# nestfs 1.0.1 (2022-02-21)
+
+- Remove test that will fail due changes in R-devel.
+
+
 # nestfs 1.0 (2019-09-21)
 
 - Introduce the fs() and nested.fs() functions which adopt a new interface based
