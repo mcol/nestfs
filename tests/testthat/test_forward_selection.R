@@ -92,6 +92,8 @@ test_that("choose.from",
 
 test_that("univariate filter",
 {
+  skip_on_cran()
+
   fs.1 <- fs(y.binom ~ age + sex, cbind(X, y.binom), binomial(),
              num.filter=5, num.inner.folds=10, max.iters=3, verbose=FALSE)
   fs.2 <- forward.selection(X, y.binom, ~ age + sex, binomial(),
