@@ -1,3 +1,8 @@
+# nestfs 1.0.2 (2022-05-04)
+
+- Skip test on CRAN to avoid failure reported by R-devel with OpenBLAS.
+
+
 # nestfs 1.0.1 (2022-02-21)
 
 - Remove test that will fail due changes in R-devel.
