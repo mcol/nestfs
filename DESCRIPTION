@@ -1,7 +1,7 @@
 Package: nestfs
 Type: Package
 Title: Cross-Validated (Nested) Forward Selection
-Version: 1.0.2
+Version: 1.0.2.9000
 Date: 2022-05-04
 Authors@R: c(person("Marco", "Colombo",
                     email="mar.colombo13@gmail.com", role=c("aut", "cre"),
