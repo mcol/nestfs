@@ -22,6 +22,18 @@ test_that("argument checks",
                "Not all model variables are in 'data'")
   expect_error(forward.selection(diabetes, y.binom, y ~ nonexisting, binomial),
                "not present in x")
+  expect_error(fs(y ~ ., diabetes, gaussian()),
+               "No selection possible")
+  expect_error(forward.selection(diabetes, y.binom, y.binom ~ ., binomial),
+               "No selection possible")
+  expect_error(fs("y ~ .", diabetes, gaussian()),
+               "No selection possible")
+  expect_error(forward.selection(diabetes, y.binom, "y.binom ~ .", binomial),
+               "No selection possible")
+  expect_error(fs(y ~ age + ., diabetes, gaussian()),
+               "No selection possible")
+  expect_error(fs(y ~ age + sex, diabetes[, c("age", "sex")], gaussian()),
+               "No selection possible")
 
   ## tests for family
   expect_error(fs(Y ~ age, diabetes),
@@ -127,6 +139,8 @@ test_that("invalid init.model inputs",
                "invalid model formula in ExtractVars")
   expect_error(validate.init.model("~ NA"),
                "invalid model formula in ExtractVars")
+  expect_error(validate.init.model("y ~ ."),
+               "No selection possible")
   expect_error(validate.init.model(c("age", "*sex")),
                "unexpected '*'")
   expect_error(validate.init.model(c("age", "")),

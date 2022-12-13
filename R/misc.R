@@ -1,6 +1,6 @@
 ##=============================================================================
 ##
-## Copyright (c) 2018-2019 Marco Colombo
+## Copyright (c) 2018-2022 Marco Colombo
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -31,11 +31,13 @@ validate.model.outcome <- function(model, data) {
   if (is.character(model) && length(model) > 1)
     stop("Model formula specified incorrectly.", call.=FALSE)
   model <- as.formula(model)
-  tt <- terms(model)
+  tt <- terms(model, data=data)
   if (attr(tt, "response") == 0)
     stop("No outcome variable specified in the model.", call.=FALSE)
   if (!inherits(data, c("data.frame", "matrix")))
     stop("'data' must be a data frame or a matrix.", call.=FALSE)
+  if (length(setdiff(colnames(data), attr(tt, "term.labels"))) == 0)
+    stop("No selection possible with all variables in the model.", call.=FALSE)
   if (any(!all.vars(model) %in% colnames(data)))
     stop("Not all model variables are in 'data'.", call.=FALSE)
   mf <- model.frame(model, data)
@@ -96,6 +98,8 @@ validate.init.model <- function(model) {
   }
   else if (!is(model, "formula"))
     stop("init.model specified incorrectly.", call.=FALSE)
+  if (any(grepl("^\\.$", model)))
+    stop("No selection possible with all variables in the model.", call.=FALSE)
 
   ## rename the left-hand side or add it if not present
   model <- update(model, "nestfs_y_ ~ .")
