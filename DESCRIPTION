@@ -1,8 +1,8 @@
 Package: nestfs
 Type: Package
 Title: Cross-Validated (Nested) Forward Selection
-Version: 1.0.2.9000
-Date: 2022-05-04
+Version: 1.0.3
+Date: 2022-12-13
 Authors@R: c(person("Marco", "Colombo",
                     email="mar.colombo13@gmail.com", role=c("aut", "cre"),
                     comment=c(ORCID="0000-0001-6672-0623")),
@@ -17,5 +17,5 @@ Imports: dgof, parallel, pROC (>= 1.9), methods, stats, utils
 Suggests:
   testthat (>= 2.0.0)
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Roxygen: list(markdown=TRUE)

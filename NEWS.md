@@ -1,3 +1,8 @@
+# nestfs 1.0.3 (2022-12-13)
+
+- Report an error if the initial model contains all the available variables.
+
+
 # nestfs 1.0.2 (2022-05-04)
 
 - Skip test on CRAN to avoid failure reported by R-devel with OpenBLAS.
