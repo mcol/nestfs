@@ -64,6 +64,5 @@ filter.predictors <- function(x, y, n, ignore=NULL) {
     x <- sapply(x, as.numeric)
   scores <- ks.pval(t(x[, !colnames(x) %in% ignore]), y)
   limit <- sort(scores, decreasing=TRUE)[n]
-  keep.idx <- match(rownames(scores)[scores >= limit], colnames(x))
-  return(keep.idx)
+  match(rownames(scores)[scores >= limit], colnames(x))
 }

@@ -121,12 +121,10 @@ fs <- function(formula, data, family, choose.from=NULL, test=c("t", "wilcoxon"),
     return(res)
   }
   paired.pvals <- function(all.llk, test.function) {
-    pvals <- NULL
-    for (i in 2:nrow(all.llk)) {
-      ttt <- test.function(all.llk[i, ], all.llk["Base", ],
-                           paired=TRUE, alternative="greater")
-      pvals <- c(pvals, ttt$p.value)
-    }
+    pvals <- sapply(2:nrow(all.llk), function(i) {
+      test.function(all.llk[i, ], all.llk["Base", ],
+                    paired=TRUE, alternative="greater")$p.value
+    })
     names(pvals) <- rownames(all.llk)[-1]
     return(pvals)
   }
@@ -140,8 +138,7 @@ fs <- function(formula, data, family, choose.from=NULL, test=c("t", "wilcoxon"),
   extract.call.params <- function() {
     args <- c("test", "sel.crit", "num.filter", "filter.ignore",
               "num.inner.folds", "max.iters", "max.pval", "min.llk.diff", "seed")
-    args <- as.list(parent.env(environment()))[args]
-    return(args)
+    as.list(parent.env(environment()))[args]
   }
 
   ## argument checks
@@ -282,7 +279,7 @@ fs <- function(formula, data, family, choose.from=NULL, test=c("t", "wilcoxon"),
       idx.sel <- which.min(inner.stats$p.value)
 
     ## choose the best variable according to the total log-likelihood
-    if (sel.crit == "total.loglik")
+    else if (sel.crit == "total.loglik")
       idx.sel <- which.max(inner.stats$total.llk)
 
     ## choose the best variables according to the total log-likelihood among
