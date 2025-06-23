@@ -82,7 +82,6 @@ validate.outcome <- function(y) {
 #' A formula describing the initial model. The function throws an error if the
 #' model parameter cannot be used.
 #'
-#' @importFrom methods is
 #' @noRd
 validate.init.model <- function(model) {
   if (is.null(model) || length(model) == 0) {
@@ -96,7 +95,7 @@ validate.init.model <- function(model) {
     else
       model <- reformulate(model, "y")
   }
-  else if (!is(model, "formula"))
+  else if (!methods::is(model, "formula"))
     stop("init.model specified incorrectly.", call.=FALSE)
   if (any(grepl("^\\.$", model)))
     stop("No selection possible with all variables in the model.", call.=FALSE)
@@ -119,7 +118,6 @@ validate.init.model <- function(model) {
 #' A valid family. The function throws an error if the family argument cannot
 #' be used.
 #'
-#' @importFrom methods is
 #' @noRd
 validate.family <- function(family, y) {
   if (missing(family))
@@ -132,7 +130,7 @@ validate.family <- function(family, y) {
     )
   if (is.function(family))
     family <- family()
-  if (!is(family, "family"))
+  if (!methods::is(family, "family"))
     stop("Argument of 'family' is not a valid family.", call.=FALSE)
   if (!family$family %in% c("gaussian", "binomial"))
     stop("Only 'gaussian' and 'binomial' are supported families.", call.=FALSE)
