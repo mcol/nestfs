@@ -2,7 +2,7 @@ nestfs: Cross-validated (nested) forward selection
 ======
 
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/nestfs)](https://cran.r-project.org/package=nestfs)
-[![CRAN\_Downloads\_Badge](https://cranlogs.r-pkg.org/badges/nestfs)](https://cran.r-project.org/package=nestfs)
+[![CRAN\_Downloads\_Badge](https://cranlogs.r-pkg.org/badges/grand-total/nestfs)](https://cran.r-project.org/package=nestfs)
 
 **nestfs** provides an implementation of forward selection based on linear
 and logistic regression which adopts cross-validation as a core component of
